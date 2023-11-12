@@ -1,6 +1,0 @@
-[workspace]
-members = [
-    "wall-e",
-    "wall-e-py",
-    "wall-e-py-macros"
-]
