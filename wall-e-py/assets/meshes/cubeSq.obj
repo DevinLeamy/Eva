@@ -1,0 +1,21 @@
+# Mesh Id
+o cubeSq
+
+# Vertex Positions
+v 0 0 1
+v 0 0 0
+v 1 0 0
+v 1 0 1
+v 0 1 1
+v 0 1 0
+v 1 1 0
+v 1 1 1
+
+# Triangle face indices: 
+# Indices start at 1
+f 1 2 3 4
+f 8 7 6 5
+f 2 1 5 6
+f 4 3 7 8
+f 1 4 8 5
+f 3 2 6 7
