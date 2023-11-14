@@ -63,5 +63,43 @@ impl Renderer {
         }
     }
 
-    pub fn render(&mut self) {}
+    pub fn render(&mut self) -> Result<(), SurfaceError> {
+        // Get access to the current texture.
+        let surface_texture = self.surface.get_current_texture()?;
+        // Create a view into the current texture that we can write to.
+        let view = surface_texture
+            .texture
+            .create_view(&TextureViewDescriptor::default());
+        // Build a command encoder to encode commands that are send to the GPU.
+        let mut encoder = self
+            .device
+            .create_command_encoder(&CommandEncoderDescriptor {
+                label: Some("render encoder"),
+            });
+
+        encoder.begin_render_pass(&RenderPassDescriptor {
+            label: Some("render pass"),
+            color_attachments: &[Some(RenderPassColorAttachment {
+                view: &view,
+                resolve_target: None,
+                ops: Operations {
+                    load: LoadOp::Clear(Color {
+                        r: 0.1,
+                        g: 0.2,
+                        b: 0.3,
+                        a: 1.0,
+                    }),
+                    store: true,
+                },
+            })],
+            depth_stencil_attachment: None,
+        });
+
+        // Submit the encoded commands to the queue, to be rendered.
+        self.queue.submit([encoder.finish()]);
+        // Present the texture view to the "owning surface".
+        surface_texture.present();
+
+        Ok(())
+    }
 }

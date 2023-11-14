@@ -22,5 +22,17 @@ pub async fn run() {
     let window_id = window.id();
     let mut renderer = Renderer::new(window).await;
 
-    event_loop.run(move |event, _, control_flow| renderer.render());
+    event_loop.run(move |event, _, control_flow| {
+        match event {
+            Event::WindowEvent {
+                window_id: _,
+                event: window_event,
+            } => match window_event {
+                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                _ => {}
+            },
+            _ => {}
+        }
+        renderer.render().unwrap()
+    });
 }
