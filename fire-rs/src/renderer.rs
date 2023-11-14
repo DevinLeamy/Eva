@@ -7,6 +7,8 @@ pub struct Renderer {
     queue: Queue,
     surface_config: SurfaceConfiguration,
     window: Window,
+
+    render_pipeline: RenderPipeline,
 }
 
 impl Renderer {
@@ -54,12 +56,51 @@ impl Renderer {
 
         surface.configure(&device, &surface_config);
 
+        // Create the render pipelines.
+        let shader = device.create_shader_module(include_wgsl!("../assets/shaders/shader.wgsl"));
+        let render_pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
+            label: Some("render pipeline layout"),
+            bind_group_layouts: &[],
+            push_constant_ranges: &[],
+        });
+        let render_pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
+            label: Some("render pipeline"),
+            layout: Some(&render_pipeline_layout),
+            vertex: VertexState {
+                module: &shader,
+                entry_point: "vs_main",
+                buffers: &[],
+            },
+            fragment: Some(FragmentState {
+                module: &shader,
+                entry_point: "fs_main",
+                targets: &[Some(ColorTargetState {
+                    format: surface_config.format,
+                    blend: Some(BlendState::REPLACE),
+                    write_mask: ColorWrites::ALL,
+                })],
+            }),
+            primitive: PrimitiveState {
+                topology: PrimitiveTopology::TriangleList,
+                strip_index_format: None,
+                front_face: FrontFace::Ccw,
+                cull_mode: Some(Face::Back),
+                polygon_mode: PolygonMode::Fill,
+                unclipped_depth: false,
+                conservative: false,
+            },
+            depth_stencil: None,
+            multisample: MultisampleState::default(),
+            multiview: None,
+        });
+
         Self {
             surface,
             device,
             queue,
             surface_config,
             window,
+            render_pipeline,
         }
     }
 
@@ -77,9 +118,10 @@ impl Renderer {
                 label: Some("render encoder"),
             });
 
-        encoder.begin_render_pass(&RenderPassDescriptor {
+        let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("render pass"),
             color_attachments: &[Some(RenderPassColorAttachment {
+                // The texture view to write the data to.
                 view: &view,
                 resolve_target: None,
                 ops: Operations {
@@ -94,6 +136,11 @@ impl Renderer {
             })],
             depth_stencil_attachment: None,
         });
+
+        render_pass.set_pipeline(&self.render_pipeline);
+        render_pass.draw(0..3, 0..1);
+
+        drop(render_pass);
 
         // Submit the encoded commands to the queue, to be rendered.
         self.queue.submit([encoder.finish()]);
