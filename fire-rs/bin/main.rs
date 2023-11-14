@@ -1,5 +1,5 @@
 use fire_rs::run;
 
 fn main() {
-    run();
+    pollster::block_on(run());
 }
