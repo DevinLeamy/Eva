@@ -1,0 +1,6 @@
+cargo:rerun-if-changed=build.rs
+cargo:rerun-if-env-changed=MACOSX_DEPLOYMENT_TARGET
+cargo:rustc-cfg=apple
+cargo:rustc-cfg=apple_new
+cargo:rustc-link-lib=dylib=objc
+cargo:cc_args=-fobjc-exceptions -fobjc-runtime=macosx-11.0 -fobjc-arc -fobjc-arc-exceptions

@@ -1,0 +1,22 @@
+[package]
+name = "fire-rs"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "main"
+path = "./bin/main.rs"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+log = "0.4.20"
+winit = "0.29.3"
+console_error_panic_hook = "0.1.7"
+console_log = "1.0.0"
+wasm-bindgen = "0.2.88"
+wasm-bindgen-futures = "0.4.38"
+wgpu = { version = "0.18.0", features = ["webgl"]}
+web-sys = { version = "0.3.64", features = ["Document", "Window", "Element"] }
+env_logger = "0.10.1"
