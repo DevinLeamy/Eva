@@ -10,6 +10,17 @@ struct Ray {
     direction: vec3f,
 };
 
+struct Sphere {
+    radius: f32
+};
+
+struct Intersection {
+    some: bool,
+    t: f32, 
+    ray: Ray,
+    normal: vec3f,
+};
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 
@@ -24,8 +35,9 @@ fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let pixel_position = compute_pixel_position(x, y);
 
     let ray = ray_from_points(camera.position, pixel_position);
+    let ray_colour = compute_ray_colour(ray);
 
-    textureStore(colour_buffer, screen_coord, vec4<f32>(ray.direction, 1.0));
+    textureStore(colour_buffer, screen_coord, vec4<f32>(ray_colour, 1.0));
 }
 
 fn compute_pixel_position(x: f32, y: f32) -> vec3f {
@@ -61,6 +73,7 @@ fn compute_pixel_position(x: f32, y: f32) -> vec3f {
     return pixel_world_pos.xyz;
 }
 
+
 fn ray_from_points(src: vec3f, dest: vec3f) -> Ray {
     var ray: Ray;
     ray.origin = src;
@@ -68,3 +81,77 @@ fn ray_from_points(src: vec3f, dest: vec3f) -> Ray {
     
     return ray;
 }
+
+fn ray_point(ray: Ray, t: f32) -> vec3f {
+    return ray.origin + ray.direction * t;
+}
+
+fn compute_ray_colour(ray: Ray) -> vec3f {
+    var sphere: Sphere;
+    sphere.radius = 1.0;
+
+    let sphere_position = vec3f(0.0, 0.0, -5.0);
+
+    var transformed_ray: Ray = ray;
+    transformed_ray.origin = transformed_ray.origin - sphere_position;
+
+    let intersection = sphere_intersection(sphere, transformed_ray);
+
+    if (intersection.some) {
+        return vec3f(1.0, 0.0, 0.0);
+    } else {
+        return vec3f(0.0, 0.0, 1.0);
+    }
+}
+
+
+fn sphere_intersection(sphere: Sphere, ray: Ray) -> Intersection {
+    var intersection: Intersection;
+    intersection.some = false; 
+
+
+    let a = 1.0;
+    let b = 2.0 * dot(ray.origin, ray.direction);
+    let c = dot(ray.origin, ray.origin) - sphere.radius * sphere.radius;
+
+    let disc = b * b - 4.0 * a * c;
+    if (disc < 0.0) {
+        // No intersection.
+        return intersection;
+    }
+
+    var t: f32 = 0.0;
+
+
+    if (disc == 0.0) {
+        // One intersection.
+        t = -b / (2.0 * a);
+    } else {
+        // Two intersections.
+        let t0 = (-b + sqrt(disc)) / (2.0 * a);
+        let t1 = (-b - sqrt(disc)) / (2.0 * a);
+
+        if (t0 <= 0.0) {
+            t = t1;
+        } else if (t1 <= 0.0) {
+            t = t0;
+        } else {
+            t = min(t0, t1);
+        }
+    }
+
+    if (t <= 0.0) {
+        return intersection;
+    }
+
+    let point = ray_point(ray, t);
+    let surface_normal = normalize(point);
+
+    intersection.some = true;
+    intersection.ray = ray;
+    intersection.t = t;
+    intersection.normal = surface_normal;
+
+    return intersection;
+}
+
