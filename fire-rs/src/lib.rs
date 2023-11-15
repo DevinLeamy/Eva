@@ -1,4 +1,4 @@
-use renderer::Renderer;
+use renderer::{Renderer, RendererBuilder};
 use winit::dpi::LogicalSize;
 use winit::{
     event::*,
@@ -19,7 +19,7 @@ pub async fn run() {
         .unwrap();
 
     let window_id = window.id();
-    let mut renderer = Renderer::new(window).await;
+    let mut renderer = RendererBuilder::new(window).build();
 
     event_loop.run(move |event, _, control_flow| {
         match event {
