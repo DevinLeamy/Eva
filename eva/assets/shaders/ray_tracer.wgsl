@@ -102,9 +102,7 @@ fn ray_point(ray: Ray, t: f32) -> vec3f {
 }
 
 fn compute_ray_colour(ray: Ray) -> vec3f {
-    var sphere: Sphere;
-    sphere.radius = 1.0;
-
+    let sphere = spheres[0].sphere;
     let sphere_position = vec3f(0.0, 0.0, -5.0);
 
     var transformed_ray: Ray = ray;

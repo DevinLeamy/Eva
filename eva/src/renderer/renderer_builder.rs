@@ -2,9 +2,7 @@ use pollster::FutureExt;
 use wgpu::*;
 use winit::window::Window;
 
-use crate::Renderer;
-
-use super::s_camera::ShaderCamera;
+use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera}};
 
 pub struct RendererBuilder {
     surface: Surface,
@@ -23,6 +21,7 @@ pub struct RendererBuilder {
     display_bind_group_layout: Option<BindGroupLayout>,
 
     camera_buffer: Option<Buffer>,
+    spheres_buffer: Option<Buffer>
 }
 
 impl RendererBuilder {
@@ -83,6 +82,7 @@ impl RendererBuilder {
             display_pipeline: None,
             display_bind_group_layout: None,
             camera_buffer: None,
+            spheres_buffer: None
         }
     }
 
@@ -101,7 +101,8 @@ impl RendererBuilder {
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
             ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
             ray_tracer_pipeline: self.ray_tracer_pipeline.unwrap(),
-            camera_buffer: self.camera_buffer.unwrap()
+            camera_buffer: self.camera_buffer.unwrap(),
+            spheres_buffer: self.spheres_buffer.unwrap()
         }
     }
 }
@@ -115,10 +116,16 @@ impl RendererBuilder {
 
         self.camera_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
             label: Some("camera buffer"), 
-            size: std::mem::size_of::<ShaderCamera>() as u64, 
+            size: ShaderCamera::size(),
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, 
-            // Note sure if this should be 'true' or 'false'.
             mapped_at_creation: false 
+        }));
+
+        self.spheres_buffer = Some(self.device.create_buffer(&BufferDescriptor {
+            label: Some("spheres buffer"),
+            size: ShaderSphereModel::size(),
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
+            mapped_at_creation: false
         }));
     }
 
@@ -147,6 +154,16 @@ impl RendererBuilder {
                         },
                         count: None,
                     },
+                    BindGroupLayoutEntry {
+                        binding: 2,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer { 
+                            ty: BufferBindingType::Storage { read_only: true }, 
+                            has_dynamic_offset: false, 
+                            min_binding_size: None 
+                        },
+                        count: None
+                    }
                 ],
             },
         ));

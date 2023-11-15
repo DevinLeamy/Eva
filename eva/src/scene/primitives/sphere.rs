@@ -4,7 +4,7 @@ use super::Collidable;
 
 #[derive(Clone, Debug, ShaderType)]
 pub struct Sphere {
-    radius: f32,
+    pub radius: f32,
 }
 
 impl Sphere {

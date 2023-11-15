@@ -2,10 +2,21 @@ use encase::ShaderType;
 
 use crate::prelude::Sphere;
 
-use super::ShaderTransform;
+use super::{ShaderStruct, ShaderTransform};
 
 #[derive(ShaderType)]
 pub struct ShaderSphereModel {
-    sphere: Sphere,
-    transform: ShaderTransform,
+    pub sphere: Sphere,
+    pub transform: ShaderTransform,
+}
+
+impl ShaderStruct for ShaderSphereModel {
+    fn as_bytes(&self) -> Option<Vec<u8>> {
+        let mut buffer = encase::UniformBuffer::new(Vec::new());
+        buffer.write(self).ok()?;
+
+        Some(buffer.into_inner())
+    }
+
+    
 }

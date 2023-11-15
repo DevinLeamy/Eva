@@ -1,9 +1,10 @@
-use crate::prelude::Camera;
+use crate::{
+    prelude::{Camera, Sphere, Transform},
+    shader::{ShaderCamera, ShaderSphereModel, ShaderStruct},
+};
 use nalgebra::Vector3;
 use wgpu::{util::DeviceExt, *};
 use winit::window::Window;
-
-use super::s_camera::ShaderCamera;
 
 pub struct Renderer {
     pub surface: Surface,
@@ -16,6 +17,7 @@ pub struct Renderer {
     pub ray_tracer_pipeline: ComputePipeline,
 
     pub camera_buffer: Buffer,
+    pub spheres_buffer: Buffer,
 }
 
 impl Renderer {
@@ -134,9 +136,10 @@ impl Renderer {
         let shader_camera: ShaderCamera = camera.into();
         let filled_camera_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
             label: Some("camera buffer"),
-            contents: &shader_camera.as_wgsl_bytes().unwrap(),
+            contents: &shader_camera.as_bytes().unwrap(),
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
         });
+
         encoder.copy_buffer_to_buffer(
             &filled_camera_buffer,
             0,
@@ -144,6 +147,26 @@ impl Renderer {
             0,
             filled_camera_buffer.size(),
         );
+
+        let model = ShaderSphereModel {
+            sphere: Sphere { radius: 1.0 },
+            transform: Transform::new().into(),
+        };
+
+        let filled_spheres_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
+            label: Some("spheres buffer"),
+            contents: &model.as_bytes().unwrap(),
+            usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
+        });
+
+        encoder.copy_buffer_to_buffer(
+            &filled_spheres_buffer,
+            0,
+            &self.spheres_buffer,
+            0,
+            filled_spheres_buffer.size(),
+        );
+
         let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("ray tracer bind group"),
             layout: &self.ray_tracer_bind_group_layout,
@@ -154,11 +177,11 @@ impl Renderer {
                 },
                 BindGroupEntry {
                     binding: 1,
-                    resource: BindingResource::Buffer(BufferBinding {
-                        buffer: &self.camera_buffer,
-                        offset: 0,
-                        size: None,
-                    }),
+                    resource: self.camera_buffer.as_entire_binding(),
+                },
+                BindGroupEntry {
+                    binding: 2,
+                    resource: self.spheres_buffer.as_entire_binding(),
                 },
             ],
         });
