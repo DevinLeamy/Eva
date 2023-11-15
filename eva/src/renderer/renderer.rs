@@ -1,5 +1,5 @@
+use crate::prelude::Camera;
 use nalgebra::Vector3;
-use wall_e::prelude::Camera;
 use wgpu::{util::DeviceExt, *};
 use winit::window::Window;
 

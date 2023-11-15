@@ -1,6 +1,6 @@
+use crate::prelude::Camera;
 use encase::ShaderType;
 use nalgebra::{Matrix4, Vector3, Vector4};
-use wall_e::prelude::Camera;
 
 #[derive(Debug, ShaderType)]
 pub struct ShaderCamera {
