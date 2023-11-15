@@ -73,7 +73,7 @@ impl Renderer {
                     visibility: ShaderStages::COMPUTE,
                     ty: BindingType::StorageTexture {
                         access: wgpu::StorageTextureAccess::WriteOnly,
-                        format: wgpu::TextureFormat::Rgba8Unorm,
+                        format: wgpu::TextureFormat::Rgba16Float,
                         view_dimension: wgpu::TextureViewDimension::D2,
                     },
                     count: None,
@@ -178,25 +178,6 @@ impl Renderer {
             .create_command_encoder(&CommandEncoderDescriptor::default());
 
         let surface_texture = self.surface.get_current_texture().unwrap();
-
-        self.ray_tracer_pass(&mut encoder);
-        self.display_pass(&mut encoder, &surface_texture);
-
-        self.queue.submit([encoder.finish()]);
-
-        surface_texture.present();
-
-        Ok(())
-    }
-}
-
-impl Renderer {
-    fn display_pass(&self, encoder: &mut CommandEncoder, surface_texture: &SurfaceTexture) {
-        // Create a view into the current texture that we can write to.
-        let view = surface_texture
-            .texture
-            .create_view(&TextureViewDescriptor::default());
-
         let window_size = self.window.inner_size();
         let texture = self.device.create_texture(&TextureDescriptor {
             label: Some("display texture"),
@@ -209,8 +190,8 @@ impl Renderer {
             sample_count: 1,
             dimension: TextureDimension::D2,
             format: TextureFormat::Rgba16Float,
-            usage: TextureUsages::COPY_SRC
-                | TextureUsages::COPY_DST
+            usage: TextureUsages::COPY_DST
+                | TextureUsages::STORAGE_BINDING
                 | TextureUsages::TEXTURE_BINDING,
             view_formats: &[],
         });
@@ -224,6 +205,30 @@ impl Renderer {
             base_array_layer: 0,
             array_layer_count: None,
         });
+
+        self.ray_tracer_pass(&mut encoder, &texture_view);
+        self.display_pass(&mut encoder, &surface_texture, &texture_view);
+
+        self.queue.submit([encoder.finish()]);
+
+        surface_texture.present();
+
+        Ok(())
+    }
+}
+
+impl Renderer {
+    fn display_pass(
+        &self,
+        encoder: &mut CommandEncoder,
+        surface_texture: &SurfaceTexture,
+        texture_view: &TextureView,
+    ) {
+        // Create a view into the current texture that we can write to.
+        let view = surface_texture
+            .texture
+            .create_view(&TextureViewDescriptor::default());
+
         let sampler = self.device.create_sampler(&SamplerDescriptor::default());
 
         let display_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
@@ -249,9 +254,9 @@ impl Renderer {
                 resolve_target: None,
                 ops: Operations {
                     load: LoadOp::Clear(Color {
-                        r: 0.0,
+                        r: 1.0,
                         g: 0.0,
-                        b: 0.0,
+                        b: 1.0,
                         a: 1.0,
                     }),
                     store: true,
@@ -267,32 +272,14 @@ impl Renderer {
         drop(render_pass);
     }
 
-    fn ray_tracer_pass(&self, encoder: &mut CommandEncoder) {
+    fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
         let window_size = self.window.inner_size();
-
-        let storage_texture = self.device.create_texture(&TextureDescriptor {
-            label: None,
-            size: Extent3d {
-                width: window_size.width,
-                height: window_size.height,
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: TextureDimension::D2,
-            format: TextureFormat::Rgba8Unorm,
-            usage: TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
-
-        let storage_texture_view = storage_texture.create_view(&TextureViewDescriptor::default());
-
         let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("ray tracer bind group"),
             layout: &self.ray_tracer_bind_group_layout,
             entries: &[BindGroupEntry {
                 binding: 0,
-                resource: BindingResource::TextureView(&storage_texture_view),
+                resource: BindingResource::TextureView(&texture_view),
             }],
         });
 
@@ -303,7 +290,7 @@ impl Renderer {
 
         ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
         ray_tracer_pass.set_bind_group(0, &ray_tracer_bind_group, &[]);
-        ray_tracer_pass.dispatch_workgroups(8, 8, 1);
+        ray_tracer_pass.dispatch_workgroups(window_size.width / 8, window_size.height / 8, 1);
 
         drop(ray_tracer_pass);
     }
