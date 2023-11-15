@@ -1,5 +1,9 @@
+use nalgebra::Vector3;
+use wall_e::prelude::Camera;
 use wgpu::{util::DeviceExt, *};
 use winit::window::Window;
+
+use super::s_camera::ShaderCamera;
 
 pub struct Renderer {
     pub surface: Surface,
@@ -10,6 +14,8 @@ pub struct Renderer {
     pub display_bind_group_layout: BindGroupLayout,
     pub ray_tracer_bind_group_layout: BindGroupLayout,
     pub ray_tracer_pipeline: ComputePipeline,
+
+    pub camera_buffer: Buffer,
 }
 
 impl Renderer {
@@ -118,13 +124,43 @@ impl Renderer {
 
     fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
         let window_size = self.window.inner_size();
+        let camera = Camera::new(
+            Vector3::zeros(),
+            50.0,
+            Vector3::new(0.0, 0.0, -1.0),
+            Vector3::new(0.0, 1.0, 0.0),
+        );
+
+        let shader_camera: ShaderCamera = camera.into();
+        let filled_camera_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
+            label: Some("camera buffer"),
+            contents: &shader_camera.as_wgsl_bytes().unwrap(),
+            usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
+        });
+        encoder.copy_buffer_to_buffer(
+            &filled_camera_buffer,
+            0,
+            &self.camera_buffer,
+            0,
+            filled_camera_buffer.size(),
+        );
         let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("ray tracer bind group"),
             layout: &self.ray_tracer_bind_group_layout,
-            entries: &[BindGroupEntry {
-                binding: 0,
-                resource: BindingResource::TextureView(&texture_view),
-            }],
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::TextureView(&texture_view),
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::Buffer(BufferBinding {
+                        buffer: &self.camera_buffer,
+                        offset: 0,
+                        size: None,
+                    }),
+                },
+            ],
         });
 
         // Invoke the compute shader.

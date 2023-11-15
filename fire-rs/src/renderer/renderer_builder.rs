@@ -4,6 +4,8 @@ use winit::window::Window;
 
 use crate::Renderer;
 
+use super::s_camera::ShaderCamera;
+
 pub struct RendererBuilder {
     surface: Surface,
     device: Device,
@@ -19,6 +21,8 @@ pub struct RendererBuilder {
 
     display_pipeline: Option<RenderPipeline>,
     display_bind_group_layout: Option<BindGroupLayout>,
+
+    camera_buffer: Option<Buffer>,
 }
 
 impl RendererBuilder {
@@ -78,6 +82,7 @@ impl RendererBuilder {
             ray_tracer_bind_group_layout: None,
             display_pipeline: None,
             display_bind_group_layout: None,
+            camera_buffer: None,
         }
     }
 
@@ -96,6 +101,7 @@ impl RendererBuilder {
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
             ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
             ray_tracer_pipeline: self.ray_tracer_pipeline.unwrap(),
+            camera_buffer: self.camera_buffer.unwrap()
         }
     }
 }
@@ -106,22 +112,42 @@ impl RendererBuilder {
         // Shaders.
         self.ray_tracer_shader = Some(self.device.create_shader_module(include_wgsl!("../../assets/shaders/ray_tracer.wgsl")));
         self.display_shader = Some(self.device.create_shader_module(include_wgsl!("../../assets/shaders/display.wgsl")));
+
+        self.camera_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: Some("camera buffer"), 
+            size: std::mem::size_of::<ShaderCamera>() as u64, 
+            usage: BufferUsages::UNIFORM | BufferUsages::COPY_DST, 
+            // Note sure if this should be 'true' or 'false'.
+            mapped_at_creation: false 
+        }));
     }
 
     fn create_bind_group_layouts(&mut self) {
         self.ray_tracer_bind_group_layout = Some(self.device.create_bind_group_layout(
             &BindGroupLayoutDescriptor {
                 label: Some("ray tracer bind group layout"),
-                entries: &[BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: ShaderStages::COMPUTE,
-                    ty: BindingType::StorageTexture {
-                        access: StorageTextureAccess::WriteOnly,
-                        format: TextureFormat::Rgba16Float,
-                        view_dimension: TextureViewDimension::D2,
+                entries: &[
+                    BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::StorageTexture {
+                            access: StorageTextureAccess::WriteOnly,
+                            format: TextureFormat::Rgba16Float,
+                            view_dimension: TextureViewDimension::D2,
+                        },
+                        count: None,
                     },
-                    count: None,
-                }],
+                    BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    },
+                ],
             },
         ));
 

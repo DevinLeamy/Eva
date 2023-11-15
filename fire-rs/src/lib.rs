@@ -7,6 +7,7 @@ use winit::{
 };
 
 mod renderer;
+mod utils;
 
 pub async fn run() {
     env_logger::init();
