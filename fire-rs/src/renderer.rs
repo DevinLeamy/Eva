@@ -1,41 +1,6 @@
 use wgpu::{util::DeviceExt, *};
 use winit::window::Window;
 
-#[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-struct Vertex {
-    position: [f32; 3],
-    color: [f32; 3],
-}
-
-impl Vertex {
-    const fn new(position: [f32; 3], color: [f32; 3]) -> Self {
-        Self { position, color }
-    }
-}
-
-impl Vertex {
-    const ATTRIBUTES: [VertexAttribute; 2] = vertex_attr_array![0 => Float32x3, 1 => Float32x3];
-
-    fn packed_buffer_layout() -> VertexBufferLayout<'static> {
-        VertexBufferLayout {
-            array_stride: std::mem::size_of::<Vertex>() as BufferAddress,
-            step_mode: VertexStepMode::Vertex,
-            attributes: &Self::ATTRIBUTES,
-        }
-    }
-}
-
-const VERTICES: &[Vertex] = &[
-    Vertex::new([-0.0868241, 0.49240386, 0.0], [0.5, 0.0, 0.0]),
-    Vertex::new([-0.49513406, 0.06958647, 0.0], [0.0, 0.5, 0.0]),
-    Vertex::new([-0.21918549, -0.44939706, 0.0], [0.0, 0.0, 0.5]),
-    Vertex::new([0.35966998, -0.3473291, 0.0], [0.0, 0.0, 0.0]),
-    Vertex::new([0.44147372, 0.2347359, 0.0], [0.5, 0.5, 0.5]),
-];
-
-const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
-
 pub struct Renderer {
     surface: Surface,
     device: Device,
@@ -43,10 +8,9 @@ pub struct Renderer {
     surface_config: SurfaceConfiguration,
     window: Window,
 
-    render_pipeline: RenderPipeline,
-
-    vertex_buffer: Buffer,
-    index_buffer: Buffer,
+    display_pipeline: RenderPipeline,
+    display_bind_group_layout: BindGroupLayout,
+    ray_tracer_pipeline: ComputePipeline,
 }
 
 impl Renderer {
@@ -94,35 +58,64 @@ impl Renderer {
 
         surface.configure(&device, &surface_config);
 
-        // Create the render pipelines.
-        let shader = device.create_shader_module(include_wgsl!("../assets/shaders/shader.wgsl"));
-        let render_pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
-            label: Some("render pipeline layout"),
+        // Create the compute pipeline.
+        let compute_shader =
+            device.create_shader_module(include_wgsl!("../assets/shaders/ray_tracer.wgsl"));
+        let ray_tracer_pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
+            label: Some("ray tracer pipeline layout"),
             bind_group_layouts: &[],
             push_constant_ranges: &[],
         });
 
-        let vertex_buffer = device.create_buffer_init(&util::BufferInitDescriptor {
-            label: Some("vertex buffer"),
-            contents: bytemuck::cast_slice(VERTICES),
-            usage: BufferUsages::VERTEX,
-        });
-        let index_buffer = device.create_buffer_init(&util::BufferInitDescriptor {
-            label: Some("index buffer"),
-            contents: bytemuck::cast_slice(INDICES),
-            usage: BufferUsages::INDEX,
+        let ray_tracer_pipeline = device.create_compute_pipeline(&ComputePipelineDescriptor {
+            label: Some("ray tracer pipeline"),
+            layout: Some(&ray_tracer_pipeline_layout),
+            module: &compute_shader,
+            entry_point: "compute_main",
         });
 
-        let render_pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
-            label: Some("render pipeline"),
+        // Create the pipelines.
+        let display_bind_group_layout =
+            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
+                label: Some("display bind group layout"),
+                entries: &[
+                    BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Sampler(SamplerBindingType::NonFiltering),
+                        count: None,
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Texture {
+                            sample_type: TextureSampleType::Float { filterable: false },
+                            view_dimension: TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: None,
+                    },
+                ],
+            });
+
+        let display_shader =
+            device.create_shader_module(include_wgsl!("../assets/shaders/display.wgsl"));
+        let render_pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
+            label: Some("display pipeline layout"),
+            bind_group_layouts: &[&display_bind_group_layout],
+            push_constant_ranges: &[],
+        });
+
+        let display_pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
+            label: Some("screen pipeline"),
             layout: Some(&render_pipeline_layout),
             vertex: VertexState {
-                module: &shader,
+                module: &display_shader,
                 entry_point: "vs_main",
-                buffers: &[Vertex::packed_buffer_layout()],
+                buffers: &[],
             },
             fragment: Some(FragmentState {
-                module: &shader,
+                module: &display_shader,
                 entry_point: "fs_main",
                 targets: &[Some(ColorTargetState {
                     format: surface_config.format,
@@ -151,10 +144,10 @@ impl Renderer {
             surface_config,
             window,
 
-            render_pipeline,
+            ray_tracer_pipeline,
+            display_pipeline,
 
-            vertex_buffer,
-            index_buffer,
+            display_bind_group_layout,
         }
     }
 
@@ -165,12 +158,66 @@ impl Renderer {
         let view = surface_texture
             .texture
             .create_view(&TextureViewDescriptor::default());
+
         // Build a command encoder to encode commands that are send to the GPU.
         let mut encoder = self
             .device
             .create_command_encoder(&CommandEncoderDescriptor {
-                label: Some("render encoder"),
+                label: Some("encoder"),
             });
+
+        // Invoke the compute shader.
+        let mut ray_tracer_pass = encoder.begin_compute_pass(&ComputePassDescriptor {
+            label: Some("ray tracer pass"),
+        });
+
+        ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
+        ray_tracer_pass.dispatch_workgroups(8, 8, 1);
+        drop(ray_tracer_pass);
+
+        let window_size = self.window.inner_size();
+        let texture = self.device.create_texture(&TextureDescriptor {
+            label: Some("display texture"),
+            size: Extent3d {
+                width: window_size.width,
+                height: window_size.height,
+                depth_or_array_layers: 1, // not sure why.
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba16Float,
+            usage: TextureUsages::COPY_SRC
+                | TextureUsages::COPY_DST
+                | TextureUsages::TEXTURE_BINDING,
+            view_formats: &[],
+        });
+        let texture_view = texture.create_view(&TextureViewDescriptor {
+            label: Some("texture view"),
+            format: Some(TextureFormat::Rgba16Float),
+            dimension: Some(TextureViewDimension::D2),
+            aspect: TextureAspect::All,
+            base_mip_level: 0,
+            mip_level_count: Some(1),
+            base_array_layer: 0,
+            array_layer_count: None,
+        });
+        let sampler = self.device.create_sampler(&SamplerDescriptor::default());
+
+        let display_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
+            label: Some("display bind group"),
+            layout: &self.display_bind_group_layout,
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::Sampler(&sampler),
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::TextureView(&texture_view),
+                },
+            ],
+        });
 
         let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("render pass"),
@@ -180,9 +227,9 @@ impl Renderer {
                 resolve_target: None,
                 ops: Operations {
                     load: LoadOp::Clear(Color {
-                        r: 0.1,
-                        g: 0.2,
-                        b: 0.3,
+                        r: 0.0,
+                        g: 0.0,
+                        b: 0.0,
                         a: 1.0,
                     }),
                     store: true,
@@ -191,10 +238,9 @@ impl Renderer {
             depth_stencil_attachment: None,
         });
 
-        render_pass.set_pipeline(&self.render_pipeline);
-        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.set_index_buffer(self.index_buffer.slice(..), IndexFormat::Uint16);
-        render_pass.draw_indexed(0..INDICES.len() as u32, 0, 0..1);
+        render_pass.set_pipeline(&self.display_pipeline);
+        render_pass.set_bind_group(0, &display_bind_group, &[]);
+        render_pass.draw(0..6 as u32, 0..1);
 
         drop(render_pass);
 
