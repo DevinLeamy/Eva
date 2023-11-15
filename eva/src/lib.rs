@@ -14,6 +14,7 @@ mod obj_mesh;
 mod ray_tracer;
 mod renderer;
 mod scene;
+mod shader;
 mod utils;
 
 pub mod prelude {
@@ -22,6 +23,7 @@ pub mod prelude {
     pub use crate::ray_tracer::*;
     pub use crate::renderer::*;
     pub use crate::scene::*;
+    pub use crate::shader::*;
     pub use crate::utils::*;
 }
 

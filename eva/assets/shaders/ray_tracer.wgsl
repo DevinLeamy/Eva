@@ -5,6 +5,20 @@ struct Camera {
     fov: f32,
 };
 
+struct Transform {
+    /// Model transformation. 
+    m: mat4x4f,
+    /// Invervse model translation.
+    m_inverse: mat4x4f,
+    /// Post-intersection normal transformation.
+    m_normal_inverse: mat3x3f,
+};
+
+struct SphereModel {
+    sphere: Sphere,
+    transform: Transform,
+};
+
 struct Ray {
     origin: vec3f,
     direction: vec3f,
@@ -23,6 +37,7 @@ struct Intersection {
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
+@group(0) @binding(2) var<storage, read> spheres: array<SphereModel>; 
 
 @compute @workgroup_size(8, 8, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {

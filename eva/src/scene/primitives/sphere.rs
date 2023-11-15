@@ -1,6 +1,8 @@
+use encase::ShaderType;
+
 use super::Collidable;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, ShaderType)]
 pub struct Sphere {
     radius: f32,
 }
