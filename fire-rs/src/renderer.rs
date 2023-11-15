@@ -10,6 +10,9 @@ pub struct Renderer {
 
     display_pipeline: RenderPipeline,
     display_bind_group_layout: BindGroupLayout,
+
+    ray_tracer_bind_group_layout: BindGroupLayout,
+
     ray_tracer_pipeline: ComputePipeline,
 }
 
@@ -61,9 +64,25 @@ impl Renderer {
         // Create the compute pipeline.
         let compute_shader =
             device.create_shader_module(include_wgsl!("../assets/shaders/ray_tracer.wgsl"));
+
+        let ray_tracer_bind_group_layout =
+            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
+                label: Some("ray tracer bind group layout"),
+                entries: &[BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: ShaderStages::COMPUTE,
+                    ty: BindingType::StorageTexture {
+                        access: wgpu::StorageTextureAccess::WriteOnly,
+                        format: wgpu::TextureFormat::Rgba8Unorm,
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                    },
+                    count: None,
+                }],
+            });
+
         let ray_tracer_pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
             label: Some("ray tracer pipeline layout"),
-            bind_group_layouts: &[],
+            bind_group_layouts: &[&ray_tracer_bind_group_layout],
             push_constant_ranges: &[],
         });
 
@@ -148,6 +167,7 @@ impl Renderer {
             display_pipeline,
 
             display_bind_group_layout,
+            ray_tracer_bind_group_layout,
         }
     }
 
@@ -248,13 +268,43 @@ impl Renderer {
     }
 
     fn ray_tracer_pass(&self, encoder: &mut CommandEncoder) {
+        let window_size = self.window.inner_size();
+
+        let storage_texture = self.device.create_texture(&TextureDescriptor {
+            label: None,
+            size: Extent3d {
+                width: window_size.width,
+                height: window_size.height,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba8Unorm,
+            usage: TextureUsages::STORAGE_BINDING | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+
+        let storage_texture_view = storage_texture.create_view(&TextureViewDescriptor::default());
+
+        let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
+            label: Some("ray tracer bind group"),
+            layout: &self.ray_tracer_bind_group_layout,
+            entries: &[BindGroupEntry {
+                binding: 0,
+                resource: BindingResource::TextureView(&storage_texture_view),
+            }],
+        });
+
         // Invoke the compute shader.
         let mut ray_tracer_pass = encoder.begin_compute_pass(&ComputePassDescriptor {
             label: Some("ray tracer pass"),
         });
 
         ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
+        ray_tracer_pass.set_bind_group(0, &ray_tracer_bind_group, &[]);
         ray_tracer_pass.dispatch_workgroups(8, 8, 1);
+
         drop(ray_tracer_pass);
     }
 }
