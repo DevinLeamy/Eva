@@ -152,13 +152,6 @@ impl Renderer {
     }
 
     pub fn render(&mut self) -> Result<(), SurfaceError> {
-        // Get access to the current texture.
-        let surface_texture = self.surface.get_current_texture()?;
-        // Create a view into the current texture that we can write to.
-        let view = surface_texture
-            .texture
-            .create_view(&TextureViewDescriptor::default());
-
         // Build a command encoder to encode commands that are send to the GPU.
         let mut encoder = self
             .device
@@ -166,14 +159,26 @@ impl Renderer {
                 label: Some("encoder"),
             });
 
-        // Invoke the compute shader.
-        let mut ray_tracer_pass = encoder.begin_compute_pass(&ComputePassDescriptor {
-            label: Some("ray tracer pass"),
-        });
+        // Get access to the current texture.
+        let surface_texture = self.surface.get_current_texture().unwrap();
+        self.ray_tracer_pass(&mut encoder);
+        self.display_pass(&mut encoder, &surface_texture);
 
-        ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
-        ray_tracer_pass.dispatch_workgroups(8, 8, 1);
-        drop(ray_tracer_pass);
+        // Submit the encoded commands to the queue, to be rendered.
+        self.queue.submit([encoder.finish()]);
+        // Present the texture view to the "owning surface".
+        surface_texture.present();
+
+        Ok(())
+    }
+}
+
+impl Renderer {
+    fn display_pass(&self, encoder: &mut CommandEncoder, surface_texture: &SurfaceTexture) {
+        // Create a view into the current texture that we can write to.
+        let view = surface_texture
+            .texture
+            .create_view(&TextureViewDescriptor::default());
 
         let window_size = self.window.inner_size();
         let texture = self.device.create_texture(&TextureDescriptor {
@@ -243,12 +248,16 @@ impl Renderer {
         render_pass.draw(0..6 as u32, 0..1);
 
         drop(render_pass);
+    }
 
-        // Submit the encoded commands to the queue, to be rendered.
-        self.queue.submit([encoder.finish()]);
-        // Present the texture view to the "owning surface".
-        surface_texture.present();
+    fn ray_tracer_pass(&self, encoder: &mut CommandEncoder) {
+        // Invoke the compute shader.
+        let mut ray_tracer_pass = encoder.begin_compute_pass(&ComputePassDescriptor {
+            label: Some("ray tracer pass"),
+        });
 
-        Ok(())
+        ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
+        ray_tracer_pass.dispatch_workgroups(8, 8, 1);
+        drop(ray_tracer_pass);
     }
 }

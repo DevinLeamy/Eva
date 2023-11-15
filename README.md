@@ -65,3 +65,12 @@ Rendered images, by default, are placed in the root folder.
 -   `obj`: Utility crate for loading `obj` files.
 -   [maturin](https://github.com/PyO3/maturin): Building python3 module generated using `pyo3`.
 -   `rand`: Utility crate for random number generation.
+
+### Resources
+
+-   https://github.com/amengede/webgpu-for-beginners/tree/main
+-   https://cohost.org/mcc/post/1406157-i-want-to-talk-about
+-   https://surma.dev/things/webgpu/
+-   https://sotrh.github.io/learn-wgpu/#what-is-wgpu
+-   https://gpuweb.github.io/gpuweb/
+-   https://github.com/gfx-rs/wgpu
