@@ -17,3 +17,4 @@ wgpu = { version = "0.17"}
 env_logger = "0.10.1"
 pollster = "0.3.0"
 bytemuck = { version = "1.14.0", features = ["derive"] }
+image = { version = "0.24.7", features = ["png", "jpeg"] }

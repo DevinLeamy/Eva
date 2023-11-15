@@ -27,10 +27,14 @@ impl Vertex {
 }
 
 const VERTICES: &[Vertex] = &[
-    Vertex::new([0.0, 0.5, 0.0], [1.0, 0.0, 0.0]),
-    Vertex::new([-0.5, -0.5, 0.0], [0.0, 1.0, 0.0]),
-    Vertex::new([0.5, -0.5, 0.0], [0.0, 0.0, 1.0]),
+    Vertex::new([-0.0868241, 0.49240386, 0.0], [0.5, 0.0, 0.0]),
+    Vertex::new([-0.49513406, 0.06958647, 0.0], [0.0, 0.5, 0.0]),
+    Vertex::new([-0.21918549, -0.44939706, 0.0], [0.0, 0.0, 0.5]),
+    Vertex::new([0.35966998, -0.3473291, 0.0], [0.0, 0.0, 0.0]),
+    Vertex::new([0.44147372, 0.2347359, 0.0], [0.5, 0.5, 0.5]),
 ];
+
+const INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
 
 pub struct Renderer {
     surface: Surface,
@@ -42,6 +46,7 @@ pub struct Renderer {
     render_pipeline: RenderPipeline,
 
     vertex_buffer: Buffer,
+    index_buffer: Buffer,
 }
 
 impl Renderer {
@@ -102,6 +107,11 @@ impl Renderer {
             contents: bytemuck::cast_slice(VERTICES),
             usage: BufferUsages::VERTEX,
         });
+        let index_buffer = device.create_buffer_init(&util::BufferInitDescriptor {
+            label: Some("index buffer"),
+            contents: bytemuck::cast_slice(INDICES),
+            usage: BufferUsages::INDEX,
+        });
 
         let render_pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
             label: Some("render pipeline"),
@@ -144,6 +154,7 @@ impl Renderer {
             render_pipeline,
 
             vertex_buffer,
+            index_buffer,
         }
     }
 
@@ -182,7 +193,8 @@ impl Renderer {
 
         render_pass.set_pipeline(&self.render_pipeline);
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.draw(0..VERTICES.len() as u32, 0..1);
+        render_pass.set_index_buffer(self.index_buffer.slice(..), IndexFormat::Uint16);
+        render_pass.draw_indexed(0..INDICES.len() as u32, 0, 0..1);
 
         drop(render_pass);
 
