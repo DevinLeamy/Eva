@@ -21,8 +21,7 @@ impl Into<ShaderCamera> for Camera {
     fn into(self) -> ShaderCamera {
         ShaderCamera {
             camera_to_world: self.camera_to_world_mat(),
-            // position: self.origin().into(),
-            position: [1.0, 0.0, 0.0].into(),
+            position: self.origin().into(),
             fov: self.fov(),
         }
     }
