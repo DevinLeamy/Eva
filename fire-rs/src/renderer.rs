@@ -155,18 +155,15 @@ impl Renderer {
         // Build a command encoder to encode commands that are send to the GPU.
         let mut encoder = self
             .device
-            .create_command_encoder(&CommandEncoderDescriptor {
-                label: Some("encoder"),
-            });
+            .create_command_encoder(&CommandEncoderDescriptor::default());
 
-        // Get access to the current texture.
         let surface_texture = self.surface.get_current_texture().unwrap();
+
         self.ray_tracer_pass(&mut encoder);
         self.display_pass(&mut encoder, &surface_texture);
 
-        // Submit the encoded commands to the queue, to be rendered.
         self.queue.submit([encoder.finish()]);
-        // Present the texture view to the "owning surface".
+
         surface_texture.present();
 
         Ok(())
