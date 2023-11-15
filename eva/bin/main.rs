@@ -1,4 +1,4 @@
-use fire_rs::run;
+use eva::run;
 
 fn main() {
     pollster::block_on(run());

@@ -485,6 +485,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "eva"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "encase",
+ "env_logger",
+ "image",
+ "lazy_static",
+ "log",
+ "nalgebra",
+ "obj",
+ "pollster",
+ "wall-e",
+ "wgpu",
+ "winit",
+]
+
+[[package]]
 name = "exr"
 version = "1.71.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -507,22 +525,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "64d6dafc854908ff5da46ff3f8f473c6984119a2876a383a860246dd7841a868"
 dependencies = [
  "simd-adler32",
-]
-
-[[package]]
-name = "fire-rs"
-version = "0.1.0"
-dependencies = [
- "bytemuck",
- "encase",
- "env_logger",
- "image",
- "log",
- "nalgebra",
- "pollster",
- "wall-e",
- "wgpu",
- "winit",
 ]
 
 [[package]]
