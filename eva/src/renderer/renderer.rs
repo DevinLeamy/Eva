@@ -1,6 +1,6 @@
 use crate::{
     prelude::{Camera, Sphere, Transform},
-    shader::{ShaderCamera, ShaderSphereModel, ShaderStruct},
+    shader::{ShaderCamera, ShaderPointLight, ShaderSphereModel, ShaderStruct},
 };
 use nalgebra::Vector3;
 use wgpu::{util::DeviceExt, *};
@@ -18,6 +18,7 @@ pub struct Renderer {
 
     pub camera_buffer: Buffer,
     pub spheres_buffer: Buffer,
+    pub lights_buffer: Buffer,
 }
 
 impl Renderer {
@@ -172,6 +173,25 @@ impl Renderer {
             filled_spheres_buffer.size(),
         );
 
+        let light = ShaderPointLight {
+            position: Vector3::new(10.0, 10.0, 0.0),
+            colour: Vector3::new(1.0, 1.0, 1.0),
+        };
+
+        let filled_lights_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
+            label: Some("lights buffer"),
+            contents: &light.as_bytes().unwrap(),
+            usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
+        });
+
+        encoder.copy_buffer_to_buffer(
+            &filled_lights_buffer,
+            0,
+            &self.lights_buffer,
+            0,
+            filled_lights_buffer.size(),
+        );
+
         let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("ray tracer bind group"),
             layout: &self.ray_tracer_bind_group_layout,
@@ -187,6 +207,10 @@ impl Renderer {
                 BindGroupEntry {
                     binding: 2,
                     resource: self.spheres_buffer.as_entire_binding(),
+                },
+                BindGroupEntry {
+                    binding: 3,
+                    resource: self.lights_buffer.as_entire_binding(),
                 },
             ],
         });

@@ -35,9 +35,15 @@ struct Intersection {
     normal: vec3f,
 };
 
+struct PointLight {
+    position: vec3f,
+    colour: vec3f,
+}
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: array<SphereModel>; 
+@group(0) @binding(3) var<storage, read> lights: array<PointLight>;
 
 @compute @workgroup_size(8, 8, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
