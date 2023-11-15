@@ -1,6 +1,5 @@
-use pollster::FutureExt;
 use renderer::Renderer;
-use winit::dpi::{LogicalSize, PhysicalSize};
+use winit::dpi::LogicalSize;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
@@ -8,6 +7,8 @@ use winit::{
 };
 
 mod renderer;
+
+
 
 pub async fn run() {
     env_logger::init();

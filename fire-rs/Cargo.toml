@@ -16,3 +16,4 @@ winit = { version = "0.28.0"}
 wgpu = { version = "0.17"}
 env_logger = "0.10.1"
 pollster = "0.3.0"
+bytemuck = { version = "1.14.0", features = ["derive"] }

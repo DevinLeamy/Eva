@@ -1,5 +1,36 @@
-use wgpu::*;
+use wgpu::{util::DeviceExt, *};
 use winit::window::Window;
+
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+struct Vertex {
+    position: [f32; 3],
+    color: [f32; 3],
+}
+
+impl Vertex {
+    const fn new(position: [f32; 3], color: [f32; 3]) -> Self {
+        Self { position, color }
+    }
+}
+
+impl Vertex {
+    const ATTRIBUTES: [VertexAttribute; 2] = vertex_attr_array![0 => Float32x3, 1 => Float32x3];
+
+    fn packed_buffer_layout() -> VertexBufferLayout<'static> {
+        VertexBufferLayout {
+            array_stride: std::mem::size_of::<Vertex>() as BufferAddress,
+            step_mode: VertexStepMode::Vertex,
+            attributes: &Self::ATTRIBUTES,
+        }
+    }
+}
+
+const VERTICES: &[Vertex] = &[
+    Vertex::new([0.0, 0.5, 0.0], [1.0, 0.0, 0.0]),
+    Vertex::new([-0.5, -0.5, 0.0], [0.0, 1.0, 0.0]),
+    Vertex::new([0.5, -0.5, 0.0], [0.0, 0.0, 1.0]),
+];
 
 pub struct Renderer {
     surface: Surface,
@@ -9,6 +40,8 @@ pub struct Renderer {
     window: Window,
 
     render_pipeline: RenderPipeline,
+
+    vertex_buffer: Buffer,
 }
 
 impl Renderer {
@@ -63,13 +96,20 @@ impl Renderer {
             bind_group_layouts: &[],
             push_constant_ranges: &[],
         });
+
+        let vertex_buffer = device.create_buffer_init(&util::BufferInitDescriptor {
+            label: Some("vertex buffer"),
+            contents: bytemuck::cast_slice(VERTICES),
+            usage: BufferUsages::VERTEX,
+        });
+
         let render_pipeline = device.create_render_pipeline(&RenderPipelineDescriptor {
             label: Some("render pipeline"),
             layout: Some(&render_pipeline_layout),
             vertex: VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[],
+                buffers: &[Vertex::packed_buffer_layout()],
             },
             fragment: Some(FragmentState {
                 module: &shader,
@@ -100,7 +140,10 @@ impl Renderer {
             queue,
             surface_config,
             window,
+
             render_pipeline,
+
+            vertex_buffer,
         }
     }
 
@@ -138,7 +181,8 @@ impl Renderer {
         });
 
         render_pass.set_pipeline(&self.render_pipeline);
-        render_pass.draw(0..3, 0..1);
+        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+        render_pass.draw(0..VERTICES.len() as u32, 0..1);
 
         drop(render_pass);
 
