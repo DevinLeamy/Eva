@@ -5,6 +5,11 @@ struct Camera {
     fov: f32,
 };
 
+struct Ray {
+    origin: vec3f,
+    direction: vec3f,
+};
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 
@@ -18,7 +23,9 @@ fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let screen_coord = vec2<i32>(i32(GlobalInvocationID.x), i32(GlobalInvocationID.y));
     let pixel_position = compute_pixel_position(x, y);
 
-    textureStore(colour_buffer, screen_coord, vec4<f32>(pixel_position.xyz, 1.0));
+    let ray = ray_from_points(camera.position, pixel_position);
+
+    textureStore(colour_buffer, screen_coord, vec4<f32>(ray.direction, 1.0));
 }
 
 fn compute_pixel_position(x: f32, y: f32) -> vec3f {
@@ -52,4 +59,12 @@ fn compute_pixel_position(x: f32, y: f32) -> vec3f {
     let pixel_world_pos = camera.camera_to_world * pixel_camera_pos;
 
     return pixel_world_pos.xyz;
+}
+
+fn ray_from_points(src: vec3f, dest: vec3f) -> Ray {
+    var ray: Ray;
+    ray.origin = src;
+    ray.direction = normalize(dest - src);
+    
+    return ray;
 }
