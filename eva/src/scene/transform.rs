@@ -4,9 +4,9 @@ use crate::utils::vector_mul;
 
 #[derive(Clone, Debug)]
 pub struct Transform {
-    rotation: Vector3<f32>,
-    translation: Vector3<f32>,
-    scale: Vector3<f32>,
+    pub rotation: Vector3<f32>,
+    pub translation: Vector3<f32>,
+    pub scale: Vector3<f32>,
 }
 
 impl Transform {

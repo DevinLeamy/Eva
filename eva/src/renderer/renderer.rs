@@ -150,7 +150,12 @@ impl Renderer {
 
         let model = ShaderSphereModel {
             sphere: Sphere { radius: 1.0 },
-            transform: Transform::new().into(),
+            transform: Transform {
+                translation: Vector3::new(0.0, 0.0, -10.0),
+                scale: Vector3::new(1.0, 1.0, 1.0),
+                ..Default::default()
+            }
+            .into(),
         };
 
         let filled_spheres_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {

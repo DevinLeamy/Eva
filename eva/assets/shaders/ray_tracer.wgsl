@@ -101,20 +101,56 @@ fn ray_point(ray: Ray, t: f32) -> vec3f {
     return ray.origin + ray.direction * t;
 }
 
+fn ray_t(ray: Ray, point: vec3f) -> f32 {
+    return length(point - ray.origin);
+}
+
+fn ray_inverse_transform(ray: Ray, transform: Transform) -> Ray {
+    let p1 = vec4f(ray.origin, 1.0);
+    let p2 = vec4f(ray.origin + ray.direction, 1.0);
+
+    let new_p1 = transform.m_inverse * p1;
+    let new_p2 = transform.m_inverse * p2;
+
+    return ray_from_points(new_p1.xyz, new_p2.xyz);
+}
+
+fn ray_transform(ray: Ray, transform: Transform) -> Ray {
+    let p1 = vec4f(ray.origin, 1.0);
+    let p2 = vec4f(ray.origin + ray.direction, 1.0);
+
+    let new_p1 = transform.m * p1;
+    let new_p2 = transform.m * p2;
+
+    return ray_from_points(new_p1.xyz, new_p2.xyz);
+}
+
+// NOTE: IS MISSING THE MATERIAL. REMEMBER TO ADD THAT.
+fn intersection_transform(intersection: Intersection, transform: Transform) -> Intersection {
+    var new_intersection: Intersection;
+    new_intersection.some = true;
+    new_intersection.ray = ray_transform(intersection.ray, transform);
+
+    let new_point = transform.m * vec4f(ray_point(intersection.ray, intersection.t), 1.0);
+    new_intersection.t = ray_t(intersection.ray, new_point.xyz);
+    new_intersection.normal = normalize(transform.m_normal_inverse * intersection.normal);
+
+    return new_intersection;
+}
+
 fn compute_ray_colour(ray: Ray) -> vec3f {
-    let sphere = spheres[0].sphere;
-    let sphere_position = vec3f(0.0, 0.0, -5.0);
+    let model = spheres[0];
+    let sphere = model.sphere;
 
-    var transformed_ray: Ray = ray;
-    transformed_ray.origin = transformed_ray.origin - sphere_position;
-
+    let transformed_ray: Ray = ray_inverse_transform(ray, model.transform);
     let intersection = sphere_intersection(sphere, transformed_ray);
 
-    if (intersection.some) {
-        return vec3f(1.0, 0.0, 0.0);
-    } else {
+    if (!intersection.some) {
         return vec3f(0.0, 0.0, 1.0);
     }
+
+    let transformed_intersection = intersection_transform(intersection, model.transform);
+    return vec3f(1.0, 0.0, 0.0);
 }
 
 
