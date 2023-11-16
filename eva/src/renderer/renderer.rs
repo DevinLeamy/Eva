@@ -156,57 +156,20 @@ impl Renderer {
         drop(render_pass);
     }
 
+    #[rustfmt::skip]
     fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
         let window_size = self.window.inner_size();
         let shader_camera: ShaderCamera = self.context.camera.clone().into();
-        let filled_camera_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
-            label: Some("camera buffer"),
-            contents: &shader_camera.as_bytes().unwrap(),
-            usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
-        });
-
-        encoder.copy_buffer_to_buffer(
-            &filled_camera_buffer,
-            0,
-            &self.camera_buffer,
-            0,
-            filled_camera_buffer.size(),
-        );
         let flat_scene: FlatScene = self.context.scene.clone().into();
-        let filled_spheres_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
-            label: Some("spheres buffer"),
-            contents: &flat_scene.spheres.as_bytes().unwrap(),
-            usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
-        });
 
         let config = ShaderGlobalConfig {
             ambient: flat_scene.ambient,
         };
 
-        self.queue
-            .write_buffer(&self.config_buffer, 0, &config.as_bytes().unwrap());
-
-        encoder.copy_buffer_to_buffer(
-            &filled_spheres_buffer,
-            0,
-            &self.spheres_buffer,
-            0,
-            filled_spheres_buffer.size(),
-        );
-
-        let filled_lights_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
-            label: Some("lights buffer"),
-            contents: &flat_scene.lights.as_bytes().unwrap(),
-            usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
-        });
-
-        encoder.copy_buffer_to_buffer(
-            &filled_lights_buffer,
-            0,
-            &self.lights_buffer,
-            0,
-            filled_lights_buffer.size(),
-        );
+        self.queue.write_buffer(&self.config_buffer, 0, &config.as_bytes().unwrap());
+        self.queue.write_buffer(&self.camera_buffer, 0, &shader_camera.as_bytes().unwrap());
+        self.queue.write_buffer(&self.spheres_buffer, 0, &flat_scene.spheres.as_bytes().unwrap());
+        self.queue.write_buffer(&self.lights_buffer, 0, &flat_scene.lights.as_bytes().unwrap());
 
         let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("ray tracer bind group"),
