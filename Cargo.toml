@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "eva",
+    "eva-py",
+    "eva-py-macros"
+]

@@ -1,5 +1,7 @@
 use nalgebra::{SimdBool, Unit, Vector3};
 
+use super::Collidable;
+
 #[derive(Clone, Debug)]
 pub struct Cube {
     min: Vector3<f32>,
@@ -24,4 +26,8 @@ impl Cube {
     fn is_inside(&self, point: &Vector3<f32>) -> bool {
         point.ge(&self.min).all() && point.le(&self.max).all()
     }
+}
+
+impl Collidable for Cube {
+    fn foo(&self) {}
 }

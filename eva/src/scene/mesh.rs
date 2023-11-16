@@ -41,3 +41,7 @@ impl Mesh {
         }
     }
 }
+
+impl Collidable for Mesh {
+    fn foo(&self) {}
+}
