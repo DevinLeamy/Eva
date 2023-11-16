@@ -134,7 +134,7 @@ fn ray_transform(ray: Ray, transform: Transform) -> Ray {
 // NOTE: IS MISSING THE MATERIAL. REMEMBER TO ADD THAT.
 fn intersection_transform(intersection: Intersection, transform: Transform) -> Intersection {
     var new_intersection: Intersection;
-    new_intersection.some = true;
+    new_intersection.some = intersection.some;
     new_intersection.ray = ray_transform(intersection.ray, transform);
 
     let new_point = transform.m * vec4f(ray_point(intersection.ray, intersection.t), 1.0);
@@ -145,18 +145,67 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 }
 
 fn compute_ray_colour(ray: Ray) -> vec3f {
+    let intersection = compute_ray_intersection(ray);
+    if (!intersection.some) {
+        return vec3f(0.0, 0.0, 1.0);
+    }
+
+    return compute_light_at_intersection(intersection);
+}
+
+fn compute_ray_intersection(ray: Ray) -> Intersection {
     let model = spheres[0];
     let sphere = model.sphere;
 
     let transformed_ray: Ray = ray_inverse_transform(ray, model.transform);
     let intersection = sphere_intersection(sphere, transformed_ray);
+    let transformed_intersection = intersection_transform(intersection, model.transform);
 
+    return transformed_intersection;
+}
+
+fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
     if (!intersection.some) {
-        return vec3f(0.0, 0.0, 1.0);
+        return vec3f(0.0, 0.0, 0.0);
     }
 
-    let transformed_intersection = intersection_transform(intersection, model.transform);
-    return vec3f(1.0, 0.0, 0.0);
+    let light = lights[0];
+    return compute_light_contribution_at_intersection(intersection, light);
+}
+
+fn compute_light_contribution_at_intersection(intersection: Intersection, light: PointLight) -> vec3f {
+    if (!intersection.some) {
+        return vec3f(0.0, 0.0, 0.0);
+    }
+
+    let intersection_point = ray_point(intersection.ray, intersection.t);
+    let to_light = normalize(light.position - intersection_point); 
+
+    // Move lightly away from the intersection point in the direction of the light to avoid
+    // intersecting with the inside of an object.
+    let offset_intersection_point = intersection_point + to_light * 0.1;
+    let ray_to_light = ray_from_points(offset_intersection_point, light.position);
+
+    let ray_to_light_intersection = compute_ray_intersection(ray_to_light);
+    if (ray_to_light_intersection.some) {
+        // In shadow.
+        return vec3f(0.0, 0.0, 0.0);
+    }
+
+    return phong_illumination(intersection, light);
+}
+
+fn phong_illumination(intersection: Intersection, light: PointLight) -> vec3f {
+    let intersection_point = ray_point(intersection.ray, intersection.t);
+    let to_light = normalize(light.position - intersection_point);
+    let to_view = normalize(camera.position - intersection_point);
+
+    let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
+    let diffuse = diffuse_strength * light.colour;
+
+    // TODO: Add ambient and specular and attenuation and material properties.
+
+    return diffuse;
 }
 
 
