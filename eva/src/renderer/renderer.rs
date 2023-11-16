@@ -13,6 +13,8 @@ use winit::{
     window::Window,
 };
 
+use super::RenderContext;
+
 pub struct Renderer {
     pub surface: Surface,
     pub device: Device,
@@ -22,12 +24,11 @@ pub struct Renderer {
     pub display_bind_group_layout: BindGroupLayout,
     pub ray_tracer_bind_group_layout: BindGroupLayout,
     pub ray_tracer_pipeline: ComputePipeline,
+    pub context: RenderContext,
 
     pub camera_buffer: Buffer,
     pub spheres_buffer: Buffer,
     pub lights_buffer: Buffer,
-
-    pub camera: Camera,
 }
 
 impl Renderer {
@@ -51,17 +52,19 @@ impl Renderer {
 
         match (key, state) {
             (VirtualKeyCode::A, ElementState::Pressed) => {
-                self.camera.translate(Vector3::new(speed, 0.0, 0.0))
+                self.context.camera.translate(Vector3::new(speed, 0.0, 0.0))
             }
-            (VirtualKeyCode::D, ElementState::Pressed) => {
-                self.camera.translate(Vector3::new(-speed, 0.0, 0.0))
-            }
+            (VirtualKeyCode::D, ElementState::Pressed) => self
+                .context
+                .camera
+                .translate(Vector3::new(-speed, 0.0, 0.0)),
             (VirtualKeyCode::W, ElementState::Pressed) => {
-                self.camera.translate(Vector3::new(0.0, speed, 0.0))
+                self.context.camera.translate(Vector3::new(0.0, speed, 0.0))
             }
-            (VirtualKeyCode::S, ElementState::Pressed) => {
-                self.camera.translate(Vector3::new(0.0, -speed, 0.0))
-            }
+            (VirtualKeyCode::S, ElementState::Pressed) => self
+                .context
+                .camera
+                .translate(Vector3::new(0.0, -speed, 0.0)),
             _ => {}
         };
     }
@@ -157,7 +160,7 @@ impl Renderer {
 
     fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
         let window_size = self.window.inner_size();
-        let shader_camera: ShaderCamera = self.camera.clone().into();
+        let shader_camera: ShaderCamera = self.context.camera.clone().into();
         let filled_camera_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
             label: Some("camera buffer"),
             contents: &shader_camera.as_bytes().unwrap(),

@@ -3,6 +3,7 @@ extern crate lazy_static;
 
 use std::time::Instant;
 
+use prelude::{Camera, RenderContext, Scene};
 use renderer::{Renderer, RendererBuilder};
 use winit::dpi::LogicalSize;
 use winit::{
@@ -29,8 +30,10 @@ pub mod prelude {
     pub use crate::utils::*;
 }
 
-pub async fn run() {
+pub async fn ray_trace(camera: Camera, scene: Scene) {
     env_logger::init();
+
+    let context = RenderContext { camera, scene };
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
@@ -39,9 +42,7 @@ pub async fn run() {
         .build(&event_loop)
         .unwrap();
 
-    let window_id = window.id();
-    let mut renderer = RendererBuilder::new(window).build();
-
+    let mut renderer = RendererBuilder::new(window, context).build();
     let mut last_frame_time: Instant = Instant::now();
 
     event_loop.run(move |event, _, control_flow| {

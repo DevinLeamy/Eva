@@ -5,6 +5,8 @@ use winit::window::Window;
 
 use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, ShaderPointLight}, ray_tracer::Camera};
 
+use super::RenderContext;
+
 const SPHERE_COUNT: u64 = 5;
 const LIGHT_COUNT: u64 = 5;
 
@@ -14,6 +16,7 @@ pub struct RendererBuilder {
     queue: Queue,
     window: Window,
     adapter: Adapter,
+    context: RenderContext,
 
     ray_tracer_shader: Option<ShaderModule>,
     display_shader: Option<ShaderModule>,
@@ -30,7 +33,7 @@ pub struct RendererBuilder {
 }
 
 impl RendererBuilder {
-    pub fn new(window: Window) -> Self {
+    pub fn new(window: Window, context: RenderContext) -> Self {
         let size = window.inner_size();
         let instance = Instance::new(InstanceDescriptor {
             backends: Backends::all(),
@@ -80,6 +83,7 @@ impl RendererBuilder {
             window,
             surface,
             adapter,
+            context,
             ray_tracer_shader: None,
             display_shader: None,
             ray_tracer_pipeline: None,
@@ -103,6 +107,7 @@ impl RendererBuilder {
             device: self.device,
             queue: self.queue,
             window: self.window,
+            context: self.context,
             display_pipeline: self.display_pipeline.unwrap(),
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
             ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
@@ -110,7 +115,6 @@ impl RendererBuilder {
             camera_buffer: self.camera_buffer.unwrap(),
             spheres_buffer: self.spheres_buffer.unwrap(),
             lights_buffer: self.lights_buffer.unwrap(),
-            camera: Camera::new(Vector3::zeros(), 50.0, Vector3::new(0.0, 0.0, -1.0), Vector3::new(0.0, 1.0, 0.0))
         }
     }
 }
