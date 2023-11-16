@@ -5,6 +5,9 @@ use winit::window::Window;
 
 use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, ShaderPointLight}, ray_tracer::Camera};
 
+const SPHERE_COUNT: u64 = 5;
+const LIGHT_COUNT: u64 = 5;
+
 pub struct RendererBuilder {
     surface: Surface,
     device: Device,
@@ -129,14 +132,14 @@ impl RendererBuilder {
         self.spheres_buffer = Some(self.device.create_buffer(&BufferDescriptor {
             label: Some("spheres buffer"),
             // Must be larger than the size of any data used.
-            size: ShaderSphereModel::size() * 10, 
+            size: ShaderSphereModel::size() * SPHERE_COUNT, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
             mapped_at_creation: false
         }));
 
         self.lights_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
             label: Some("lights buffer"), 
-            size: ShaderPointLight::size(), 
+            size: ShaderPointLight::size() * LIGHT_COUNT, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
             mapped_at_creation: false
         }));

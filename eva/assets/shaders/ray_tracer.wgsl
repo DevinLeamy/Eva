@@ -48,6 +48,11 @@ struct Intersection {
     material: PhongMaterial,
 };
 
+struct PointLights {
+    length: u32,
+    lights: array<PointLight>,
+};
+
 struct PointLight {
     position: vec3f,
     colour: vec3f,
@@ -56,7 +61,7 @@ struct PointLight {
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
-@group(0) @binding(3) var<storage, read> lights: array<PointLight>;
+@group(0) @binding(3) var<storage, read> lights: PointLights;
 
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
@@ -200,7 +205,7 @@ fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
         return vec3f(0.0, 0.0, 0.0);
     }
 
-    let light = lights[0];
+    let light = lights.lights[0];
     return compute_light_contribution_at_intersection(intersection, light);
 }
 

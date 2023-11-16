@@ -1,6 +1,9 @@
 use crate::{
     prelude::{Camera, PhongMaterial, Sphere, Transform},
-    shader::{ShaderCamera, ShaderPointLight, ShaderSphereModel, ShaderSphereModels, ShaderStruct},
+    shader::{
+        ShaderCamera, ShaderPointLight, ShaderPointLights, ShaderSphereModel, ShaderSphereModels,
+        ShaderStruct,
+    },
 };
 use encase::ArrayLength;
 use nalgebra::Vector3;
@@ -231,14 +234,17 @@ impl Renderer {
             filled_spheres_buffer.size(),
         );
 
-        let light = ShaderPointLight {
-            position: Vector3::new(10.0, 10.0, 0.0),
-            colour: Vector3::new(1.0, 1.0, 1.0),
+        let lights = ShaderPointLights {
+            length: ArrayLength,
+            lights: vec![ShaderPointLight {
+                position: Vector3::new(10.0, 10.0, 0.0),
+                colour: Vector3::new(1.0, 1.0, 1.0),
+            }],
         };
 
         let filled_lights_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
             label: Some("lights buffer"),
-            contents: &light.as_bytes().unwrap(),
+            contents: &lights.as_bytes().unwrap(),
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
         });
 
