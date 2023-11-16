@@ -1,8 +1,9 @@
+use nalgebra::Vector3;
 use pollster::FutureExt;
 use wgpu::*;
 use winit::window::Window;
 
-use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, ShaderPointLight}};
+use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, ShaderPointLight}, ray_tracer::Camera};
 
 pub struct RendererBuilder {
     surface: Surface,
@@ -105,7 +106,8 @@ impl RendererBuilder {
             ray_tracer_pipeline: self.ray_tracer_pipeline.unwrap(),
             camera_buffer: self.camera_buffer.unwrap(),
             spheres_buffer: self.spheres_buffer.unwrap(),
-            lights_buffer: self.lights_buffer.unwrap()
+            lights_buffer: self.lights_buffer.unwrap(),
+            camera: Camera::new(Vector3::zeros(), 50.0, Vector3::new(0.0, 0.0, -1.0), Vector3::new(0.0, 1.0, 0.0))
         }
     }
 }

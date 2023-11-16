@@ -4,7 +4,10 @@ use crate::{
 };
 use nalgebra::Vector3;
 use wgpu::{util::DeviceExt, *};
-use winit::window::Window;
+use winit::{
+    event::{ElementState, VirtualKeyCode},
+    window::Window,
+};
 
 pub struct Renderer {
     pub surface: Surface,
@@ -19,6 +22,8 @@ pub struct Renderer {
     pub camera_buffer: Buffer,
     pub spheres_buffer: Buffer,
     pub lights_buffer: Buffer,
+
+    pub camera: Camera,
 }
 
 impl Renderer {
@@ -34,6 +39,27 @@ impl Renderer {
         surface_texture.present();
 
         Ok(())
+    }
+
+    // Temporary: just for testing.
+    pub fn update(&mut self, key: VirtualKeyCode, state: ElementState) {
+        let speed = 0.1;
+
+        match (key, state) {
+            (VirtualKeyCode::A, ElementState::Pressed) => {
+                self.camera.translate(Vector3::new(speed, 0.0, 0.0))
+            }
+            (VirtualKeyCode::D, ElementState::Pressed) => {
+                self.camera.translate(Vector3::new(-speed, 0.0, 0.0))
+            }
+            (VirtualKeyCode::W, ElementState::Pressed) => {
+                self.camera.translate(Vector3::new(0.0, speed, 0.0))
+            }
+            (VirtualKeyCode::S, ElementState::Pressed) => {
+                self.camera.translate(Vector3::new(0.0, -speed, 0.0))
+            }
+            _ => {}
+        };
     }
 }
 
@@ -127,14 +153,7 @@ impl Renderer {
 
     fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
         let window_size = self.window.inner_size();
-        let camera = Camera::new(
-            Vector3::zeros(),
-            50.0,
-            Vector3::new(0.0, 0.0, -1.0),
-            Vector3::new(0.0, 1.0, 0.0),
-        );
-
-        let shader_camera: ShaderCamera = camera.into();
+        let shader_camera: ShaderCamera = self.camera.clone().into();
         let filled_camera_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
             label: Some("camera buffer"),
             contents: &shader_camera.as_bytes().unwrap(),

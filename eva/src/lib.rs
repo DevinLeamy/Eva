@@ -47,6 +47,15 @@ pub async fn run() {
                 event: window_event,
             } => match window_event {
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                WindowEvent::KeyboardInput { input, .. } => {
+                    match (input.virtual_keycode, input.state) {
+                        (Some(key), state) => {
+                            renderer.update(key, state);
+                        }
+
+                        _ => {}
+                    }
+                }
                 _ => {}
             },
             _ => {}

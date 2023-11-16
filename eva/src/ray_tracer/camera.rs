@@ -25,6 +25,10 @@ impl Camera {
         self.position = position;
     }
 
+    pub fn translate(&mut self, translation: Vector3<f32>) {
+        self.position += translation;
+    }
+
     pub fn set_fov(&mut self, fov: f32) {
         self.fov = fov;
     }
