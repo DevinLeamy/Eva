@@ -246,7 +246,7 @@ impl Renderer {
 
         ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
         ray_tracer_pass.set_bind_group(0, &ray_tracer_bind_group, &[]);
-        ray_tracer_pass.dispatch_workgroups(window_size.width / 8, window_size.height / 8, 1);
+        ray_tracer_pass.dispatch_workgroups(window_size.width / 3, window_size.height / 3, 1);
 
         drop(ray_tracer_pass);
     }

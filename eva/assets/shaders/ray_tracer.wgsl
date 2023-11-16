@@ -53,7 +53,7 @@ struct PointLight {
 @group(0) @binding(2) var<storage, read> spheres: array<SphereModel>; 
 @group(0) @binding(3) var<storage, read> lights: array<PointLight>;
 
-@compute @workgroup_size(8, 8, 1)
+@compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let screen_size: vec2<i32> = vec2<i32>(textureDimensions(colour_buffer));
 

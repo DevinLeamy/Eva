@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate lazy_static;
 
+use std::time::Instant;
+
 use renderer::{Renderer, RendererBuilder};
 use winit::dpi::LogicalSize;
 use winit::{
@@ -40,6 +42,8 @@ pub async fn run() {
     let window_id = window.id();
     let mut renderer = RendererBuilder::new(window).build();
 
+    let mut last_frame_time: Instant = Instant::now();
+
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::WindowEvent {
@@ -60,6 +64,10 @@ pub async fn run() {
             },
             _ => {}
         }
-        renderer.render().unwrap()
+        let now = Instant::now();
+        if now.duration_since(last_frame_time).as_millis() > 32 {
+            renderer.render().unwrap();
+            last_frame_time = Instant::now();
+        }
     });
 }
