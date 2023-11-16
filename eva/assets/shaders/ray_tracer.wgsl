@@ -56,12 +56,17 @@ struct PointLights {
 struct PointLight {
     position: vec3f,
     colour: vec3f,
-}
+};
+
+struct GlobalConfig {
+    ambient_light: vec3f,
+};
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
 @group(0) @binding(3) var<storage, read> lights: PointLights;
+@group(0) @binding(4) var<uniform> config: GlobalConfig;
 
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
@@ -165,7 +170,7 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 fn compute_ray_colour(ray: Ray) -> vec3f {
     let intersection = compute_ray_intersection(ray);
     if (!intersection.some) {
-        return vec3f(0.9, 0.9, 0.9);
+        return vec3f(0.1, 0.1, 0.1);
         // return vec3f(0.0, 0.0, 0.0);
     }
 
@@ -242,15 +247,16 @@ fn phong_illumination(intersection: Intersection, light: PointLight) -> vec3f {
     let to_light = normalize(light.position - intersection_point);
     let to_view = normalize(camera.position - intersection_point);
 
+    let ambient = config.ambient_light * light.colour * intersection.material.diffuse;
+
     let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
     let diffuse = diffuse_strength * light.colour * intersection.material.diffuse;
 
-    // TODO: Add ambient and attenuation.
     let half_vector = normalize(to_view + to_light);
     let specular_strength = pow(max(0.0, dot(intersection.normal, half_vector)), intersection.material.shininess);
     let specular = light.colour * specular_strength * intersection.material.specular;
 
-    return diffuse + specular;
+    return diffuse + specular + ambient;
 }
 
 

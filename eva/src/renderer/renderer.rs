@@ -1,11 +1,8 @@
 use crate::{
-    prelude::{Camera, PhongMaterial, Sphere, Transform, FlatScene},
-    shader::{
-        ShaderCamera, ShaderPointLight, ShaderPointLights, ShaderSphereModel, ShaderSphereModels,
-        ShaderStruct,
-    },
+    prelude::FlatScene,
+    shader::{ShaderCamera, ShaderGlobalConfig, ShaderStruct},
 };
-use encase::ArrayLength;
+
 use nalgebra::Vector3;
 use wgpu::{util::DeviceExt, *};
 use winit::{
@@ -27,6 +24,7 @@ pub struct Renderer {
     pub context: RenderContext,
 
     pub camera_buffer: Buffer,
+    pub config_buffer: Buffer,
     pub spheres_buffer: Buffer,
     pub lights_buffer: Buffer,
 }
@@ -181,6 +179,13 @@ impl Renderer {
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
         });
 
+        let config = ShaderGlobalConfig {
+            ambient: flat_scene.ambient,
+        };
+
+        self.queue
+            .write_buffer(&self.config_buffer, 0, &config.as_bytes().unwrap());
+
         encoder.copy_buffer_to_buffer(
             &filled_spheres_buffer,
             0,
@@ -222,6 +227,10 @@ impl Renderer {
                 BindGroupEntry {
                     binding: 3,
                     resource: self.lights_buffer.as_entire_binding(),
+                },
+                BindGroupEntry {
+                    binding: 4,
+                    resource: self.config_buffer.as_entire_binding(),
                 },
             ],
         });

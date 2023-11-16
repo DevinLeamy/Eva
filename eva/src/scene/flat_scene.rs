@@ -1,3 +1,5 @@
+use nalgebra::Vector3;
+
 use crate::shader::{ShaderPointLight, ShaderPointLights, ShaderSphereModel, ShaderSphereModels};
 
 use super::{Geometry, Light, Node, Scene, Sphere, Transform};
@@ -6,6 +8,7 @@ use super::{Geometry, Light, Node, Scene, Sphere, Transform};
 pub struct FlatScene {
     pub lights: ShaderPointLights,
     pub spheres: ShaderSphereModels,
+    pub ambient: Vector3<f32>,
 }
 
 impl std::fmt::Display for FlatScene {
@@ -49,6 +52,7 @@ impl SceneFlattener {
         FlatScene {
             lights: flattener.lights,
             spheres: flattener.spheres,
+            ambient: scene.ambient(),
         }
     }
 }
