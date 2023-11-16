@@ -46,7 +46,7 @@ impl Renderer {
 
     // Temporary: just for testing.
     pub fn update(&mut self, key: VirtualKeyCode, state: ElementState) {
-        let speed = 0.1;
+        let speed = 10.0;
 
         match (key, state) {
             (VirtualKeyCode::A, ElementState::Pressed) => {
