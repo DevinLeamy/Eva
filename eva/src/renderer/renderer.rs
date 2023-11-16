@@ -1,7 +1,8 @@
 use crate::{
     prelude::{Camera, PhongMaterial, Sphere, Transform},
-    shader::{ShaderCamera, ShaderPointLight, ShaderSphereModel, ShaderStruct},
+    shader::{ShaderCamera, ShaderPointLight, ShaderSphereModel, ShaderSphereModels, ShaderStruct},
 };
+use encase::ArrayLength;
 use nalgebra::Vector3;
 use wgpu::{util::DeviceExt, *};
 use winit::{
@@ -168,24 +169,57 @@ impl Renderer {
             filled_camera_buffer.size(),
         );
 
-        let model = ShaderSphereModel {
-            sphere: Sphere { radius: 1.0 },
-            transform: Transform {
-                translation: Vector3::new(0.0, 0.0, -10.0),
-                scale: Vector3::new(1.0, 1.0, 1.0),
-                ..Default::default()
-            }
-            .into(),
-            material: PhongMaterial {
-                diffuse: Vector3::new(1.0, 0.0, 0.0),
-                specular: Vector3::new(1.0, 1.0, 1.0),
-                shininess: 15.0,
-            },
+        let models = ShaderSphereModels {
+            length: ArrayLength,
+            spheres: vec![
+                ShaderSphereModel {
+                    sphere: Sphere { radius: 1.0 },
+                    transform: Transform {
+                        translation: Vector3::new(0.0, 0.0, -10.0),
+                        scale: Vector3::new(1.0, 1.0, 1.0),
+                        ..Default::default()
+                    }
+                    .into(),
+                    material: PhongMaterial {
+                        diffuse: Vector3::new(1.0, 0.0, 0.0),
+                        specular: Vector3::new(1.0, 1.0, 1.0),
+                        shininess: 15.0,
+                    },
+                },
+                ShaderSphereModel {
+                    sphere: Sphere { radius: 1.0 },
+                    transform: Transform {
+                        translation: Vector3::new(3.0, 1.0, -10.0),
+                        scale: Vector3::new(1.0, 1.0, 1.0),
+                        ..Default::default()
+                    }
+                    .into(),
+                    material: PhongMaterial {
+                        diffuse: Vector3::new(0.0, 0.0, 1.0),
+                        specular: Vector3::new(1.0, 1.0, 1.0),
+                        shininess: 15.0,
+                    },
+                },
+                ShaderSphereModel {
+                    sphere: Sphere { radius: 1.0 },
+                    transform: Transform {
+                        translation: Vector3::new(-2.0, -1.0, -10.0),
+                        scale: Vector3::new(1.0, 1.0, 1.0),
+                        ..Default::default()
+                    }
+                    .into(),
+                    material: PhongMaterial {
+                        diffuse: Vector3::new(0.0, 1.0, 0.0),
+                        specular: Vector3::new(1.0, 1.0, 1.0),
+                        shininess: 15.0,
+                    },
+                },
+            ],
         };
 
         let filled_spheres_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
             label: Some("spheres buffer"),
-            contents: &model.as_bytes().unwrap(),
+            contents: &models.as_bytes().unwrap(),
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
         });
 

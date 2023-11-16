@@ -20,6 +20,11 @@ struct PhongMaterial {
     shininess: f32,
 };
 
+struct SphereModels {
+    length: u32,
+    spheres: array<SphereModel>,
+}
+
 struct SphereModel {
     sphere: Sphere,
     transform: Transform,
@@ -50,7 +55,7 @@ struct PointLight {
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
-@group(0) @binding(2) var<storage, read> spheres: array<SphereModel>; 
+@group(0) @binding(2) var<storage, read> spheres: SphereModels; 
 @group(0) @binding(3) var<storage, read> lights: array<PointLight>;
 
 @compute @workgroup_size(3, 3, 1)
@@ -155,24 +160,39 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 fn compute_ray_colour(ray: Ray) -> vec3f {
     let intersection = compute_ray_intersection(ray);
     if (!intersection.some) {
-        return vec3f(0.0, 0.0, 1.0);
+        return vec3f(0.9, 0.9, 0.9);
+        // return vec3f(0.0, 0.0, 0.0);
     }
 
     return compute_light_at_intersection(intersection);
 }
 
 fn compute_ray_intersection(ray: Ray) -> Intersection {
-    let model = spheres[0];
-    let sphere = model.sphere;
+    var intersection: Intersection;
+    intersection.some = false; 
 
-    let transformed_ray: Ray = ray_inverse_transform(ray, model.transform);
-    let intersection = sphere_intersection(sphere, transformed_ray);
-    var transformed_intersection: Intersection = intersection_transform(intersection, model.transform);
+    for (var i: i32 = 0; i < i32(spheres.length); i = i + 1) {
+        let sphere_model = spheres.spheres[i];
+        let sphere = sphere_model.sphere;
 
-    // Set the material of the object that was intersected with.
-    transformed_intersection.material = model.material;
+        let transformed_ray: Ray = ray_inverse_transform(ray, sphere_model.transform);
+        let new_intersection = sphere_intersection(sphere, transformed_ray);
+        var transformed_intersection: Intersection = intersection_transform(new_intersection, sphere_model.transform);
 
-    return transformed_intersection;
+        // Set the material of the object that was intersected with.
+        transformed_intersection.material = sphere_model.material;
+    
+        if (transformed_intersection.some) {
+            if (!intersection.some) {
+                intersection = transformed_intersection;
+            } else if (intersection.t >= transformed_intersection.t) {
+                // Take the nearer intersection.
+                intersection = transformed_intersection;
+            }
+        }
+    }
+
+    return intersection;
 }
 
 fn compute_light_at_intersection(intersection: Intersection) -> vec3f {

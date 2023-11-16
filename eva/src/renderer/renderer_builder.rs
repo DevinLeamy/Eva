@@ -128,7 +128,8 @@ impl RendererBuilder {
 
         self.spheres_buffer = Some(self.device.create_buffer(&BufferDescriptor {
             label: Some("spheres buffer"),
-            size: ShaderSphereModel::size(),
+            // Must be larger than the size of any data used.
+            size: ShaderSphereModel::size() * 10, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
             mapped_at_creation: false
         }));

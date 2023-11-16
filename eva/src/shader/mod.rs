@@ -1,4 +1,3 @@
-// Structure and utilities for shaders.
 mod shader_camera;
 mod shader_point_light;
 mod shader_sphere;
