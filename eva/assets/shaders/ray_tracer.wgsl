@@ -214,9 +214,12 @@ fn phong_illumination(intersection: Intersection, light: PointLight) -> vec3f {
     let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
     let diffuse = diffuse_strength * light.colour * intersection.material.diffuse;
 
-    // TODO: Add ambient and specular and attenuation and material properties.
+    // TODO: Add ambient and attenuation.
+    let half_vector = normalize(to_view + to_light);
+    let specular_strength = pow(max(0.0, dot(intersection.normal, half_vector)), intersection.material.shininess);
+    let specular = light.colour * specular_strength * intersection.material.specular;
 
-    return diffuse;
+    return diffuse + specular;
 }
 
 

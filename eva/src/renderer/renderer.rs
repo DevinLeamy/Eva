@@ -158,9 +158,9 @@ impl Renderer {
             }
             .into(),
             material: PhongMaterial {
-                diffuse: Vector3::new(1.0, 1.0, 0.0),
-                specular: Vector3::new(0.0, 0.0, 0.0),
-                shininess: 0.0,
+                diffuse: Vector3::new(1.0, 0.0, 0.0),
+                specular: Vector3::new(1.0, 1.0, 1.0),
+                shininess: 15.0,
             },
         };
 
