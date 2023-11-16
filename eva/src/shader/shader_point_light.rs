@@ -3,7 +3,7 @@ use nalgebra::Vector3;
 
 use super::ShaderStruct;
 
-#[derive(ShaderType)]
+#[derive(ShaderType, Debug)]
 pub struct ShaderPointLight {
     pub position: Vector3<f32>,
     pub colour: Vector3<f32>,
@@ -18,7 +18,7 @@ impl ShaderStruct for ShaderPointLight {
     }
 }
 
-#[derive(ShaderType)]
+#[derive(ShaderType, Debug)]
 pub struct ShaderPointLights {
     pub length: ArrayLength,
     #[size(runtime)]
@@ -30,5 +30,18 @@ impl ShaderStruct for ShaderPointLights {
         let mut buffer = encase::StorageBuffer::new(Vec::new());
         buffer.write(self).ok()?;
         Some(buffer.into_inner())
+    }
+}
+
+impl ShaderPointLights {
+    pub fn new() -> Self {
+        Self {
+            length: ArrayLength,
+            lights: Vec::new(),
+        }
+    }
+
+    pub fn add(&mut self, light: ShaderPointLight) {
+        self.lights.push(light);
     }
 }

@@ -1,44 +1,19 @@
-use nalgebra::Vector3;
+use crate::shader::{ShaderPointLight, ShaderPointLights, ShaderSphereModel, ShaderSphereModels};
 
-use super::{Geometry, Light, Node, Scene, Transform};
+use super::{Geometry, Light, Node, Scene, Sphere, Transform};
 
 #[derive(Debug)]
 pub struct FlatScene {
-    lights: Vec<Light>,
-    geometry: Vec<Geometry>,
-    ambient: Vector3<f32>,
-}
-
-impl FlatScene {
-    pub fn new(lights: Vec<Light>, geometry: Vec<Geometry>, ambient: Vector3<f32>) -> Self {
-        Self {
-            lights,
-            geometry,
-            ambient,
-        }
-    }
-}
-
-impl FlatScene {
-    pub fn geometry(&self) -> &Vec<Geometry> {
-        &self.geometry
-    }
-
-    pub fn lights(&self) -> &Vec<Light> {
-        &self.lights
-    }
-
-    pub fn ambient(&self) -> &Vector3<f32> {
-        &self.ambient
-    }
+    pub lights: ShaderPointLights,
+    pub spheres: ShaderSphereModels,
 }
 
 impl std::fmt::Display for FlatScene {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for light in &self.lights {
+        for light in &self.lights.lights {
             writeln!(f, "Light: {:?}", light)?;
         }
-        for geometry in &self.geometry {
+        for geometry in &self.spheres.spheres {
             writeln!(f, "Object: {:?}", geometry)?;
         }
 
@@ -54,16 +29,16 @@ impl From<Scene> for FlatScene {
 
 struct SceneFlattener {
     transforms: Vec<Transform>,
-    lights: Vec<Light>,
-    geometry: Vec<Geometry>,
+    lights: ShaderPointLights,
+    spheres: ShaderSphereModels,
 }
 
 impl SceneFlattener {
     fn new() -> Self {
         Self {
             transforms: vec![Transform::default()],
-            lights: Vec::new(),
-            geometry: Vec::new(),
+            lights: ShaderPointLights::new(),
+            spheres: ShaderSphereModels::new(),
         }
     }
 
@@ -71,7 +46,10 @@ impl SceneFlattener {
         let mut flattener = Self::new();
         flattener.traverse_scene(&scene);
 
-        FlatScene::new(flattener.lights, flattener.geometry, scene.ambient())
+        FlatScene {
+            lights: flattener.lights,
+            spheres: flattener.spheres,
+        }
     }
 }
 
@@ -95,23 +73,20 @@ impl SceneFlattener {
     }
 
     fn handle_light(&mut self, light: &Light) {
-        let new_light = Light::new(
-            self.top_transform(),
-            light.colour().clone(),
-            light.attenuation().clone(),
-            Vec::new(),
-        );
-        self.lights.push(new_light);
+        self.lights.add(ShaderPointLight {
+            position: self.top_transform().translation(),
+            colour: light.colour().clone(),
+        });
     }
 
     fn handle_geometry(&mut self, geometry: &Geometry) {
-        let new_geometry = Geometry::new(
-            self.top_transform(),
-            geometry.material().clone(),
-            geometry.primitive().clone(),
-            Vec::new(),
-        );
-        self.geometry.push(new_geometry);
+        let model = ShaderSphereModel {
+            sphere: Sphere { radius: 1.0 },
+            transform: self.top_transform().into(),
+            material: geometry.material().clone(),
+        };
+
+        self.spheres.add(model);
     }
 
     fn push_transform(&mut self, transform: &Transform) {

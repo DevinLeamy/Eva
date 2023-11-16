@@ -3,7 +3,7 @@ use nalgebra::{Matrix3, Matrix4};
 
 use crate::prelude::Transform;
 
-#[derive(ShaderType)]
+#[derive(ShaderType, Debug)]
 pub struct ShaderTransform {
     m: Matrix4<f32>,
     m_inverse: Matrix4<f32>,

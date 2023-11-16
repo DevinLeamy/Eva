@@ -4,7 +4,7 @@ use crate::prelude::{PhongMaterial, Sphere};
 
 use super::{ShaderStruct, ShaderTransform};
 
-#[derive(ShaderType)]
+#[derive(ShaderType, Debug)]
 pub struct ShaderSphereModel {
     pub sphere: Sphere,
     pub transform: ShaderTransform,
@@ -20,7 +20,7 @@ impl ShaderStruct for ShaderSphereModel {
     }
 }
 
-#[derive(ShaderType)]
+#[derive(ShaderType, Debug)]
 pub struct ShaderSphereModels {
     pub length: ArrayLength,
     #[size(runtime)]
@@ -32,5 +32,18 @@ impl ShaderStruct for ShaderSphereModels {
         let mut buffer = encase::StorageBuffer::new(Vec::new());
         buffer.write(self).ok()?;
         Some(buffer.into_inner())
+    }
+}
+
+impl ShaderSphereModels {
+    pub fn new() -> Self {
+        Self {
+            length: ArrayLength,
+            spheres: Vec::new()
+        }
+    }
+
+    pub fn add(&mut self, light: ShaderSphereModel) {
+        self.spheres.push(light);
     }
 }
