@@ -509,6 +509,7 @@ dependencies = [
  "eva",
  "eva-py-macros",
  "nalgebra",
+ "pollster",
  "pyo3",
 ]
 

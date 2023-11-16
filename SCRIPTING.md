@@ -43,7 +43,7 @@ Scene nodes can be rotated, scaled, translated, and have any number of children.
 
 ```python3
 # Imports
-from wall_e_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
+from eva_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
 
 # Materials
 # ...

@@ -1,4 +1,4 @@
-from wall_e_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
+from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
 from shared import copy_and_archive_image
 import random
 

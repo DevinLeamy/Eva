@@ -28,6 +28,8 @@ pub mod prelude {
     pub use crate::scene::*;
     pub use crate::shader::*;
     pub use crate::utils::*;
+
+    pub use crate::ray_trace;
 }
 
 pub async fn ray_trace(camera: Camera, scene: Scene) {

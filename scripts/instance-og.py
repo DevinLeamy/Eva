@@ -1,4 +1,4 @@
-from wall_e_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
+from eva_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
 from shared import copy_and_archive_image
 
 stone = Material((0.8, 0.7, 0.7), (0.0, 0.0, 0.0), 0)

@@ -4,11 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "wall_e_py"
-crate-type = ["cdylib"]
+name = "eva_py"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 pyo3 = { version = "0.19.0", features = ["multiple-pymethods"] }
 eva = { path = "../eva" }
 nalgebra = "0.32.3"
 eva-py-macros = { path = "../eva-py-macros" }
+pollster = "0.3.0"

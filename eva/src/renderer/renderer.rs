@@ -1,5 +1,5 @@
 use crate::{
-    prelude::{Camera, PhongMaterial, Sphere, Transform},
+    prelude::{Camera, PhongMaterial, Sphere, Transform, FlatScene},
     shader::{
         ShaderCamera, ShaderPointLight, ShaderPointLights, ShaderSphereModel, ShaderSphereModels,
         ShaderStruct,
@@ -174,58 +174,10 @@ impl Renderer {
             0,
             filled_camera_buffer.size(),
         );
-
-        let models = ShaderSphereModels {
-            length: ArrayLength,
-            spheres: vec![
-                ShaderSphereModel {
-                    sphere: Sphere { radius: 1.0 },
-                    transform: Transform {
-                        translation: Vector3::new(0.0, 0.0, -10.0),
-                        scale: Vector3::new(1.0, 1.0, 1.0),
-                        ..Default::default()
-                    }
-                    .into(),
-                    material: PhongMaterial {
-                        diffuse: Vector3::new(1.0, 0.0, 0.0),
-                        specular: Vector3::new(1.0, 1.0, 1.0),
-                        shininess: 15.0,
-                    },
-                },
-                ShaderSphereModel {
-                    sphere: Sphere { radius: 1.0 },
-                    transform: Transform {
-                        translation: Vector3::new(3.0, 1.0, -10.0),
-                        scale: Vector3::new(1.0, 1.0, 1.0),
-                        ..Default::default()
-                    }
-                    .into(),
-                    material: PhongMaterial {
-                        diffuse: Vector3::new(0.0, 0.0, 1.0),
-                        specular: Vector3::new(1.0, 1.0, 1.0),
-                        shininess: 15.0,
-                    },
-                },
-                ShaderSphereModel {
-                    sphere: Sphere { radius: 1.0 },
-                    transform: Transform {
-                        translation: Vector3::new(-2.0, -1.0, -10.0),
-                        scale: Vector3::new(1.0, 1.0, 1.0),
-                        ..Default::default()
-                    }
-                    .into(),
-                    material: PhongMaterial {
-                        diffuse: Vector3::new(0.0, 1.0, 0.0),
-                        specular: Vector3::new(1.0, 1.0, 1.0),
-                        shininess: 15.0,
-                    },
-                },
-            ],
-        };
-
+        let flat_scene: FlatScene = self.context.scene.clone().into();
         let filled_spheres_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
             label: Some("spheres buffer"),
-            contents: &models.as_bytes().unwrap(),
+            contents: &flat_scene.spheres.as_bytes().unwrap(),
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
         });
 
@@ -237,23 +189,9 @@ impl Renderer {
             filled_spheres_buffer.size(),
         );
 
-        let lights = ShaderPointLights {
-            length: ArrayLength,
-            lights: vec![
-                ShaderPointLight {
-                    position: Vector3::new(10.0, 10.0, 0.0),
-                    colour: Vector3::new(0.6, 0.6, 0.6),
-                },
-                ShaderPointLight {
-                    position: Vector3::new(-10.0, 3.0, 0.0),
-                    colour: Vector3::new(0.6, 0.6, 0.6),
-                },
-            ],
-        };
-
         let filled_lights_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {
             label: Some("lights buffer"),
-            contents: &lights.as_bytes().unwrap(),
+            contents: &flat_scene.lights.as_bytes().unwrap(),
             usage: BufferUsages::UNIFORM | BufferUsages::COPY_SRC,
         });
 

@@ -66,20 +66,16 @@ fn ray_trace(
     height: u32,
     path: String,
 ) -> PyResult<()> {
-    // let mut tracer = RayTracer::new(
-    //     PngImage::new(width, height),
-    //     scene.inner.clone(),
-    //     camera.inner.clone(),
-    // );
-    // let output = tracer.run();
-
-    // output.save(path);
+    pollster::block_on(eva::prelude::ray_trace(
+        camera.inner.clone(),
+        scene.inner.clone(),
+    ));
 
     Ok(())
 }
 
 #[pymodule]
-fn wall_e_py(_py: Python, m: &PyModule) -> PyResult<()> {
+fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyGeometry>()?;
     m.add_class::<PyScene>()?;
     m.add_class::<PyLight>()?;
