@@ -236,10 +236,16 @@ impl Renderer {
 
         let lights = ShaderPointLights {
             length: ArrayLength,
-            lights: vec![ShaderPointLight {
-                position: Vector3::new(10.0, 10.0, 0.0),
-                colour: Vector3::new(1.0, 1.0, 1.0),
-            }],
+            lights: vec![
+                ShaderPointLight {
+                    position: Vector3::new(10.0, 10.0, 0.0),
+                    colour: Vector3::new(0.6, 0.6, 0.6),
+                },
+                ShaderPointLight {
+                    position: Vector3::new(-10.0, 3.0, 0.0),
+                    colour: Vector3::new(0.6, 0.6, 0.6),
+                },
+            ],
         };
 
         let filled_lights_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {

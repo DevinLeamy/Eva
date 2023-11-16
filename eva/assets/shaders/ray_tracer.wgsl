@@ -205,8 +205,14 @@ fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
         return vec3f(0.0, 0.0, 0.0);
     }
 
-    let light = lights.lights[0];
-    return compute_light_contribution_at_intersection(intersection, light);
+    var total_light: vec3f = vec3f();
+
+    for (var i: i32 = 0; i < i32(lights.length); i = i + 1) {
+        let light = lights.lights[i];
+        total_light = total_light + compute_light_contribution_at_intersection(intersection, light);
+    }
+
+    return total_light;
 }
 
 fn compute_light_contribution_at_intersection(intersection: Intersection, light: PointLight) -> vec3f {
