@@ -1,5 +1,5 @@
 use crate::{
-    prelude::{Camera, Sphere, Transform},
+    prelude::{Camera, PhongMaterial, Sphere, Transform},
     shader::{ShaderCamera, ShaderPointLight, ShaderSphereModel, ShaderStruct},
 };
 use nalgebra::Vector3;
@@ -157,6 +157,11 @@ impl Renderer {
                 ..Default::default()
             }
             .into(),
+            material: PhongMaterial {
+                diffuse: Vector3::new(1.0, 1.0, 0.0),
+                specular: Vector3::new(0.0, 0.0, 0.0),
+                shininess: 0.0,
+            },
         };
 
         let filled_spheres_buffer = self.device.create_buffer_init(&util::BufferInitDescriptor {

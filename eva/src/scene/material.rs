@@ -1,10 +1,11 @@
+use encase::ShaderType;
 use nalgebra::Vector3;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, ShaderType)]
 pub struct PhongMaterial {
-    diffuse: Vector3<f32>,
-    specular: Vector3<f32>,
-    shininess: f32,
+    pub diffuse: Vector3<f32>,
+    pub specular: Vector3<f32>,
+    pub shininess: f32,
 }
 
 impl PhongMaterial {

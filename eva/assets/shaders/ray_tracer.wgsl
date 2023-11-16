@@ -14,9 +14,16 @@ struct Transform {
     m_normal_inverse: mat3x3f,
 };
 
+struct PhongMaterial {
+    diffuse: vec3f,
+    specular: vec3f,
+    shininess: f32,
+};
+
 struct SphereModel {
     sphere: Sphere,
     transform: Transform,
+    material: PhongMaterial,
 };
 
 struct Ray {
@@ -33,6 +40,7 @@ struct Intersection {
     t: f32, 
     ray: Ray,
     normal: vec3f,
+    material: PhongMaterial,
 };
 
 struct PointLight {
@@ -131,11 +139,11 @@ fn ray_transform(ray: Ray, transform: Transform) -> Ray {
     return ray_from_points(new_p1.xyz, new_p2.xyz);
 }
 
-// NOTE: IS MISSING THE MATERIAL. REMEMBER TO ADD THAT.
 fn intersection_transform(intersection: Intersection, transform: Transform) -> Intersection {
     var new_intersection: Intersection;
     new_intersection.some = intersection.some;
     new_intersection.ray = ray_transform(intersection.ray, transform);
+    new_intersection.material = intersection.material;
 
     let new_point = transform.m * vec4f(ray_point(intersection.ray, intersection.t), 1.0);
     new_intersection.t = ray_t(intersection.ray, new_point.xyz);
@@ -159,7 +167,10 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
 
     let transformed_ray: Ray = ray_inverse_transform(ray, model.transform);
     let intersection = sphere_intersection(sphere, transformed_ray);
-    let transformed_intersection = intersection_transform(intersection, model.transform);
+    var transformed_intersection: Intersection = intersection_transform(intersection, model.transform);
+
+    // Set the material of the object that was intersected with.
+    transformed_intersection.material = model.material;
 
     return transformed_intersection;
 }
@@ -201,7 +212,7 @@ fn phong_illumination(intersection: Intersection, light: PointLight) -> vec3f {
     let to_view = normalize(camera.position - intersection_point);
 
     let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
-    let diffuse = diffuse_strength * light.colour;
+    let diffuse = diffuse_strength * light.colour * intersection.material.diffuse;
 
     // TODO: Add ambient and specular and attenuation and material properties.
 

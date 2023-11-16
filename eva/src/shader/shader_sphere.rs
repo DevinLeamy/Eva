@@ -1,6 +1,6 @@
 use encase::ShaderType;
 
-use crate::prelude::Sphere;
+use crate::prelude::{PhongMaterial, Sphere};
 
 use super::{ShaderStruct, ShaderTransform};
 
@@ -8,6 +8,7 @@ use super::{ShaderStruct, ShaderTransform};
 pub struct ShaderSphereModel {
     pub sphere: Sphere,
     pub transform: ShaderTransform,
+    pub material: PhongMaterial,
 }
 
 impl ShaderStruct for ShaderSphereModel {
@@ -17,6 +18,4 @@ impl ShaderStruct for ShaderSphereModel {
 
         Some(buffer.into_inner())
     }
-
-    
 }
