@@ -71,6 +71,14 @@ impl Renderer {
                 .context
                 .camera
                 .translate(Vector3::new(0.0, -speed, 0.0)),
+            (VirtualKeyCode::M, ElementState::Pressed) => self
+                .context
+                .camera
+                .translate(Vector3::new(0.0, 0.0, speed)),
+            (VirtualKeyCode::K, ElementState::Pressed) => self
+                .context
+                .camera
+                .translate(Vector3::new(0.0, 0.0, -speed)),
             _ => {}
         };
     }
