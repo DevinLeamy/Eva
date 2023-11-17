@@ -4,7 +4,7 @@ use crate::{
 };
 
 use nalgebra::Vector3;
-use wgpu::{util::DeviceExt, *};
+use wgpu::*;
 use winit::{
     event::{ElementState, VirtualKeyCode},
     window::Window,
@@ -26,6 +26,7 @@ pub struct Renderer {
     pub camera_buffer: Buffer,
     pub config_buffer: Buffer,
     pub spheres_buffer: Buffer,
+    pub cubes_buffer: Buffer,
     pub lights_buffer: Buffer,
 }
 
@@ -169,6 +170,7 @@ impl Renderer {
         self.queue.write_buffer(&self.config_buffer, 0, &config.as_bytes().unwrap());
         self.queue.write_buffer(&self.camera_buffer, 0, &shader_camera.as_bytes().unwrap());
         self.queue.write_buffer(&self.spheres_buffer, 0, &flat_scene.spheres.as_bytes().unwrap());
+        self.queue.write_buffer(&self.cubes_buffer, 0, &flat_scene.cubes.as_bytes().unwrap());
         self.queue.write_buffer(&self.lights_buffer, 0, &flat_scene.lights.as_bytes().unwrap());
 
         let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
@@ -194,6 +196,10 @@ impl Renderer {
                 BindGroupEntry {
                     binding: 4,
                     resource: self.config_buffer.as_entire_binding(),
+                },
+                BindGroupEntry {
+                    binding: 5,
+                    resource: self.cubes_buffer.as_entire_binding(),
                 },
             ],
         });

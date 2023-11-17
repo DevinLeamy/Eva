@@ -2,11 +2,12 @@ use pollster::FutureExt;
 use wgpu::*;
 use winit::window::Window;
 
-use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, ShaderPointLight, ShaderGlobalConfig}};
+use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, ShaderPointLight, ShaderGlobalConfig, ShaderCubeModel}};
 
 use super::RenderContext;
 
 const SPHERE_COUNT: u64 = 100;
+const CUBE_COUNT: u64 = 10;
 const LIGHT_COUNT: u64 = 5;
 
 pub struct RendererBuilder {
@@ -28,6 +29,7 @@ pub struct RendererBuilder {
 
     camera_buffer: Option<Buffer>,
     spheres_buffer: Option<Buffer>,
+    cubes_buffer: Option<Buffer>,
     lights_buffer: Option<Buffer>,
     config_buffer: Option<Buffer>,
 }
@@ -93,6 +95,7 @@ impl RendererBuilder {
             camera_buffer: None,
             config_buffer: None,
             spheres_buffer: None,
+            cubes_buffer: None,
             lights_buffer: None,
         }
     }
@@ -115,6 +118,7 @@ impl RendererBuilder {
             ray_tracer_pipeline: self.ray_tracer_pipeline.unwrap(),
             camera_buffer: self.camera_buffer.unwrap(),
             config_buffer: self.config_buffer.unwrap(),
+            cubes_buffer: self.cubes_buffer.unwrap(),
             spheres_buffer: self.spheres_buffer.unwrap(),
             lights_buffer: self.lights_buffer.unwrap(),
         }
@@ -146,6 +150,14 @@ impl RendererBuilder {
             label: Some("spheres buffer"),
             // Must be larger than the size of any data used.
             size: ShaderSphereModel::size() * SPHERE_COUNT, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
+            mapped_at_creation: false
+        }));
+
+        self.cubes_buffer = Some(self.device.create_buffer(&BufferDescriptor {
+            label: None,
+            // Must be larger than the size of any data used.
+            size: ShaderCubeModel::size() * CUBE_COUNT, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
             mapped_at_creation: false
         }));
@@ -208,6 +220,16 @@ impl RendererBuilder {
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::Buffer { 
                             ty: BufferBindingType::Uniform, 
+                            has_dynamic_offset: false, 
+                            min_binding_size: None 
+                        },
+                        count: None
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 5,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer { 
+                            ty: BufferBindingType::Storage { read_only: true }, 
                             has_dynamic_offset: false, 
                             min_binding_size: None 
                         },

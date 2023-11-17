@@ -13,7 +13,7 @@ mod prelude {
     pub use crate::py_mesh::PyMesh;
     pub use crate::py_transform::PyTransform;
     pub use eva::prelude::{
-        Camera, Collidable, Cube, Geometry, Light, Mesh, PhongMaterial, Scene, Sphere,
+        Camera, Cube, Geometry, Light, Mesh, PhongMaterial, Primitive, Scene, Sphere,
         Transformation,
     };
     pub use nalgebra::Vector3;

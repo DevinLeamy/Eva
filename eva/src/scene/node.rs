@@ -1,6 +1,6 @@
 use nalgebra::Vector3;
 
-use super::{Collidable, PhongMaterial, Sphere, Transform};
+use super::{PhongMaterial, Primitive, Sphere, Transform};
 
 #[derive(Clone, Debug)]
 pub enum Node {
@@ -62,7 +62,7 @@ pub struct Geometry {
     transform: Transform,
     children: Vec<Node>,
     material: PhongMaterial,
-    primitive: Box<dyn Collidable>,
+    primitive: Primitive,
 }
 
 impl Default for Geometry {
@@ -71,7 +71,7 @@ impl Default for Geometry {
             transform: Transform::default(),
             children: Vec::new(),
             material: PhongMaterial::default(),
-            primitive: Box::new(Sphere::new(1.0)),
+            primitive: Primitive::Sphere(Sphere::new(1.0)),
         }
     }
 }
@@ -80,7 +80,7 @@ impl Geometry {
     pub fn new(
         transform: Transform,
         material: PhongMaterial,
-        primitive: Box<dyn Collidable>,
+        primitive: Primitive,
         children: Vec<Node>,
     ) -> Self {
         Self {
@@ -91,7 +91,7 @@ impl Geometry {
         }
     }
 
-    pub fn from_collidable(primitive: Box<dyn Collidable>) -> Self {
+    pub fn from_primitive(primitive: Primitive) -> Self {
         Self {
             transform: Transform::default(),
             children: Vec::new(),
@@ -120,7 +120,7 @@ impl Geometry {
         self.material = material;
     }
 
-    pub fn primitive(&self) -> &Box<dyn Collidable> {
+    pub fn primitive(&self) -> &Primitive {
         &self.primitive
     }
 

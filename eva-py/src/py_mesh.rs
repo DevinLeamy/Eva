@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
 pub use crate::prelude::*;
+use std::path::PathBuf;
 
 const MESH_PATH: &str = "./eva-py/assets/meshes/";
 
@@ -20,7 +19,7 @@ impl PyMesh {
         let mesh = Mesh::from_path(path);
 
         Self {
-            inner: Geometry::from_collidable(Box::new(mesh)),
+            inner: Geometry::from_primitive(Primitive::Mesh(mesh)),
         }
     }
 

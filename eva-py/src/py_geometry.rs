@@ -27,12 +27,13 @@ impl PyGeometry {
     #[new]
     fn new(primitive_type: &str) -> PyResult<Self> {
         let primitive_type: PrimitiveType = primitive_type.into();
-        let primitive: Box<dyn Collidable> = match primitive_type {
-            PrimitiveType::Sphere => Box::new(Sphere::new(1.0)),
-            PrimitiveType::Cube => Box::new(Cube::new(1.0)),
+        let primitive: Primitive = match primitive_type {
+            PrimitiveType::Sphere => Primitive::Sphere(Sphere::new(1.0)),
+            PrimitiveType::Cube => Primitive::Cube(Cube::new(1.0)),
         };
+
         Ok(Self {
-            inner: Geometry::from_collidable(primitive),
+            inner: Geometry::from_primitive(primitive),
         })
     }
 

@@ -20,6 +20,20 @@ struct PhongMaterial {
     shininess: f32,
 };
 
+struct CubeModels {
+    length: u32,
+    cubes: array<CubeModel>,
+};
+
+struct CubeModel {
+    cube: Cube,
+    transform: Transform,
+};
+
+struct Cube {
+    size: f32,
+};
+
 struct SphereModels {
     length: u32,
     spheres: array<SphereModel>,
@@ -67,6 +81,7 @@ struct GlobalConfig {
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
 @group(0) @binding(3) var<storage, read> lights: PointLights;
 @group(0) @binding(4) var<uniform> config: GlobalConfig;
+@group(0) @binding(5) var<storage, read> cubes: CubeModels; 
 
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {

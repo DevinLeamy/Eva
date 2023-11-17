@@ -1,13 +1,17 @@
 use nalgebra::Vector3;
 
-use crate::shader::{ShaderPointLight, ShaderPointLights, ShaderSphereModel, ShaderSphereModels};
+use crate::shader::{
+    ShaderCubeModel, ShaderCubeModels, ShaderPointLight, ShaderPointLights, ShaderSphereModel,
+    ShaderSphereModels,
+};
 
-use super::{Geometry, Light, Node, Scene, Sphere, Transform};
+use super::{Geometry, Light, Node, Primitive, Scene, Sphere, Transform};
 
 #[derive(Debug)]
 pub struct FlatScene {
     pub lights: ShaderPointLights,
     pub spheres: ShaderSphereModels,
+    pub cubes: ShaderCubeModels,
     pub ambient: Vector3<f32>,
 }
 
@@ -34,6 +38,7 @@ struct SceneFlattener {
     transforms: Vec<Transform>,
     lights: ShaderPointLights,
     spheres: ShaderSphereModels,
+    cubes: ShaderCubeModels,
 }
 
 impl SceneFlattener {
@@ -42,6 +47,7 @@ impl SceneFlattener {
             transforms: vec![Transform::default()],
             lights: ShaderPointLights::new(),
             spheres: ShaderSphereModels::new(),
+            cubes: ShaderCubeModels::new(),
         }
     }
 
@@ -52,6 +58,7 @@ impl SceneFlattener {
         FlatScene {
             lights: flattener.lights,
             spheres: flattener.spheres,
+            cubes: flattener.cubes,
             ambient: scene.ambient(),
         }
     }
@@ -84,13 +91,30 @@ impl SceneFlattener {
     }
 
     fn handle_geometry(&mut self, geometry: &Geometry) {
-        let model = ShaderSphereModel {
-            sphere: Sphere { radius: 1.0 },
-            transform: self.top_transform().into(),
-            material: geometry.material().clone(),
-        };
-
-        self.spheres.add(model);
+        match geometry.primitive().clone() {
+            Primitive::Cube(cube) => {
+                self.cubes.add(ShaderCubeModel {
+                    cube,
+                    transform: self.top_transform().into(),
+                    material: geometry.material().clone(),
+                });
+            }
+            Primitive::Sphere(sphere) => {
+                self.spheres.add(ShaderSphereModel {
+                    sphere,
+                    transform: self.top_transform().into(),
+                    material: geometry.material().clone(),
+                });
+            }
+            Primitive::Mesh(_) => {
+                // TODO: Add mesh geometries.
+                self.spheres.add(ShaderSphereModel {
+                    sphere: Sphere { radius: 1.0 },
+                    transform: self.top_transform().into(),
+                    material: geometry.material().clone(),
+                });
+            }
+        }
     }
 
     fn push_transform(&mut self, transform: &Transform) {

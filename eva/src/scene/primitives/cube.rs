@@ -1,8 +1,7 @@
-use nalgebra::{SimdBool, Unit, Vector3};
+use encase::ShaderType;
+use nalgebra::Vector3;
 
-use super::Collidable;
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, ShaderType)]
 pub struct Cube {
     min: Vector3<f32>,
     max: Vector3<f32>,
@@ -20,14 +19,4 @@ impl Cube {
     pub fn from_points(min: Vector3<f32>, max: Vector3<f32>) -> Self {
         Self { min, max }
     }
-}
-
-impl Cube {
-    fn is_inside(&self, point: &Vector3<f32>) -> bool {
-        point.ge(&self.min).all() && point.le(&self.max).all()
-    }
-}
-
-impl Collidable for Cube {
-    fn foo(&self) {}
 }
