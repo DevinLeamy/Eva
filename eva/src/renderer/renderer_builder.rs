@@ -7,7 +7,7 @@ use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, Sh
 use super::RenderContext;
 
 const SPHERE_COUNT: u64 = 100;
-const CUBE_COUNT: u64 = 10;
+const CUBE_COUNT: u64 = 25;
 const LIGHT_COUNT: u64 = 5;
 
 pub struct RendererBuilder {

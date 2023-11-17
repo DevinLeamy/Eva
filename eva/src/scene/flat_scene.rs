@@ -108,9 +108,11 @@ impl SceneFlattener {
             }
             Primitive::Mesh(_) => {
                 // TODO: Add mesh geometries.
+                let mut transform = self.top_transform();
+                transform.set_scale([1.0, 1.0, 1.0].into());
                 self.spheres.add(ShaderSphereModel {
                     sphere: Sphere { radius: 1.0 },
-                    transform: self.top_transform().into(),
+                    transform: transform.into(),
                     material: geometry.material().clone(),
                 });
             }

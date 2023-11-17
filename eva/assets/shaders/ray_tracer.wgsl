@@ -187,8 +187,8 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 fn compute_ray_colour(ray: Ray) -> vec3f {
     let intersection = compute_ray_intersection(ray);
     if (!intersection.some) {
-        return vec3f(0.1, 0.1, 0.1);
-        // return vec3f(0.0, 0.0, 0.0);
+        // return vec3f(0.1, 0.1, 0.1);
+        return vec3f(0.0, 0.0, 0.0);
     }
 
     return compute_light_at_intersection(intersection);
