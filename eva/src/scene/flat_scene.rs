@@ -1,11 +1,14 @@
 use nalgebra::Vector3;
 
-use crate::shader::{
-    ShaderCubeModel, ShaderCubeModels, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
-    ShaderPointLights, ShaderSphereModel, ShaderSphereModels,
+use crate::{
+    prelude::extents,
+    shader::{
+        ShaderCubeModel, ShaderCubeModels, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
+        ShaderPointLights, ShaderSphereModel, ShaderSphereModels,
+    },
 };
 
-use super::{Geometry, Light, Node, Primitive, Scene, Transform};
+use super::{Cube, Geometry, Light, Node, Primitive, Scene, Transform};
 
 #[derive(Debug)]
 pub struct FlatScene {
@@ -111,11 +114,14 @@ impl SceneFlattener {
                 });
             }
             Primitive::Mesh(mesh) => {
+                let (min, max) = extents(&mesh.points);
+
                 self.meshes.add(ShaderMeshModel {
                     points: mesh.points,
                     triangles: mesh.triangles,
                     transform: self.top_transform().into(),
                     material: geometry.material().clone(),
+                    bounding_box: Cube::from_points(min, max),
                 });
             }
         }

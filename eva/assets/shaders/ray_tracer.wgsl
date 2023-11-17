@@ -100,7 +100,8 @@ struct MeshModelHeader {
     triangle_offset: u32,
     triangle_count: u32,
     material: PhongMaterial,
-    transform: Transform
+    transform: Transform,
+    bounding_box: Cube
 };
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
@@ -275,6 +276,12 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
     for (var i: i32 = 0; i < i32(mesh_headers.length); i = i + 1) {
         let mesh = mesh_headers.headers[i];
         let transformed_ray: Ray = ray_inverse_transform(ray, mesh.transform);
+
+        let bounding_box_intersection = cube_intersection(mesh.bounding_box, transformed_ray);
+        if (!bounding_box_intersection.some) {
+            // Missed the bounding box.
+            continue;
+        } 
 
         for (var j: i32 = 0; j < i32(mesh.triangle_count); j = j + 1) {
             let triangle = mesh_triangles.triangles[i32(mesh.triangle_offset) + j];

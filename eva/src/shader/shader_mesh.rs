@@ -1,7 +1,7 @@
 use encase::{ArrayLength, ShaderType};
 use nalgebra::Vector3;
 
-use crate::prelude::PhongMaterial;
+use crate::prelude::{Cube, PhongMaterial};
 
 use super::{ShaderStruct, ShaderTransform};
 
@@ -17,6 +17,7 @@ pub struct ShaderMeshModel {
     pub triangles: Vec<Vector3<u32>>,
     pub transform: ShaderTransform,
     pub material: PhongMaterial,
+    pub bounding_box: Cube,
 }
 
 impl ShaderMeshModels {
@@ -34,6 +35,7 @@ impl ShaderMeshModels {
             triangle_count: mesh.triangles.len() as u32,
             material: mesh.material,
             transform: mesh.transform,
+            bounding_box: mesh.bounding_box,
         })
     }
 }
@@ -112,4 +114,5 @@ pub struct ShaderMeshModelHeader {
     triangle_count: u32,
     material: PhongMaterial,
     transform: ShaderTransform,
+    bounding_box: Cube,
 }
