@@ -28,10 +28,12 @@ struct CubeModels {
 struct CubeModel {
     cube: Cube,
     transform: Transform,
+    material: PhongMaterial
 };
 
 struct Cube {
-    size: f32,
+    min: vec3f,
+    max: vec3f,
 };
 
 struct SphereModels {
@@ -196,6 +198,7 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
     var intersection: Intersection;
     intersection.some = false; 
 
+    // Sphere intersection tests.
     for (var i: i32 = 0; i < i32(spheres.length); i = i + 1) {
         let sphere_model = spheres.spheres[i];
         let sphere = sphere_model.sphere;
@@ -206,6 +209,28 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
 
         // Set the material of the object that was intersected with.
         transformed_intersection.material = sphere_model.material;
+    
+        if (transformed_intersection.some) {
+            if (!intersection.some) {
+                intersection = transformed_intersection;
+            } else if (intersection.t >= transformed_intersection.t) {
+                // Take the nearer intersection.
+                intersection = transformed_intersection;
+            }
+        }
+    }
+
+    // Cube intersection tests.
+    for (var i: i32 = 0; i < i32(cubes.length); i = i + 1) {
+        let cube_model = cubes.cubes[i];
+        let cube = cube_model.cube;
+
+        let transformed_ray: Ray = ray_inverse_transform(ray, cube_model.transform);
+        let new_intersection = cube_intersection(cube, transformed_ray);
+        var transformed_intersection: Intersection = intersection_transform(new_intersection, cube_model.transform);
+
+        // Set the material of the object that was intersected with.
+        transformed_intersection.material = cube_model.material;
     
         if (transformed_intersection.some) {
             if (!intersection.some) {
@@ -325,3 +350,95 @@ fn sphere_intersection(sphere: Sphere, ray: Ray) -> Intersection {
     return intersection;
 }
 
+fn cube_intersection(cube: Cube, ray: Ray) -> Intersection {
+    let min = cube.min;
+    let max = cube.max;
+
+    var intersection: Intersection;
+    intersection.some = false;
+
+    if (cube_point_inside(cube, ray.origin)) {
+        return intersection;
+    }
+
+    var tmin: f32 = (min.x - ray.origin.x) / ray.direction.x;
+    var tmax: f32 = (max.x - ray.origin.x) / ray.direction.x;
+    if (tmin > tmax) {
+        let t = tmin;
+        tmin = tmax;
+        tmax = t;
+    }
+
+    var tmin_y: f32 = (min.y - ray.origin.y) / ray.direction.y;
+    var tmax_y: f32 = (max.y - ray.origin.y) / ray.direction.y;
+    if (tmin_y > tmax_y) {
+        let t = tmin_y;
+        tmin_y = tmax_y;
+        tmax_y = t;
+    }
+
+    if (tmin > tmax_y || tmax < tmin_y) {
+        return intersection;
+    }
+
+    tmin = max(tmin, tmin_y);
+    tmax = min(tmax, tmax_y);
+
+    var tmin_z: f32 = (min.z - ray.origin.z) / ray.direction.z;
+    var tmax_z: f32 = (max.z - ray.origin.z) / ray.direction.z;
+    if (tmin_z > tmax_z) {
+        let t = tmin_z;
+        tmin_z = tmax_z;
+        tmax_z = t;
+    }
+
+    if (tmin > tmax_z || tmax < tmin_z) {
+        return intersection;
+    }
+
+    tmin = max(tmin, tmin_z);
+    tmax = min(tmax, tmax_z);
+
+    if (tmin <= 0.0) {
+        return intersection;
+    }
+
+    var normal: vec3f = vec3(0.0, 0.0, 0.0);
+
+    // Flip the sign based on the direction of the incoming ray.
+    if (tmin > tmin_y && tmin > tmin_z) {
+        normal.x = opposite_sign(ray.direction.x);
+    } else if tmin_y > tmin_z {
+        normal.y = opposite_sign(ray.direction.y);
+    } else {
+        normal.z = opposite_sign(ray.direction.z);
+    }
+
+    intersection.some = true;
+    intersection.t = tmin;
+    intersection.normal = normal;
+    intersection.ray = ray;
+
+    return intersection;
+}
+
+
+fn cube_point_inside(cube: Cube, point: vec3f) -> bool {
+    if (point.x < cube.min.x || point.y < cube.min.y || point.z < cube.min.z) {
+        return false;
+    } 
+    if (point.x > cube.max.x || point.y > cube.max.y || point.z > cube.max.z) {
+        return false;
+    }
+    return true;
+}
+
+fn opposite_sign(v: f32) -> f32 {
+    if (v == 0.0) {
+        return 0.0;
+    } else if (v < 0.0) {
+        return 1.0;
+    } else {
+        return -1.0;
+    }
+}
