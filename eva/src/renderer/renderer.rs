@@ -17,11 +17,18 @@ pub struct Renderer {
     pub device: Device,
     pub queue: Queue,
     pub window: Window,
-    pub display_pipeline: RenderPipeline,
-    pub display_bind_group_layout: BindGroupLayout,
-    pub ray_tracer_bind_group_layout: BindGroupLayout,
-    pub ray_tracer_pipeline: ComputePipeline,
     pub context: RenderContext,
+
+    pub ray_tracer_pipeline: ComputePipeline,
+    pub display_pipeline: RenderPipeline,
+
+    pub ray_tracer_bind_group_layout: BindGroupLayout,
+    pub display_bind_group_layout: BindGroupLayout,
+    pub mesh_bind_group_layout: BindGroupLayout,
+
+    pub mesh_points_buffer: Buffer,
+    pub mesh_triangles_buffer: Buffer,
+    pub mesh_headers_buffer: Buffer,
 
     pub camera_buffer: Buffer,
     pub config_buffer: Buffer,
@@ -173,6 +180,29 @@ impl Renderer {
         self.queue.write_buffer(&self.cubes_buffer, 0, &flat_scene.cubes.as_bytes().unwrap());
         self.queue.write_buffer(&self.lights_buffer, 0, &flat_scene.lights.as_bytes().unwrap());
 
+        self.queue.write_buffer(&self.mesh_points_buffer, 0, &flat_scene.meshes.points.as_bytes().unwrap());
+        self.queue.write_buffer(&self.mesh_triangles_buffer, 0, &flat_scene.meshes.triangles.as_bytes().unwrap());
+        self.queue.write_buffer(&self.mesh_headers_buffer, 0, &flat_scene.meshes.headers.as_bytes().unwrap());
+
+        let mesh_bind_group = self.device.create_bind_group(&BindGroupDescriptor { 
+            label: None, 
+            layout: &self.mesh_bind_group_layout, 
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: self.mesh_points_buffer.as_entire_binding()
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: self.mesh_triangles_buffer.as_entire_binding()
+                },
+                BindGroupEntry {
+                    binding: 2,
+                    resource: self.mesh_headers_buffer.as_entire_binding()
+                },
+            ]
+        });
+
         let ray_tracer_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("ray tracer bind group"),
             layout: &self.ray_tracer_bind_group_layout,
@@ -211,6 +241,7 @@ impl Renderer {
 
         ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
         ray_tracer_pass.set_bind_group(0, &ray_tracer_bind_group, &[]);
+        ray_tracer_pass.set_bind_group(1, &mesh_bind_group, &[]);
         ray_tracer_pass.dispatch_workgroups(window_size.width / 3, window_size.height / 3, 1);
 
         drop(ray_tracer_pass);

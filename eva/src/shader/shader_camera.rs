@@ -13,7 +13,6 @@ impl ShaderStruct for ShaderCamera {
     fn as_bytes(&self) -> Option<Vec<u8>> {
         let mut buffer = encase::UniformBuffer::new(Vec::new());
         buffer.write(self).ok()?;
-
         Some(buffer.into_inner())
     }
 }

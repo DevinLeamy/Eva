@@ -1,17 +1,18 @@
 use nalgebra::Vector3;
 
 use crate::shader::{
-    ShaderCubeModel, ShaderCubeModels, ShaderPointLight, ShaderPointLights, ShaderSphereModel,
-    ShaderSphereModels,
+    ShaderCubeModel, ShaderCubeModels, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
+    ShaderPointLights, ShaderSphereModel, ShaderSphereModels,
 };
 
-use super::{Geometry, Light, Node, Primitive, Scene, Sphere, Transform};
+use super::{Geometry, Light, Node, Primitive, Scene, Transform};
 
 #[derive(Debug)]
 pub struct FlatScene {
     pub lights: ShaderPointLights,
     pub spheres: ShaderSphereModels,
     pub cubes: ShaderCubeModels,
+    pub meshes: ShaderMeshModels,
     pub ambient: Vector3<f32>,
 }
 
@@ -39,6 +40,7 @@ struct SceneFlattener {
     lights: ShaderPointLights,
     spheres: ShaderSphereModels,
     cubes: ShaderCubeModels,
+    meshes: ShaderMeshModels,
 }
 
 impl SceneFlattener {
@@ -48,6 +50,7 @@ impl SceneFlattener {
             lights: ShaderPointLights::new(),
             spheres: ShaderSphereModels::new(),
             cubes: ShaderCubeModels::new(),
+            meshes: ShaderMeshModels::new(),
         }
     }
 
@@ -60,6 +63,7 @@ impl SceneFlattener {
             spheres: flattener.spheres,
             cubes: flattener.cubes,
             ambient: scene.ambient(),
+            meshes: flattener.meshes,
         }
     }
 }
@@ -106,13 +110,11 @@ impl SceneFlattener {
                     material: geometry.material().clone(),
                 });
             }
-            Primitive::Mesh(_) => {
-                // TODO: Add mesh geometries.
-                let mut transform = self.top_transform();
-                transform.set_scale([1.0, 1.0, 1.0].into());
-                self.spheres.add(ShaderSphereModel {
-                    sphere: Sphere { radius: 1.0 },
-                    transform: transform.into(),
+            Primitive::Mesh(mesh) => {
+                self.meshes.add(ShaderMeshModel {
+                    points: mesh.points,
+                    triangles: mesh.triangles,
+                    transform: self.top_transform().into(),
                     material: geometry.material().clone(),
                 });
             }

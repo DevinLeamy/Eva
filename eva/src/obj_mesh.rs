@@ -9,10 +9,10 @@ pub struct ObjTriangle {
 
 #[derive(Clone, Debug)]
 pub struct ObjMesh {
-    positions: Vec<Vector3<f32>>,
-    normals: Vec<Vector3<f32>>,
-    uvs: Vec<Vector2<f32>>,
-    triangles: Vec<ObjTriangle>,
+    pub positions: Vec<Vector3<f32>>,
+    pub normals: Vec<Vector3<f32>>,
+    pub uvs: Vec<Vector2<f32>>,
+    pub triangles: Vec<ObjTriangle>,
 }
 
 impl ObjMesh {
@@ -28,14 +28,6 @@ impl ObjMesh {
             uvs,
             triangles,
         }
-    }
-
-    pub fn triangles(&self) -> &Vec<ObjTriangle> {
-        &self.triangles
-    }
-
-    pub fn positions(&self) -> &Vec<Vector3<f32>> {
-        &self.positions
     }
 
     pub fn normals(&self) -> &Vec<Vector3<f32>> {

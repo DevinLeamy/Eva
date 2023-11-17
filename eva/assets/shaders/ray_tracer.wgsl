@@ -78,12 +78,41 @@ struct GlobalConfig {
     ambient_light: vec3f,
 };
 
+struct MeshPoints {
+    length: u32,
+    points: array<vec3f>
+};
+
+struct MeshTriangles {
+    length: u32,
+    // vec3u -> triangle
+    triangles: array<vec3u> 
+};
+
+struct MeshHeaders {
+    length: u32,
+    headers: array<MeshModelHeader>
+};
+
+struct MeshModelHeader {
+    vertex_offset: u32,
+    vertex_count: u32,
+    triangle_offset: u32,
+    triangle_count: u32,
+    material: PhongMaterial,
+    transform: Transform
+};
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
 @group(0) @binding(3) var<storage, read> lights: PointLights;
 @group(0) @binding(4) var<uniform> config: GlobalConfig;
 @group(0) @binding(5) var<storage, read> cubes: CubeModels; 
+
+@group(1) @binding(0) var<storage, read> mesh_points: MeshPoints;
+@group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
+@group(1) @binding(2) var<storage, read> mesh_headers: MeshHeaders;
 
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
@@ -239,6 +268,20 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
                 // Take the nearer intersection.
                 intersection = transformed_intersection;
             }
+        }
+    }
+    
+    // Mesh intersection tests.
+    for (var i: i32 = 0; i < i32(mesh_headers.length); i = i + 1) {
+        let mesh = mesh_headers.headers[i];
+
+        for (var j: i32 = 0; j < i32(mesh.triangle_count); j = j + 1) {
+            let triangle = mesh_triangles.triangles[i32(mesh.triangle_offset) + j];
+            let p1 = mesh_points.points[mesh.vertex_offset + triangle.x];
+            let p2 = mesh_points.points[mesh.vertex_offset + triangle.y];
+            let p3 = mesh_points.points[mesh.vertex_offset + triangle.z];
+
+            // TODO: Triangle intersection.
         }
     }
 

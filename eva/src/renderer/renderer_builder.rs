@@ -9,6 +9,9 @@ use super::RenderContext;
 const SPHERE_COUNT: u64 = 100;
 const CUBE_COUNT: u64 = 25;
 const LIGHT_COUNT: u64 = 5;
+const MESH_POINT_BUFFER_SIZE: u64 = 100_000;
+const MESH_TRIANGLE_BUFFER_SIZE: u64 = 100_000;
+const MESH_HEADERS_BUFFER_SIZE: u64 = 100_000;
 
 pub struct RendererBuilder {
     surface: Surface,
@@ -23,9 +26,14 @@ pub struct RendererBuilder {
 
     ray_tracer_pipeline: Option<ComputePipeline>,
     ray_tracer_bind_group_layout: Option<BindGroupLayout>,
+    mesh_bind_group_layout: Option<BindGroupLayout>,
 
     display_pipeline: Option<RenderPipeline>,
     display_bind_group_layout: Option<BindGroupLayout>,
+
+    mesh_points_buffer: Option<Buffer>,
+    mesh_triangles_buffer: Option<Buffer>,
+    mesh_headers_buffer: Option<Buffer>,
 
     camera_buffer: Option<Buffer>,
     spheres_buffer: Option<Buffer>,
@@ -86,12 +94,21 @@ impl RendererBuilder {
             surface,
             adapter,
             context,
+
             ray_tracer_shader: None,
             display_shader: None,
+
             ray_tracer_pipeline: None,
-            ray_tracer_bind_group_layout: None,
             display_pipeline: None,
+
+            ray_tracer_bind_group_layout: None,
+            mesh_bind_group_layout: None,
             display_bind_group_layout: None,
+
+            mesh_points_buffer: None,
+            mesh_triangles_buffer: None,
+            mesh_headers_buffer: None,
+
             camera_buffer: None,
             config_buffer: None,
             spheres_buffer: None,
@@ -112,10 +129,18 @@ impl RendererBuilder {
             queue: self.queue,
             window: self.window,
             context: self.context,
-            display_pipeline: self.display_pipeline.unwrap(),
-            display_bind_group_layout: self.display_bind_group_layout.unwrap(),
-            ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
+
             ray_tracer_pipeline: self.ray_tracer_pipeline.unwrap(),
+            display_pipeline: self.display_pipeline.unwrap(),
+
+            ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
+            mesh_bind_group_layout: self.mesh_bind_group_layout.unwrap(),
+            display_bind_group_layout: self.display_bind_group_layout.unwrap(),
+
+            mesh_points_buffer: self.mesh_points_buffer.unwrap(),
+            mesh_triangles_buffer: self.mesh_triangles_buffer.unwrap(),
+            mesh_headers_buffer: self.mesh_headers_buffer.unwrap(),
+
             camera_buffer: self.camera_buffer.unwrap(),
             config_buffer: self.config_buffer.unwrap(),
             cubes_buffer: self.cubes_buffer.unwrap(),
@@ -168,9 +193,68 @@ impl RendererBuilder {
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
             mapped_at_creation: false
         }));
+
+        self.mesh_points_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None,
+            size: MESH_POINT_BUFFER_SIZE, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
+            mapped_at_creation: false
+        }));
+
+        self.mesh_triangles_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None,
+            size: MESH_TRIANGLE_BUFFER_SIZE, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
+            mapped_at_creation: false
+        }));
+
+        self.mesh_headers_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None,
+            size: MESH_HEADERS_BUFFER_SIZE, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
+            mapped_at_creation: false
+        }));
     }
 
     fn create_bind_group_layouts(&mut self) {
+        self.mesh_bind_group_layout = Some(self.device.create_bind_group_layout(
+            &BindGroupLayoutDescriptor { 
+                label: None, 
+                entries: &[
+                    BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 2,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None
+                    }
+                ]
+            }
+        ));
+
         self.ray_tracer_bind_group_layout = Some(self.device.create_bind_group_layout(
             &BindGroupLayoutDescriptor {
                 label: Some("ray tracer bind group layout"),
@@ -276,7 +360,10 @@ impl RendererBuilder {
             .device
             .create_pipeline_layout(&PipelineLayoutDescriptor {
                 label: Some("ray tracer pipeline layout"),
-                bind_group_layouts: &[self.ray_tracer_bind_group_layout.as_ref().unwrap()],
+                bind_group_layouts: &[
+                    self.ray_tracer_bind_group_layout.as_ref().unwrap(), 
+                    self.mesh_bind_group_layout.as_ref().unwrap()
+                ],
                 push_constant_ranges: &[],
             });
 
