@@ -178,7 +178,7 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
     new_intersection.material = intersection.material;
 
     let new_point = transform.m * vec4f(ray_point(intersection.ray, intersection.t), 1.0);
-    new_intersection.t = ray_t(intersection.ray, new_point.xyz);
+    new_intersection.t = ray_t(new_intersection.ray, new_point.xyz);
     new_intersection.normal = normalize(transform.m_normal_inverse * intersection.normal);
 
     return new_intersection;
@@ -274,20 +274,19 @@ fn compute_light_contribution_at_intersection(intersection: Intersection, light:
     let ray_to_light = ray_from_points(offset_intersection_point, light.position);
 
     let ray_to_light_intersection = compute_ray_intersection(ray_to_light);
-    if (ray_to_light_intersection.some) {
-        // In shadow.
-        return vec3f(0.0, 0.0, 0.0);
-    }
-
-    return phong_illumination(intersection, light);
+    return phong_illumination(intersection, light, ray_to_light_intersection.some);
 }
 
-fn phong_illumination(intersection: Intersection, light: PointLight) -> vec3f {
+fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: bool) -> vec3f {
+    let ambient = config.ambient_light * light.colour * intersection.material.diffuse;
+    if (in_shadow) {
+        return ambient;
+    }
+
     let intersection_point = ray_point(intersection.ray, intersection.t);
     let to_light = normalize(light.position - intersection_point);
     let to_view = normalize(camera.position - intersection_point);
 
-    let ambient = config.ambient_light * light.colour * intersection.material.diffuse;
 
     let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
     let diffuse = diffuse_strength * light.colour * intersection.material.diffuse;
@@ -316,7 +315,6 @@ fn sphere_intersection(sphere: Sphere, ray: Ray) -> Intersection {
     }
 
     var t: f32 = 0.0;
-
 
     if (disc == 0.0) {
         // One intersection.
@@ -421,7 +419,6 @@ fn cube_intersection(cube: Cube, ray: Ray) -> Intersection {
 
     return intersection;
 }
-
 
 fn cube_point_inside(cube: Cube, point: vec3f) -> bool {
     if (point.x < cube.min.x || point.y < cube.min.y || point.z < cube.min.z) {
