@@ -274,6 +274,7 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
     // Mesh intersection tests.
     for (var i: i32 = 0; i < i32(mesh_headers.length); i = i + 1) {
         let mesh = mesh_headers.headers[i];
+        let transformed_ray: Ray = ray_inverse_transform(ray, mesh.transform);
 
         for (var j: i32 = 0; j < i32(mesh.triangle_count); j = j + 1) {
             let triangle = mesh_triangles.triangles[i32(mesh.triangle_offset) + j];
@@ -281,7 +282,20 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
             let p2 = mesh_points.points[mesh.vertex_offset + triangle.y];
             let p3 = mesh_points.points[mesh.vertex_offset + triangle.z];
 
-            // TODO: Triangle intersection.
+            let new_intersection = triangle_intersection(p1, p2, p3, transformed_ray);
+            var transformed_intersection: Intersection = intersection_transform(new_intersection, mesh.transform);
+
+            // Set the material of the object that was intersected with.
+            transformed_intersection.material = mesh.material;
+        
+            if (transformed_intersection.some) {
+                if (!intersection.some) {
+                    intersection = transformed_intersection;
+                } else if (intersection.t >= transformed_intersection.t) {
+                    // Take the nearer intersection.
+                    intersection = transformed_intersection;
+                }
+            }
         }
     }
 
@@ -481,4 +495,51 @@ fn opposite_sign(v: f32) -> f32 {
     } else {
         return -1.0;
     }
+}
+
+
+fn triangle_intersection(p1: vec3f, p2: vec3f, p3: vec3f, ray: Ray) -> Intersection {
+    let EPSILON: f32 = 0.0000001;
+
+    var intersection: Intersection;
+    intersection.some = false;
+
+    let edge1 = p2 - p1;
+    let edge2 = p3 - p1;
+
+    let cross_dir_edge2 = cross(ray.direction, edge2);
+    let det = dot(edge1, cross_dir_edge2);
+
+    if (abs(det) < EPSILON) {
+        // Parallel or lies in triangle plane
+        return intersection;
+    }
+
+    let inv_det = 1.0 / det;
+    let to_origin = ray.origin - p1;
+    let u = inv_det * dot(to_origin, cross_dir_edge2);
+
+    if (u < 0.0 || u > 1.0) {
+        return intersection;
+    }
+
+    let cross_origin_edge1 = cross(to_origin, edge1);
+    let v = inv_det * dot(ray.direction, cross_origin_edge1);
+
+    if (v < 0.0 || u + v > 1.0) {
+        return intersection;
+    }
+
+    let t = inv_det * dot(edge2, cross_origin_edge1);
+
+    if (t <= EPSILON) {
+        return intersection;
+    }
+
+    intersection.some = true;
+    intersection.t = t;
+    intersection.ray = ray;
+    intersection.normal = normalize(cross(edge1, edge2));
+    
+    return intersection;
 }
