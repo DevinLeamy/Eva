@@ -62,6 +62,7 @@ struct Intersection {
     ray: Ray,
     normal: vec3f,
     material: PhongMaterial,
+    uv: vec2f,
 };
 
 struct PointLights {
@@ -202,10 +203,8 @@ fn ray_transform(ray: Ray, transform: Transform) -> Ray {
 }
 
 fn intersection_transform(intersection: Intersection, transform: Transform) -> Intersection {
-    var new_intersection: Intersection;
-    new_intersection.some = intersection.some;
+    var new_intersection: Intersection = intersection;
     new_intersection.ray = ray_transform(intersection.ray, transform);
-    new_intersection.material = intersection.material;
 
     let new_point = transform.m * vec4f(ray_point(intersection.ray, intersection.t), 1.0);
     new_intersection.t = ray_t(new_intersection.ray, new_point.xyz);
@@ -363,7 +362,9 @@ fn compute_light_contribution_at_intersection(intersection: Intersection, light:
 }
 
 fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: bool) -> vec3f {
-    let ambient = config.ambient_light * light.colour * intersection.material.diffuse;
+    let material_colour = intersection.material.diffuse;
+
+    let ambient = config.ambient_light * light.colour * material_colour;
     if (in_shadow) {
         return ambient;
     }
@@ -374,7 +375,7 @@ fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: 
 
 
     let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
-    let diffuse = diffuse_strength * light.colour * intersection.material.diffuse;
+    let diffuse = diffuse_strength * light.colour * material_colour;
 
     let half_vector = normalize(to_view + to_light);
     let specular_strength = pow(max(0.0, dot(intersection.normal, half_vector)), intersection.material.shininess);
@@ -430,8 +431,20 @@ fn sphere_intersection(sphere: Sphere, ray: Ray) -> Intersection {
     intersection.ray = ray;
     intersection.t = ray_t(ray, point);
     intersection.normal = surface_normal;
+    intersection.uv = sphere_uv(sphere, point);
 
     return intersection;
+}
+
+fn sphere_uv(sphere: Sphere, point: vec3f) -> vec2f {
+    let PI = radians(180.0);
+
+    let theta = acos(-point.y);
+    let phi = atan2(-point.z, point.x) + PI;
+
+    let u = phi / (2.0 * PI);
+    let v = theta / PI;
+    return vec2f(u, v);
 }
 
 fn cube_intersection(cube: Cube, ray: Ray) -> Intersection {
@@ -502,6 +515,8 @@ fn cube_intersection(cube: Cube, ray: Ray) -> Intersection {
     intersection.t = tmin;
     intersection.normal = normal;
     intersection.ray = ray;
+    // TODO: Set proper UVs.
+    intersection.uv = vec2f(0.0, 0.0);
 
     return intersection;
 }
@@ -569,6 +584,8 @@ fn triangle_intersection(p1: vec3f, p2: vec3f, p3: vec3f, ray: Ray) -> Intersect
     intersection.t = t;
     intersection.ray = ray;
     intersection.normal = normalize(cross(edge1, edge2));
+    // TODO: Set proper UVs.
+    intersection.uv = vec2f(0.0, 0.0);
     
     return intersection;
 }
