@@ -1,5 +1,4 @@
 from eva_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
-from shared import copy_and_archive_image
 
 stone = Material((0.8, 0.7, 0.7), (0.0, 0.0, 0.0), 0)
 grass = Material((0.1, 0.7, 0.1), (0.0, 0.0, 0.0), 0)
@@ -74,5 +73,3 @@ scene.set_root(scene_root)
 scene.set_ambient(0.4, 0.4, 0.4)
 
 ray_trace(scene, camera, 256, 256, "image.png")
-
-copy_and_archive_image()

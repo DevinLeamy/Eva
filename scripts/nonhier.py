@@ -1,5 +1,4 @@
 from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
-from shared import copy_and_archive_image
 
 mat1 = Material((0.7, 1.0, 0.7), (0.5, 0.7, 0.5), 25)
 mat2 = Material((0.5, 0.5, 0.5), (0.5, 0.7, 0.5), 25)
@@ -63,5 +62,3 @@ scene.set_root(scene_root)
 scene.set_ambient(0.3, 0.3, 0.3)
 
 ray_trace(scene, camera, 256, 256, "image.png")
-
-copy_and_archive_image()

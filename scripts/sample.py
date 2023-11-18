@@ -1,5 +1,4 @@
 from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
-from shared import copy_and_archive_image
 import random
 
 wood = Material((0.8, 0.7, 0.7), (0.0, 0.0, 0.0), 0)
@@ -182,5 +181,3 @@ camera = Camera((0, 30, 30), (0, 0, -1), (0, 1, 0), 80)
 camera.look_at(0, 0, 0)
 
 ray_trace(scene, camera, 500, 500, "image.png")
-
-copy_and_archive_image()
