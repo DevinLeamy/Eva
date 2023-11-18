@@ -241,7 +241,7 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
 fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     var reflected_ray: Ray;
     reflected_ray.direction = normalize(ray.direction - intersection.normal * 2.0 * dot(ray.direction, intersection.normal));
-    reflected_ray.origin = ray_point(ray, intersection.t) + 0.1 * reflected_ray.direction;
+    reflected_ray.origin = ray_point(ray, intersection.t) + 0.5 * reflected_ray.direction;
 
     return reflected_ray;
 }
@@ -423,12 +423,13 @@ fn sphere_intersection(sphere: Sphere, ray: Ray) -> Intersection {
         return intersection;
     }
 
-    let point = ray_point(ray, t);
+    var point: vec3f = ray_point(ray, t);
     let surface_normal = normalize(point);
+    point = surface_normal * sphere.radius;
 
     intersection.some = true;
     intersection.ray = ray;
-    intersection.t = t;
+    intersection.t = ray_t(ray, point);
     intersection.normal = surface_normal;
 
     return intersection;
