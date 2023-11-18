@@ -219,8 +219,7 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
     var ray: Ray = _ray;
 
     var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
-    var reflectance: f32 = 0.5; 
-    var total_reflectance: f32 = 0.5; 
+    var total_reflectance: vec3f = vec3(0.5); 
 
     for (var i: i32 = 0; i < 2; i = i + 1) {
         let intersection = compute_ray_intersection(ray);
@@ -231,7 +230,7 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
         }
 
         total_light = total_light + total_reflectance * compute_light_at_intersection(intersection);
-        total_reflectance = total_reflectance * reflectance;
+        total_reflectance = total_reflectance * intersection.material.specular;
 
         ray = compute_reflected_ray(ray, intersection);
     }
