@@ -14,7 +14,6 @@ use winit::{
 
 mod obj_loader;
 mod obj_mesh;
-mod ray_tracer;
 mod renderer;
 mod scene;
 mod shader;
@@ -23,7 +22,6 @@ mod utils;
 pub mod prelude {
     pub use crate::obj_loader::*;
     pub use crate::obj_mesh::*;
-    pub use crate::ray_tracer::*;
     pub use crate::renderer::*;
     pub use crate::scene::*;
     pub use crate::shader::*;
