@@ -104,6 +104,7 @@ struct MeshModelHeader {
     bounding_box: Cube
 };
 
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
@@ -214,14 +215,36 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
     return new_intersection;
 }
 
-fn compute_ray_colour(ray: Ray) -> vec3f {
-    let intersection = compute_ray_intersection(ray);
-    if (!intersection.some) {
-        // return vec3f(0.1, 0.1, 0.1);
-        return vec3f(0.0, 0.0, 0.0);
+fn compute_ray_colour(_ray: Ray) -> vec3f {
+    var ray: Ray = _ray;
+
+    var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
+    var reflectance: f32 = 0.5; 
+    var total_reflectance: f32 = 0.5; 
+
+    for (var i: i32 = 0; i < 2; i = i + 1) {
+        let intersection = compute_ray_intersection(ray);
+        if (!intersection.some) {
+            // return vec3f(0.1, 0.1, 0.1);
+            // return vec3f(0.0, 0.0, 0.0);
+            break;
+        }
+
+        total_light = total_light + total_reflectance * compute_light_at_intersection(intersection);
+        total_reflectance = total_reflectance * reflectance;
+
+        ray = compute_reflected_ray(ray, intersection);
     }
 
-    return compute_light_at_intersection(intersection);
+    return total_light;
+}
+
+fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
+    var reflected_ray: Ray;
+    reflected_ray.direction = normalize(ray.direction - intersection.normal * 2.0 * dot(ray.direction, intersection.normal));
+    reflected_ray.origin = ray_point(ray, intersection.t) + 0.1 * reflected_ray.direction;
+
+    return reflected_ray;
 }
 
 fn compute_ray_intersection(ray: Ray) -> Intersection {
