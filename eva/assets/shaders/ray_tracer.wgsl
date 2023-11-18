@@ -120,6 +120,7 @@ struct MeshModelHeader {
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let screen_size: vec2<i32> = vec2<i32>(textureDimensions(colour_buffer));
 
+    // Add 0.5 to get the center of the pixel.
     let x = f32(GlobalInvocationID.x);
     let y = f32(GlobalInvocationID.y);
 
@@ -143,10 +144,8 @@ fn compute_pixel_position(x: f32, y: f32) -> vec3f {
     let aspect = width / height;
 
     // Convert the pixel coordinates to NDC coordinates.
-    //
-    // We add 0.5 to x and y to get the center of the pixel.
-    let ndc_x = (x + 0.5) / width;
-    let ndc_y = (y + 0.5) / height;
+    let ndc_x = x / width;
+    let ndc_y = y / height;
 
     // Convert the NDC coordinates to Screen coordinates.
     let screen_x = (ndc_x - 0.5) * 2.0 * aspect;
