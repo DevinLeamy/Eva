@@ -1,7 +1,6 @@
 from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
 
 scene = Scene()
-missing = scene.add_texture("missing.png")
 spheres = scene.add_texture("spheres.png")
 earth = scene.add_texture("earth.jpg")
 

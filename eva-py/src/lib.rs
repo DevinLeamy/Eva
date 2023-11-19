@@ -42,10 +42,15 @@ struct PyScene {
 impl PyScene {
     #[new]
     fn new() -> Self {
+        let mut texture_loader = TextureLoader::new();
+        let mut path = PathBuf::from(TEXTURE_PATH);
+        path.push("missing.png".to_string());
+        texture_loader.load(path);
+
         Self {
             root: Node::Transformation(Transformation::new()),
             ambient: Vector3::new(0.1, 0.1, 0.1),
-            texture_loader: TextureLoader::new(),
+            texture_loader,
         }
     }
 
