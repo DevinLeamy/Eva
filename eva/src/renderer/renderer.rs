@@ -84,6 +84,8 @@ impl Renderer {
                 .translate(Vector3::new(0.0, 0.0, -speed)),
             _ => {}
         };
+
+        self.context.camera.look_at(Vector3::new(0.0, 0.0, 0.0));
     }
 }
 
