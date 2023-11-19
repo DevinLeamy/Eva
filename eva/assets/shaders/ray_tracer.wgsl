@@ -118,8 +118,8 @@ struct MeshModelHeader {
 @group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
 @group(1) @binding(2) var<storage, read> mesh_headers: MeshHeaders;
 
-@group(2) @binding(0) var textures: binding_array<texture_2d<f32>, 3>;
-@group(2) @binding(1) var texture_samplers: binding_array<sampler, 3>;
+@group(2) @binding(0) var textures: binding_array<texture_2d<f32>, 12>;
+@group(2) @binding(1) var texture_samplers: binding_array<sampler, 12>;
 
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {

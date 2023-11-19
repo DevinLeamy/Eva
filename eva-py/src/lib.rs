@@ -92,7 +92,7 @@ fn ray_trace(
         Scene {
             ambient: scene.ambient,
             root: scene.root.clone(),
-            textures: scene.texture_loader.textures().clone(),
+            textures: scene.texture_loader.clone().textures(),
         },
     ));
 

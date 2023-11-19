@@ -4,7 +4,7 @@ use pollster::FutureExt;
 use wgpu::*;
 use winit::window::Window;
 
-use crate::{Renderer, shader::{ShaderSphereModel, ShaderStruct, ShaderCamera, ShaderPointLight, ShaderGlobalConfig, ShaderCubeModel}};
+use crate::prelude::*;
 
 use super::RenderContext;
 
@@ -14,8 +14,6 @@ const LIGHT_COUNT: u64 = 5;
 const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
 const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;
 const MESH_HEADERS_BUFFER_SIZE: u64 = 5_000;
-
-const TEXTURE_2D_COUNT: u32 = 3;
 
 pub struct RendererBuilder {
     surface: Surface,
@@ -230,8 +228,6 @@ impl RendererBuilder {
     }
 
     fn create_bind_group_layouts(&mut self) {
-        let texture_count = self.context.scene.textures().textures().len() as u32;
-
         self.texture_bind_group_layout = Some(self.device.create_bind_group_layout(
             &BindGroupLayoutDescriptor {
                 label: None,
@@ -244,13 +240,13 @@ impl RendererBuilder {
                             view_dimension: TextureViewDimension::D2,
                             multisampled: false,
                         },
-                        count: NonZeroU32::new(texture_count),
+                        count: NonZeroU32::new(TEXTURE_2D_COUNT),
                     },
                     BindGroupLayoutEntry {
                         binding: 1,
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::Sampler(SamplerBindingType::NonFiltering),
-                        count: NonZeroU32::new(texture_count),
+                        count: NonZeroU32::new(TEXTURE_2D_COUNT),
                     }
                 ]
             }

@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use std::collections::HashMap;
 
+const FILLER_TEXTURE_PATH: &'static str = "./eva/assets/textures/filler.png";
+
+#[derive(Clone)]
 pub struct TextureLoader {
     texture_ids: HashMap<PathBuf, u32>,
     textures: ShaderTextures,
@@ -27,7 +30,12 @@ impl TextureLoader {
         id
     }
 
-    pub fn textures(&self) -> &ShaderTextures {
-        &self.textures
+    pub fn textures(mut self) -> ShaderTextures {
+        while (self.textures.textures().len() as u32) < TEXTURE_2D_COUNT {
+            self.textures
+                .add_texture(ShaderTexture::from_path(FILLER_TEXTURE_PATH).unwrap());
+        }
+
+        self.textures
     }
 }
