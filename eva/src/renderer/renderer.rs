@@ -25,6 +25,7 @@ pub struct Renderer {
     pub ray_tracer_bind_group_layout: BindGroupLayout,
     pub display_bind_group_layout: BindGroupLayout,
     pub mesh_bind_group_layout: BindGroupLayout,
+    pub texture_bind_group_layout: BindGroupLayout,
 
     pub mesh_points_buffer: Buffer,
     pub mesh_triangles_buffer: Buffer,
@@ -174,7 +175,6 @@ impl Renderer {
 
     #[rustfmt::skip]
     fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
-        let window_size = self.window.inner_size();
         let shader_camera: ShaderCamera = self.context.camera.clone().into();
         let flat_scene: FlatScene = self.context.scene.clone().into();
 
@@ -242,6 +242,49 @@ impl Renderer {
             ],
         });
 
+        let texture_descriptors: Vec<TextureDescriptor> = flat_scene.textures.textures().iter().map(|texture| texture.clone().into()).collect();
+        let texture_extents: Vec<Extent3d> = flat_scene.textures.textures().iter().map(|texture| Extent3d { 
+            width: texture.width(), 
+            height: texture.height(), 
+            depth_or_array_layers: 1, 
+        }).collect();
+        let texture_data: Vec<Vec<u16>> = flat_scene.textures.textures().iter().map(|texture| texture.as_bytes()).collect();
+
+        let textures: Vec<Texture> = texture_descriptors.into_iter().map(|descriptor| self.device.create_texture(&descriptor)).collect();
+        let texture_views: Vec<TextureView> = textures.iter().map(|texture| texture.create_view(&TextureViewDescriptor::default())).collect();
+
+        for i in 0..texture_data.len() {
+            self.queue.write_texture(
+                textures[i].as_image_copy(),
+                &bytemuck::cast_slice(&texture_data[i]),
+                ImageDataLayout {
+                    offset: 0,
+                    bytes_per_row: Some(4),
+                    rows_per_image: None,
+                },
+                texture_extents[i]
+            );
+        }
+
+        let texture_2d_sampler = self.device.create_sampler(&SamplerDescriptor::default());
+
+        let texture_bind_group = self.device.create_bind_group(&BindGroupDescriptor { 
+            label: None, 
+            layout: &self.texture_bind_group_layout, 
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::TextureViewArray(
+                        &texture_views.iter().map(|c| c).collect::<Vec<&TextureView>>()
+                    ) 
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::SamplerArray(&[&texture_2d_sampler, &texture_2d_sampler])
+                }
+            ] 
+        });
+
         // Invoke the compute shader.
         let mut ray_tracer_pass = encoder.begin_compute_pass(&ComputePassDescriptor {
             label: Some("ray tracer pass"),
@@ -250,6 +293,9 @@ impl Renderer {
         ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
         ray_tracer_pass.set_bind_group(0, &ray_tracer_bind_group, &[]);
         ray_tracer_pass.set_bind_group(1, &mesh_bind_group, &[]);
+        ray_tracer_pass.set_bind_group(2, &texture_bind_group, &[]);
+
+        let window_size = self.window.inner_size();
         ray_tracer_pass.dispatch_workgroups(window_size.width / 3, window_size.height / 3, 1);
 
         drop(ray_tracer_pass);

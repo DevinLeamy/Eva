@@ -127,6 +127,10 @@ impl Geometry {
     pub fn material(&self) -> &PhongMaterial {
         &self.material
     }
+
+    pub fn material_mut(&mut self) -> &mut PhongMaterial {
+        &mut self.material
+    }
 }
 
 impl From<Geometry> for Node {

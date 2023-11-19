@@ -1,11 +1,14 @@
 use encase::ShaderType;
 use nalgebra::Vector3;
 
+const MISSING_TEXTURE_ID: u32 = 0;
+
 #[derive(Clone, Debug, ShaderType)]
 pub struct PhongMaterial {
     pub diffuse: Vector3<f32>,
     pub specular: Vector3<f32>,
     pub shininess: f32,
+    pub texture_id: u32,
 }
 
 impl PhongMaterial {
@@ -14,6 +17,7 @@ impl PhongMaterial {
             diffuse,
             specular,
             shininess,
+            texture_id: MISSING_TEXTURE_ID,
         }
     }
 
@@ -28,6 +32,10 @@ impl PhongMaterial {
     pub fn shininess(&self) -> f32 {
         self.shininess
     }
+
+    pub fn set_texture(&mut self, id: u32) {
+        self.texture_id = id;
+    }
 }
 
 impl Default for PhongMaterial {
@@ -36,6 +44,7 @@ impl Default for PhongMaterial {
             diffuse: Vector3::zeros(),
             specular: Vector3::zeros(),
             shininess: 0.0,
+            texture_id: MISSING_TEXTURE_ID,
         }
     }
 }

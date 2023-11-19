@@ -5,6 +5,8 @@ mod shader_mesh;
 mod shader_point_light;
 mod shader_sphere;
 mod shader_struct;
+mod shader_texture;
+mod shader_textures;
 mod shader_transform;
 
 pub use shader_camera::*;
@@ -14,4 +16,6 @@ pub use shader_mesh::*;
 pub use shader_point_light::*;
 pub use shader_sphere::*;
 pub use shader_struct::*;
+pub use shader_texture::*;
+pub use shader_textures::*;
 pub use shader_transform::*;

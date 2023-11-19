@@ -1,3 +1,5 @@
+use std::num::NonZeroU32;
+
 use pollster::FutureExt;
 use wgpu::*;
 use winit::window::Window;
@@ -13,6 +15,8 @@ const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
 const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;
 const MESH_HEADERS_BUFFER_SIZE: u64 = 5_000;
 
+const TEXTURE_2D_COUNT: u32 = 1;
+
 pub struct RendererBuilder {
     surface: Surface,
     device: Device,
@@ -27,6 +31,7 @@ pub struct RendererBuilder {
     ray_tracer_pipeline: Option<ComputePipeline>,
     ray_tracer_bind_group_layout: Option<BindGroupLayout>,
     mesh_bind_group_layout: Option<BindGroupLayout>,
+    texture_bind_group_layout: Option<BindGroupLayout>,
 
     display_pipeline: Option<RenderPipeline>,
     display_bind_group_layout: Option<BindGroupLayout>,
@@ -64,7 +69,7 @@ impl RendererBuilder {
         let (device, queue) = adapter
             .request_device(
                 &DeviceDescriptor {
-                    features: Features::empty(),
+                    features: Features::SAMPLED_TEXTURE_AND_STORAGE_BUFFER_ARRAY_NON_UNIFORM_INDEXING | Features::TEXTURE_BINDING_ARRAY,
                     limits: Limits::default(),
                     label: None,
                 },
@@ -103,6 +108,7 @@ impl RendererBuilder {
 
             ray_tracer_bind_group_layout: None,
             mesh_bind_group_layout: None,
+            texture_bind_group_layout: None,
             display_bind_group_layout: None,
 
             mesh_points_buffer: None,
@@ -135,6 +141,7 @@ impl RendererBuilder {
 
             ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
             mesh_bind_group_layout: self.mesh_bind_group_layout.unwrap(),
+            texture_bind_group_layout: self.texture_bind_group_layout.unwrap(),
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
 
             mesh_points_buffer: self.mesh_points_buffer.unwrap(),
@@ -217,6 +224,30 @@ impl RendererBuilder {
     }
 
     fn create_bind_group_layouts(&mut self) {
+        self.texture_bind_group_layout = Some(self.device.create_bind_group_layout(
+            &BindGroupLayoutDescriptor {
+                label: None,
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Texture {
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: NonZeroU32::new(TEXTURE_2D_COUNT),
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: NonZeroU32::new(TEXTURE_2D_COUNT),
+                    }
+                ]
+            }
+        ));
+
         self.mesh_bind_group_layout = Some(self.device.create_bind_group_layout(
             &BindGroupLayoutDescriptor { 
                 label: None, 
@@ -362,7 +393,8 @@ impl RendererBuilder {
                 label: Some("ray tracer pipeline layout"),
                 bind_group_layouts: &[
                     self.ray_tracer_bind_group_layout.as_ref().unwrap(), 
-                    self.mesh_bind_group_layout.as_ref().unwrap()
+                    self.mesh_bind_group_layout.as_ref().unwrap(),
+                    self.texture_bind_group_layout.as_ref().unwrap()
                 ],
                 push_constant_ranges: &[],
             });

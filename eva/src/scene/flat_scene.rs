@@ -4,7 +4,7 @@ use crate::{
     prelude::extents,
     shader::{
         ShaderCubeModel, ShaderCubeModels, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
-        ShaderPointLights, ShaderSphereModel, ShaderSphereModels,
+        ShaderPointLights, ShaderSphereModel, ShaderSphereModels, ShaderTextures,
     },
 };
 
@@ -17,6 +17,7 @@ pub struct FlatScene {
     pub cubes: ShaderCubeModels,
     pub meshes: ShaderMeshModels,
     pub ambient: Vector3<f32>,
+    pub textures: ShaderTextures,
 }
 
 impl std::fmt::Display for FlatScene {
@@ -67,6 +68,7 @@ impl SceneFlattener {
             cubes: flattener.cubes,
             ambient: scene.ambient(),
             meshes: flattener.meshes,
+            textures: scene.textures().to_owned(),
         }
     }
 }

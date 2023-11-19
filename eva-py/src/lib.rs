@@ -22,12 +22,20 @@ mod prelude {
     pub use eva_py_macros::PyNode;
 }
 
+use std::path::PathBuf;
+
+use eva::prelude::{Node, TextureLoader};
+
 use crate::prelude::*;
+
+const TEXTURE_PATH: &str = "./eva/assets/textures/";
 
 #[pyclass]
 #[pyo3(name = "Scene")]
 struct PyScene {
-    inner: Scene,
+    root: Node,
+    ambient: Vector3<f32>,
+    texture_loader: TextureLoader,
 }
 
 #[pymethods]
@@ -35,26 +43,34 @@ impl PyScene {
     #[new]
     fn new() -> Self {
         Self {
-            inner: Scene::new(),
+            root: Node::Transformation(Transformation::new()),
+            ambient: Vector3::new(0.1, 0.1, 0.1),
+            texture_loader: TextureLoader::new(),
         }
     }
 
     fn set_root(&mut self, py: Python, root: PyObject) {
         if let Ok(child) = root.extract::<PyRef<PyGeometry>>(py) {
-            *self.inner.root_mut() = child.inner.clone().into();
+            self.root = child.inner.clone().into();
         } else if let Ok(child) = root.extract::<PyRef<PyTransform>>(py) {
-            *self.inner.root_mut() = child.inner.clone().into();
+            self.root = child.inner.clone().into();
         } else if let Ok(child) = root.extract::<PyRef<PyLight>>(py) {
-            *self.inner.root_mut() = child.inner.clone().into();
+            self.root = child.inner.clone().into();
         } else if let Ok(child) = root.extract::<PyRef<PyMesh>>(py) {
-            *self.inner.root_mut() = child.inner.clone().into();
+            self.root = child.inner.clone().into();
         } else {
             panic!("add_child only accepts PyGeometry, PyTransform, PyLight, or PyMesh");
         }
     }
 
     fn set_ambient(&mut self, r: f32, g: f32, b: f32) {
-        self.inner.set_ambient(Vector3::new(r, g, b))
+        self.ambient = Vector3::new(r, g, b);
+    }
+
+    fn add_texture(&mut self, texture_name: String) -> u32 {
+        let mut path = PathBuf::from(TEXTURE_PATH);
+        path.push(texture_name);
+        self.texture_loader.load(path)
     }
 }
 
@@ -68,7 +84,11 @@ fn ray_trace(
 ) -> PyResult<()> {
     pollster::block_on(eva::prelude::ray_trace(
         camera.inner.clone(),
-        scene.inner.clone(),
+        Scene {
+            ambient: scene.ambient,
+            root: scene.root.clone(),
+            textures: scene.texture_loader.textures().clone(),
+        },
     ));
 
     Ok(())

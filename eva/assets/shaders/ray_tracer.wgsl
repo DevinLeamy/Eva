@@ -18,6 +18,7 @@ struct PhongMaterial {
     diffuse: vec3f,
     specular: vec3f,
     shininess: f32,
+    texture_id: u32,
 };
 
 struct CubeModels {
@@ -116,6 +117,9 @@ struct MeshModelHeader {
 @group(1) @binding(0) var<storage, read> mesh_points: MeshPoints;
 @group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
 @group(1) @binding(2) var<storage, read> mesh_headers: MeshHeaders;
+
+@group(2) @binding(0) var textures: binding_array<texture_2d<f32>>;
+@group(2) @binding(1) var texture_samplers: binding_array<sampler>;
 
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
@@ -362,7 +366,7 @@ fn compute_light_contribution_at_intersection(intersection: Intersection, light:
 }
 
 fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: bool) -> vec3f {
-    let material_colour = intersection.material.diffuse;
+    let material_colour = intersection_material_colour(intersection);
 
     let ambient = config.ambient_light * light.colour * material_colour;
     if (in_shadow) {
@@ -382,6 +386,19 @@ fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: 
     let specular = light.colour * specular_strength * intersection.material.specular;
 
     return diffuse + specular + ambient;
+}
+
+fn intersection_material_colour(intersection: Intersection) -> vec3f {
+    var colour: vec3f = intersection.material.diffuse;
+    if (intersection.material.texture_id != u32(0)) {
+        colour = sample_texture(intersection.material.texture_id, intersection.uv);
+    }
+
+    return colour;
+}
+
+fn sample_texture(texture_id: u32, uv: vec2f) -> vec3f {
+    return textureSampleLevel(textures[texture_id], texture_samplers[texture_id], uv, 0.0).rgb;
 }
 
 

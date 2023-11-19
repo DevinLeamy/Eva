@@ -40,4 +40,8 @@ impl PyGeometry {
     fn set_material(&mut self, material: PyRef<PyMaterial>) {
         self.inner.set_material(material.inner.clone());
     }
+
+    fn set_texture(&mut self, texture_id: u32) {
+        self.inner.material_mut().set_texture(texture_id);
+    }
 }

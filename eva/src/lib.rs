@@ -18,14 +18,19 @@ mod renderer;
 mod scene;
 mod shader;
 mod utils;
+mod texture_loader;
 
 pub mod prelude {
+    pub use std::path::PathBuf;
+    pub use wgpu::*;
+
     pub use crate::obj_loader::*;
     pub use crate::obj_mesh::*;
     pub use crate::renderer::*;
     pub use crate::scene::*;
     pub use crate::shader::*;
     pub use crate::utils::*;
+    pub use crate::texture_loader::*;
 
     pub use crate::ray_trace;
 }
