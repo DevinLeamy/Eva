@@ -1,9 +1,12 @@
 from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
 
 scene = Scene()
+missing = scene.add_texture("missing.png")
+spheres = scene.add_texture("spheres.png")
 earth = scene.add_texture("earth.jpg")
 
-mat1 = Material((0.7, 0.7, 0.7), (0.5, 0.5, 0.5), 25)
+mat1 = Material((0.7, 0.7, 0.7), (0.0, 0.0, 0.0), 25)
+# mat1 = Material((0.7, 0.7, 0.7), (0.5, 0.5, 0.5), 25)
 mat2 = Material((0.5, 0.5, 0.5), (0.0, 0.0, 0.0), 25)
 
 scene_root = Transform()
@@ -18,12 +21,14 @@ scene_root.add_child(s1)
 
 s2 = Geometry('sphere')
 s2.set_material(mat1)
+s2.set_texture(spheres)
 s2.scale(150, 150, 150)
 s2.translate(200, 50, -100)
 scene_root.add_child(s2)
 
 s3 = Geometry('sphere')
 s3.set_material(mat2)
+s3.set_texture(earth)
 s3.scale(1000, 1000, 1000)
 s3.translate(0, -1200, -500)
 scene_root.add_child(s3)

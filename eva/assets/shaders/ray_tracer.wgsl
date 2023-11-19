@@ -118,8 +118,8 @@ struct MeshModelHeader {
 @group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
 @group(1) @binding(2) var<storage, read> mesh_headers: MeshHeaders;
 
-@group(2) @binding(0) var textures: binding_array<texture_2d<f32>>;
-@group(2) @binding(1) var texture_samplers: binding_array<sampler>;
+@group(2) @binding(0) var textures: binding_array<texture_2d<f32>, 3>;
+@group(2) @binding(1) var texture_samplers: binding_array<sampler, 3>;
 
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
@@ -391,7 +391,9 @@ fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: 
 fn intersection_material_colour(intersection: Intersection) -> vec3f {
     var colour: vec3f = intersection.material.diffuse;
     if (intersection.material.texture_id != u32(0)) {
-        colour = sample_texture(intersection.material.texture_id, intersection.uv);
+        let texture_coords = vec2f(intersection.uv.x, 1.0 - intersection.uv.y);
+        colour = sample_texture(intersection.material.texture_id, texture_coords);
+        // colour = sample_texture(u32(0), texture_coords);
     }
 
     return colour;

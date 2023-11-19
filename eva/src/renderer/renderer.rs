@@ -248,10 +248,12 @@ impl Renderer {
             height: texture.height(), 
             depth_or_array_layers: 1, 
         }).collect();
-        let texture_data: Vec<Vec<u16>> = flat_scene.textures.textures().iter().map(|texture| texture.as_bytes()).collect();
+        let texture_data: Vec<Vec<f32>> = flat_scene.textures.textures().iter().map(|texture| texture.as_bytes()).collect();
 
         let textures: Vec<Texture> = texture_descriptors.into_iter().map(|descriptor| self.device.create_texture(&descriptor)).collect();
-        let texture_views: Vec<TextureView> = textures.iter().map(|texture| texture.create_view(&TextureViewDescriptor::default())).collect();
+        let texture_views: Vec<TextureView> = textures.iter().map(|texture| texture.create_view(&TextureViewDescriptor {
+            ..Default::default()
+        })).collect();
 
         for i in 0..texture_data.len() {
             self.queue.write_texture(
@@ -259,14 +261,24 @@ impl Renderer {
                 &bytemuck::cast_slice(&texture_data[i]),
                 ImageDataLayout {
                     offset: 0,
-                    bytes_per_row: Some(4),
+                    bytes_per_row: Some(4 * 4 * texture_extents[i].width),
                     rows_per_image: None,
                 },
                 texture_extents[i]
             );
         }
 
-        let texture_2d_sampler = self.device.create_sampler(&SamplerDescriptor::default());
+        let texture_2d_sampler = self.device.create_sampler(&SamplerDescriptor {
+            mag_filter: FilterMode::Linear,
+            min_filter: FilterMode::Linear,
+            mipmap_filter: FilterMode::Linear,
+            address_mode_u: AddressMode::ClampToEdge, 
+            address_mode_v: AddressMode::ClampToEdge, 
+            address_mode_w: AddressMode::ClampToEdge,
+            lod_min_clamp: 0.0, 
+            lod_max_clamp: std::f32::MAX,
+            ..Default::default()
+        });
 
         let texture_bind_group = self.device.create_bind_group(&BindGroupDescriptor { 
             label: None, 
@@ -280,7 +292,7 @@ impl Renderer {
                 },
                 BindGroupEntry {
                     binding: 1,
-                    resource: BindingResource::SamplerArray(&[&texture_2d_sampler, &texture_2d_sampler])
+                    resource: BindingResource::SamplerArray(&[&texture_2d_sampler, &texture_2d_sampler, &texture_2d_sampler])
                 }
             ] 
         });

@@ -15,7 +15,7 @@ const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
 const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;
 const MESH_HEADERS_BUFFER_SIZE: u64 = 5_000;
 
-const TEXTURE_2D_COUNT: u32 = 1;
+const TEXTURE_2D_COUNT: u32 = 3;
 
 pub struct RendererBuilder {
     surface: Surface,
@@ -228,20 +228,20 @@ impl RendererBuilder {
             &BindGroupLayoutDescriptor {
                 label: None,
                 entries: &[
-                    wgpu::BindGroupLayoutEntry {
+                    BindGroupLayoutEntry {
                         binding: 0,
-                        visibility: wgpu::ShaderStages::COMPUTE,
-                        ty: wgpu::BindingType::Texture {
-                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                            view_dimension: wgpu::TextureViewDimension::D2,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Texture {
+                            sample_type: TextureSampleType::Float { filterable: false },
+                            view_dimension: TextureViewDimension::D2,
                             multisampled: false,
                         },
                         count: NonZeroU32::new(TEXTURE_2D_COUNT),
                     },
-                    wgpu::BindGroupLayoutEntry {
+                    BindGroupLayoutEntry {
                         binding: 1,
-                        visibility: wgpu::ShaderStages::COMPUTE,
-                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Sampler(SamplerBindingType::NonFiltering),
                         count: NonZeroU32::new(TEXTURE_2D_COUNT),
                     }
                 ]

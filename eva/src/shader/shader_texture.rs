@@ -17,8 +17,8 @@ impl ShaderTexture {
 }
 
 impl ShaderTexture {
-    pub fn as_bytes(&self) -> Vec<u16> {
-        self.image.clone().into_rgba16().into_raw()
+    pub fn as_bytes(&self) -> Vec<f32> {
+        self.image.clone().into_rgba32f().into_raw()
     }
 
     pub fn width(&self) -> u32 {
@@ -42,7 +42,7 @@ impl<'a> Into<TextureDescriptor<'a>> for ShaderTexture {
             mip_level_count: 1,
             sample_count: 1,
             dimension: TextureDimension::D2,
-            format: TextureFormat::Rgba16Float,
+            format: TextureFormat::Rgba32Float,
             usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
             view_formats: &[],
         }
