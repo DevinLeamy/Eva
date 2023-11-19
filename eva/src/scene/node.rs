@@ -40,7 +40,7 @@ impl Node {
         }
     }
 
-    fn transform_mut(&mut self) -> &mut Transform {
+    pub fn transform_mut(&mut self) -> &mut Transform {
         match self {
             Node::Light(light) => light.transform_mut(),
             Node::Geometry(geometry) => geometry.transform_mut(),

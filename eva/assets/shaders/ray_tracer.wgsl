@@ -243,7 +243,8 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
 fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     var reflected_ray: Ray;
     reflected_ray.direction = normalize(ray.direction - intersection.normal * 2.0 * dot(ray.direction, intersection.normal));
-    reflected_ray.origin = ray_point(ray, intersection.t) + 0.5 * reflected_ray.direction;
+    // Offset to avoid floating point errors.
+    reflected_ray.origin = ray_point(ray, intersection.t) + reflected_ray.direction;
 
     return reflected_ray;
 }

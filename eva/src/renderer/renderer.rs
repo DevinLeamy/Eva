@@ -82,6 +82,12 @@ impl Renderer {
                 .context
                 .camera
                 .translate(Vector3::new(0.0, 0.0, -speed)),
+            (VirtualKeyCode::Space, ElementState::Pressed) => self
+                .context
+                .scene
+                .root_mut()
+                .transform_mut()
+                .rotate_y(1.0f32.to_radians()),
             _ => {}
         };
 
