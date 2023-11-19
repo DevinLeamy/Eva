@@ -230,6 +230,8 @@ impl RendererBuilder {
     }
 
     fn create_bind_group_layouts(&mut self) {
+        let texture_count = self.context.scene.textures().textures().len() as u32;
+
         self.texture_bind_group_layout = Some(self.device.create_bind_group_layout(
             &BindGroupLayoutDescriptor {
                 label: None,
@@ -242,13 +244,13 @@ impl RendererBuilder {
                             view_dimension: TextureViewDimension::D2,
                             multisampled: false,
                         },
-                        count: NonZeroU32::new(TEXTURE_2D_COUNT),
+                        count: NonZeroU32::new(texture_count),
                     },
                     BindGroupLayoutEntry {
                         binding: 1,
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::Sampler(SamplerBindingType::NonFiltering),
-                        count: NonZeroU32::new(TEXTURE_2D_COUNT),
+                        count: NonZeroU32::new(texture_count),
                     }
                 ]
             }
@@ -400,19 +402,6 @@ impl RendererBuilder {
             ..Default::default()
         })).collect();
 
-        for i in 0..texture_data.len() {
-            self.queue.write_texture(
-                textures[i].as_image_copy(),
-                &bytemuck::cast_slice(&texture_data[i]),
-                ImageDataLayout {
-                    offset: 0,
-                    bytes_per_row: Some(4 * 4 * texture_extents[i].width),
-                    rows_per_image: None,
-                },
-                texture_extents[i]
-            );
-        }
-
         let texture_2d_sampler = self.device.create_sampler(&SamplerDescriptor {
             mag_filter: FilterMode::Linear,
             min_filter: FilterMode::Linear,
@@ -424,6 +413,21 @@ impl RendererBuilder {
             lod_max_clamp: std::f32::MAX,
             ..Default::default()
         });
+        let mut samplers = Vec::new();
+
+        for i in 0..texture_data.len() {
+            self.queue.write_texture(
+                textures[i].as_image_copy(),
+                &bytemuck::cast_slice(&texture_data[i]),
+                ImageDataLayout {
+                    offset: 0,
+                    bytes_per_row: Some(4 * 4 * texture_extents[i].width),
+                    rows_per_image: None,
+                },
+                texture_extents[i]
+            );
+            samplers.push(&texture_2d_sampler);
+        }
 
         self.texture_bind_group = Some(self.device.create_bind_group(&BindGroupDescriptor { 
             label: None, 
@@ -437,7 +441,7 @@ impl RendererBuilder {
                 },
                 BindGroupEntry {
                     binding: 1,
-                    resource: BindingResource::SamplerArray(&[&texture_2d_sampler, &texture_2d_sampler, &texture_2d_sampler])
+                    resource: BindingResource::SamplerArray(&samplers)
                 }
             ] 
         }));
