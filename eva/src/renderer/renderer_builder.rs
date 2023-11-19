@@ -29,12 +29,14 @@ pub struct RendererBuilder {
     display_shader: Option<ShaderModule>,
 
     ray_tracer_pipeline: Option<ComputePipeline>,
+    display_pipeline: Option<RenderPipeline>,
+
     ray_tracer_bind_group_layout: Option<BindGroupLayout>,
     mesh_bind_group_layout: Option<BindGroupLayout>,
     texture_bind_group_layout: Option<BindGroupLayout>,
-
-    display_pipeline: Option<RenderPipeline>,
     display_bind_group_layout: Option<BindGroupLayout>,
+
+    texture_bind_group: Option<BindGroup>,
 
     mesh_points_buffer: Option<Buffer>,
     mesh_triangles_buffer: Option<Buffer>,
@@ -111,6 +113,8 @@ impl RendererBuilder {
             texture_bind_group_layout: None,
             display_bind_group_layout: None,
 
+            texture_bind_group: None,
+
             mesh_points_buffer: None,
             mesh_triangles_buffer: None,
             mesh_headers_buffer: None,
@@ -143,6 +147,8 @@ impl RendererBuilder {
             mesh_bind_group_layout: self.mesh_bind_group_layout.unwrap(),
             texture_bind_group_layout: self.texture_bind_group_layout.unwrap(),
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
+
+            texture_bind_group: self.texture_bind_group.unwrap(),
 
             mesh_points_buffer: self.mesh_points_buffer.unwrap(),
             mesh_triangles_buffer: self.mesh_triangles_buffer.unwrap(),
@@ -379,7 +385,63 @@ impl RendererBuilder {
         ));
     }
 
-    fn create_bind_groups(&mut self) {}
+    fn create_bind_groups(&mut self) {
+        let scene = &self.context.scene;
+        let texture_descriptors: Vec<TextureDescriptor> = scene.textures.textures().iter().map(|texture| texture.clone().into()).collect();
+        let texture_extents: Vec<Extent3d> = scene.textures.textures().iter().map(|texture| Extent3d { 
+            width: texture.width(), 
+            height: texture.height(), 
+            depth_or_array_layers: 1, 
+        }).collect();
+        let texture_data: Vec<Vec<f32>> = scene.textures.textures().iter().map(|texture| texture.as_bytes()).collect();
+
+        let textures: Vec<Texture> = texture_descriptors.into_iter().map(|descriptor| self.device.create_texture(&descriptor)).collect();
+        let texture_views: Vec<TextureView> = textures.iter().map(|texture| texture.create_view(&TextureViewDescriptor {
+            ..Default::default()
+        })).collect();
+
+        for i in 0..texture_data.len() {
+            self.queue.write_texture(
+                textures[i].as_image_copy(),
+                &bytemuck::cast_slice(&texture_data[i]),
+                ImageDataLayout {
+                    offset: 0,
+                    bytes_per_row: Some(4 * 4 * texture_extents[i].width),
+                    rows_per_image: None,
+                },
+                texture_extents[i]
+            );
+        }
+
+        let texture_2d_sampler = self.device.create_sampler(&SamplerDescriptor {
+            mag_filter: FilterMode::Linear,
+            min_filter: FilterMode::Linear,
+            mipmap_filter: FilterMode::Linear,
+            address_mode_u: AddressMode::ClampToEdge, 
+            address_mode_v: AddressMode::ClampToEdge, 
+            address_mode_w: AddressMode::ClampToEdge,
+            lod_min_clamp: 0.0, 
+            lod_max_clamp: std::f32::MAX,
+            ..Default::default()
+        });
+
+        self.texture_bind_group = Some(self.device.create_bind_group(&BindGroupDescriptor { 
+            label: None, 
+            layout: &self.texture_bind_group_layout.as_ref().unwrap(), 
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::TextureViewArray(
+                        &texture_views.iter().map(|c| c).collect::<Vec<&TextureView>>()
+                    ) 
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::SamplerArray(&[&texture_2d_sampler, &texture_2d_sampler, &texture_2d_sampler])
+                }
+            ] 
+        }));
+    }
 
     fn create_pipelines(&mut self) {
         self.create_render_pipeline();
