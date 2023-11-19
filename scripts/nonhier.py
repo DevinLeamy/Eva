@@ -4,7 +4,10 @@ mat1 = Material((0.7, 1.0, 0.7), (0.5, 0.7, 0.5), 25)
 mat2 = Material((0.5, 0.5, 0.5), (0.5, 0.7, 0.5), 25)
 mat3 = Material((1.0, 0.6, 0.1), (0.5, 0.7, 0.5), 25)
 mat4 = Material((0.7, 0.6, 1.0), (0.5, 0.4, 0.8), 25)
+mat5 = Material((0.7, 1.0, 0.7), (0.0, 0.0, 0.0), 25)
 
+scene = Scene()
+earth = scene.add_texture("earth.jpg")
 scene_root = Transform()
 
 s1 = Geometry('sphere')
@@ -14,9 +17,10 @@ s1.translate(0, 0, -400)
 scene_root.add_child(s1)
 
 s2 = Geometry('sphere')
-s2.set_material(mat1)
+s2.set_material(mat5)
 s2.scale(150, 150, 150)
 s2.translate(200, 50, -100)
+s2.set_texture(earth)
 scene_root.add_child(s2)
 
 s3 = Geometry('sphere')
@@ -54,10 +58,9 @@ magenta_light = Light((0.7, 0, 0.7), (1, 0, 0))
 magenta_light.translate(400.0, 100.0, 150.0)
 
 scene_root.add_child(white_light)
-scene_root.add_child(magenta_light)
+# scene_root.add_child(magenta_light)
 camera = Camera((0, 0, 800), (0, 0, -1), (0, 1, 0), 50)
 
-scene = Scene()
 scene.set_root(scene_root)
 scene.set_ambient(0.3, 0.3, 0.3)
 

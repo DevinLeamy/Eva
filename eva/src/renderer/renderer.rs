@@ -25,6 +25,9 @@ pub struct Renderer {
     pub ray_tracer_bind_group_layout: BindGroupLayout,
     pub display_bind_group_layout: BindGroupLayout,
     pub mesh_bind_group_layout: BindGroupLayout,
+    pub texture_bind_group_layout: BindGroupLayout,
+
+    pub texture_bind_group: BindGroup,
 
     pub mesh_points_buffer: Buffer,
     pub mesh_triangles_buffer: Buffer,
@@ -174,7 +177,6 @@ impl Renderer {
 
     #[rustfmt::skip]
     fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
-        let window_size = self.window.inner_size();
         let shader_camera: ShaderCamera = self.context.camera.clone().into();
         let flat_scene: FlatScene = self.context.scene.clone().into();
 
@@ -250,6 +252,9 @@ impl Renderer {
         ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);
         ray_tracer_pass.set_bind_group(0, &ray_tracer_bind_group, &[]);
         ray_tracer_pass.set_bind_group(1, &mesh_bind_group, &[]);
+        ray_tracer_pass.set_bind_group(2, &self.texture_bind_group, &[]);
+
+        let window_size = self.window.inner_size();
         ray_tracer_pass.dispatch_workgroups(window_size.width / 3, window_size.height / 3, 1);
 
         drop(ray_tracer_pass);

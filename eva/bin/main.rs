@@ -11,6 +11,4 @@ fn main() {
         Vector3::new(0.0, 0.0, -1.0),
         Vector3::new(0.0, 1.0, 0.0),
     );
-
-    pollster::block_on(ray_trace(camera, Scene::new()));
 }
