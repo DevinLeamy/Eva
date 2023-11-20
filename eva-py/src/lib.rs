@@ -80,13 +80,7 @@ impl PyScene {
 }
 
 #[pyfunction]
-fn ray_trace(
-    scene: &PyScene,
-    camera: &PyCamera,
-    width: u32,
-    height: u32,
-    path: String,
-) -> PyResult<()> {
+fn ray_trace(scene: &PyScene, camera: &PyCamera) -> PyResult<()> {
     let skybox = ShaderSkybox::create_skybox([
         PathBuf::from(format!("{SKYBOX_PATH}/blue/x.png")),
         PathBuf::from(format!("{SKYBOX_PATH}/blue/-x.png")),

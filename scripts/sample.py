@@ -180,4 +180,4 @@ scene.set_ambient(0.2, 0.2, 0.2)
 camera = Camera((0, 30, 30), (0, 0, -1), (0, 1, 0), 80)
 camera.look_at(0, 0, 0)
 
-ray_trace(scene, camera, 500, 500, "image.png")
+ray_trace(scene, camera)

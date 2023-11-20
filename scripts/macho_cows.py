@@ -72,4 +72,4 @@ scene = Scene()
 scene.set_root(scene_root)
 scene.set_ambient(0.4, 0.4, 0.4)
 
-ray_trace(scene, camera, 256, 256, "image.png")
+ray_trace(scene, camera)
