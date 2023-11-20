@@ -10,9 +10,9 @@ scene = Scene()
 earth = scene.add_texture("earth.jpg")
 scene_root = Transform()
 
-s1 = Geometry('sphere')
+s1 = Mesh('buckyball.obj')
 s1.set_material(mat1)
-s1.scale(100, 100, 100)
+s1.scale(45, 45, 45)
 s1.translate(0, 0, -400)
 scene_root.add_child(s1)
 
@@ -28,6 +28,7 @@ s3.set_material(mat2)
 s3.scale(1000, 1000, 1000)
 s3.translate(0, -1200, -500)
 scene_root.add_child(s3)
+
 
 b1 = Geometry('cube')
 b1.set_material(mat4)
