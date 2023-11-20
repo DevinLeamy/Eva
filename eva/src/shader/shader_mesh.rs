@@ -3,7 +3,7 @@ use nalgebra::Vector3;
 
 use crate::prelude::{Cube, PhongMaterial};
 
-use super::{ShaderStruct, ShaderTransform};
+use super::{IntoShaderBool, ShaderBool, ShaderStruct, ShaderTransform};
 
 #[derive(Debug, Default)]
 pub struct ShaderMeshModels {
@@ -46,6 +46,8 @@ impl ShaderMeshModels {
 
             position_offset,
             normal_offset,
+
+            has_normals: (mesh.normals.len() > 0).shader_bool(),
         })
     }
 }
@@ -182,4 +184,6 @@ pub struct ShaderMeshModelHeader {
 
     position_offset: u32,
     normal_offset: u32,
+
+    has_normals: ShaderBool,
 }

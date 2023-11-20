@@ -107,6 +107,9 @@ struct MeshModelHeader {
 
     position_offset: u32,
     normal_offset: u32,
+
+    // ShaderBool (0=false, 1=true)
+    has_normals: u32
 };
 
 struct MeshVertices {
