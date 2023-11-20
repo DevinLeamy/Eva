@@ -225,14 +225,13 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
 
     var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
     var total_reflectance: vec3f = vec3(0.5); 
-    var missed: bool = false;
 
     for (var i: i32 = 0; i < 2; i = i + 1) {
         let intersection = compute_ray_intersection(ray);
         if (!intersection.some) {
             // return vec3f(0.1, 0.1, 0.1);
             // return vec3f(0.0, 0.0, 0.0);
-            missed = true;
+            total_light = total_light + total_reflectance * compute_skybox_colour(ray.direction);
             break;
         }
 
@@ -240,10 +239,6 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
         total_reflectance = total_reflectance * intersection.material.specular;
 
         ray = compute_reflected_ray(ray, intersection);
-    }
-
-    if (missed) {
-        total_light = total_light + compute_skybox_colour(ray.direction);
     }
 
     return total_light;
