@@ -10,27 +10,28 @@ impl SkyboxExtension for Device {
     fn create_skybox_view(&self, queue: &Queue, skybox: &ShaderSkybox) -> TextureView {
         let skybox_texture = self.create_texture(&skybox.clone().into());
         let mut encoder = self.create_command_encoder(&CommandEncoderDescriptor::default());
+        let image_size = skybox.images[0].width();
+        let bytes_per_row = align(4 * 4 * image_size, 256);
 
         for i in 0..6 {
-            let image = &skybox.images[i];
-            assert!(image.width() == image.height());
-            let size = image.width();
-
-            let buffer = self.create_buffer_init(&util::BufferInitDescriptor {
+            // Note: Buffers needs to be created for every time because the write does not happen immediately,
+            // meaning that on the next frame if a new buffer is used, the existing data gets overritten.
+            let buffer = self.create_buffer(&BufferDescriptor {
                 label: None,
-                contents: bytemuck::cast_slice(&image.clone().into_rgba32f()),
-                usage: BufferUsages::COPY_DST | BufferUsages::COPY_SRC,
+                size: (bytes_per_row * image_size) as u64,
+                usage: BufferUsages::COPY_SRC | BufferUsages::COPY_DST,
+                mapped_at_creation: false,
             });
 
-            let bytes = 4 * 4 * size;
+            let image = &skybox.images[i];
+            queue.write_buffer(&buffer, 0, &create_aligned_image_bytes(image, 256));
             encoder.copy_buffer_to_texture(
                 ImageCopyBuffer {
                     buffer: &buffer,
                     layout: ImageDataLayout {
                         offset: 0,
-                        // bytes_per_row: Some(bytes + 256 - (bytes % 256)),
-                        bytes_per_row: Some(bytes),
-                        rows_per_image: Some(size),
+                        bytes_per_row: Some(bytes_per_row),
+                        rows_per_image: Some(image_size),
                     },
                 },
                 ImageCopyTexture {
@@ -44,8 +45,8 @@ impl SkyboxExtension for Device {
                     aspect: TextureAspect::All,
                 },
                 Extent3d {
-                    width: size,
-                    height: size,
+                    width: image_size,
+                    height: image_size,
                     depth_or_array_layers: 1,
                 },
             );

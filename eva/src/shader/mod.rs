@@ -9,6 +9,7 @@ mod shader_struct;
 mod shader_texture;
 mod shader_textures;
 mod shader_transform;
+mod shader_utils;
 
 pub use shader_camera::*;
 pub use shader_cube::*;
@@ -21,3 +22,4 @@ pub use shader_struct::*;
 pub use shader_texture::*;
 pub use shader_textures::*;
 pub use shader_transform::*;
+pub use shader_utils::*;
