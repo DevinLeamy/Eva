@@ -129,8 +129,12 @@ fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let screen_size: vec2<i32> = vec2<i32>(textureDimensions(colour_buffer));
 
     // Add 0.5 to get the center of the pixel.
-    let x = f32(GlobalInvocationID.x);
-    let y = f32(GlobalInvocationID.y);
+    var x = f32(GlobalInvocationID.x) + 0.5;
+    var y = f32(GlobalInvocationID.y) + 0.5;
+
+    // Jitter.
+    x = x + (random01(vec2f(GlobalInvocationID.xy)) - 0.5) / 3.0;
+    y = y + (random01(vec2f(GlobalInvocationID.yx)) - 0.5) / 3.0;
 
     let screen_coord = vec2<i32>(i32(GlobalInvocationID.x), i32(GlobalInvocationID.y));
     let pixel_position = compute_pixel_position(x, y);
@@ -615,4 +619,9 @@ fn triangle_intersection(p1: vec3f, p2: vec3f, p3: vec3f, ray: Ray) -> Intersect
     intersection.uv = vec2f(0.0, 0.0);
     
     return intersection;
+}
+
+fn random01(seed: vec2<f32>) -> f32 {
+    let x = dot(seed, vec2<f32>(12.9898, 78.233)) * 0.01267123 + 54.54321;
+    return fract(sin(x) * 43758.5453);
 }
