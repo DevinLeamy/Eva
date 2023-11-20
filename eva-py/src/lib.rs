@@ -24,11 +24,12 @@ mod prelude {
 
 use std::path::PathBuf;
 
-use eva::prelude::{Node, TextureLoader};
+use eva::prelude::{Node, ShaderSkybox, TextureLoader};
 
 use crate::prelude::*;
 
-const TEXTURE_PATH: &str = "./eva/assets/textures/";
+const TEXTURE_PATH: &str = "./eva/assets/textures";
+const SKYBOX_PATH: &str = "./eva/assets/skybox";
 
 #[pyclass]
 #[pyo3(name = "Scene")]
@@ -43,8 +44,7 @@ impl PyScene {
     #[new]
     fn new() -> Self {
         let mut texture_loader = TextureLoader::new();
-        let mut path = PathBuf::from(TEXTURE_PATH);
-        path.push("missing.png".to_string());
+        let mut path = PathBuf::from(format!("{TEXTURE_PATH}/missing.png"));
         texture_loader.load(path);
 
         Self {
@@ -87,12 +87,23 @@ fn ray_trace(
     height: u32,
     path: String,
 ) -> PyResult<()> {
+    let skybox = ShaderSkybox::create_skybox([
+        PathBuf::from(format!("{SKYBOX_PATH}/blue/x.png")),
+        PathBuf::from(format!("{SKYBOX_PATH}/blue/-x.png")),
+        PathBuf::from(format!("{SKYBOX_PATH}/blue/y.png")),
+        PathBuf::from(format!("{SKYBOX_PATH}/blue/-y.png")),
+        PathBuf::from(format!("{SKYBOX_PATH}/blue/z.png")),
+        PathBuf::from(format!("{SKYBOX_PATH}/blue/-z.png")),
+    ])
+    .unwrap();
+
     pollster::block_on(eva::prelude::ray_trace(
         camera.inner.clone(),
         Scene {
             ambient: scene.ambient,
             root: scene.root.clone(),
             textures: scene.texture_loader.clone().textures(),
+            skybox,
         },
     ));
 

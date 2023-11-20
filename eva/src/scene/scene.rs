@@ -1,16 +1,12 @@
-use std::path::PathBuf;
-
+use crate::prelude::*;
 use nalgebra::Vector3;
-
-use crate::{shader::ShaderTextures, texture_loader::TextureLoader};
-
-use super::{Node, Transformation};
 
 #[derive(Clone)]
 pub struct Scene {
     pub ambient: Vector3<f32>,
     pub root: Node,
     pub textures: ShaderTextures,
+    pub skybox: ShaderSkybox,
 }
 
 impl Scene {

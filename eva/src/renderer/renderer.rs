@@ -26,8 +26,10 @@ pub struct Renderer {
     pub display_bind_group_layout: BindGroupLayout,
     pub mesh_bind_group_layout: BindGroupLayout,
     pub texture_bind_group_layout: BindGroupLayout,
+    pub skybox_bind_group_layout: BindGroupLayout,
 
     pub texture_bind_group: BindGroup,
+    pub skybox_bind_group: BindGroup,
 
     pub mesh_points_buffer: Buffer,
     pub mesh_triangles_buffer: Buffer,
@@ -261,6 +263,7 @@ impl Renderer {
         ray_tracer_pass.set_bind_group(0, &ray_tracer_bind_group, &[]);
         ray_tracer_pass.set_bind_group(1, &mesh_bind_group, &[]);
         ray_tracer_pass.set_bind_group(2, &self.texture_bind_group, &[]);
+        ray_tracer_pass.set_bind_group(3, &self.skybox_bind_group, &[]);
 
         let window_size = self.window.inner_size();
         ray_tracer_pass.dispatch_workgroups(window_size.width / 3, window_size.height / 3, 1);

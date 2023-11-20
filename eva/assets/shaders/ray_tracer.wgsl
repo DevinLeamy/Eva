@@ -121,6 +121,9 @@ struct MeshModelHeader {
 @group(2) @binding(0) var textures: binding_array<texture_2d<f32>, 12>;
 @group(2) @binding(1) var texture_samplers: binding_array<sampler, 12>;
 
+@group(3) @binding(0) var skybox: texture_cube<f32>;
+@group(3) @binding(1) var skybox_sampler: sampler;
+
 @compute @workgroup_size(3, 3, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let screen_size: vec2<i32> = vec2<i32>(textureDimensions(colour_buffer));
@@ -222,12 +225,14 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
 
     var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
     var total_reflectance: vec3f = vec3(0.5); 
+    var missed: bool = false;
 
     for (var i: i32 = 0; i < 2; i = i + 1) {
         let intersection = compute_ray_intersection(ray);
         if (!intersection.some) {
             // return vec3f(0.1, 0.1, 0.1);
             // return vec3f(0.0, 0.0, 0.0);
+            missed = true;
             break;
         }
 
@@ -237,7 +242,16 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
         ray = compute_reflected_ray(ray, intersection);
     }
 
+    if (missed) {
+        total_light = total_light + compute_skybox_colour(ray.direction);
+    }
+
     return total_light;
+}
+
+fn compute_skybox_colour(coords: vec3f) -> vec3f {
+    let colour = textureSampleLevel(skybox, skybox_sampler, coords, 0.0).rgb; 
+    return colour;
 }
 
 fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {

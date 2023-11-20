@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 
 use pollster::FutureExt;
-use wgpu::*;
+use wgpu::{*, util::DeviceExt};
 use winit::window::Window;
 
 use crate::prelude::*;
@@ -32,9 +32,11 @@ pub struct RendererBuilder {
     ray_tracer_bind_group_layout: Option<BindGroupLayout>,
     mesh_bind_group_layout: Option<BindGroupLayout>,
     texture_bind_group_layout: Option<BindGroupLayout>,
+    skybox_bind_group_layout: Option<BindGroupLayout>,
     display_bind_group_layout: Option<BindGroupLayout>,
 
     texture_bind_group: Option<BindGroup>,
+    skybox_bind_group: Option<BindGroup>,
 
     mesh_points_buffer: Option<Buffer>,
     mesh_triangles_buffer: Option<Buffer>,
@@ -109,9 +111,11 @@ impl RendererBuilder {
             ray_tracer_bind_group_layout: None,
             mesh_bind_group_layout: None,
             texture_bind_group_layout: None,
+            skybox_bind_group_layout: None,
             display_bind_group_layout: None,
 
             texture_bind_group: None,
+            skybox_bind_group: None,
 
             mesh_points_buffer: None,
             mesh_triangles_buffer: None,
@@ -144,9 +148,11 @@ impl RendererBuilder {
             ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
             mesh_bind_group_layout: self.mesh_bind_group_layout.unwrap(),
             texture_bind_group_layout: self.texture_bind_group_layout.unwrap(),
+            skybox_bind_group_layout: self.skybox_bind_group_layout.unwrap(),
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
 
             texture_bind_group: self.texture_bind_group.unwrap(),
+            skybox_bind_group: self.skybox_bind_group.unwrap(),
 
             mesh_points_buffer: self.mesh_points_buffer.unwrap(),
             mesh_triangles_buffer: self.mesh_triangles_buffer.unwrap(),
@@ -228,6 +234,27 @@ impl RendererBuilder {
     }
 
     fn create_bind_group_layouts(&mut self) {
+        self.skybox_bind_group_layout = Some(self.device.create_bind_group_layout(
+            &BindGroupLayoutDescriptor { label: None, entries: &[
+                BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: ShaderStages::COMPUTE,
+                    ty: BindingType::Texture {
+                        sample_type: TextureSampleType::Float { filterable: false },
+                        view_dimension: TextureViewDimension::Cube,
+                        multisampled: false,
+                    },
+                    count: None
+                },
+                BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: ShaderStages::COMPUTE,
+                    ty: BindingType::Sampler(SamplerBindingType::NonFiltering),
+                    count: None
+                },
+            ]}
+        ));
+
         self.texture_bind_group_layout = Some(self.device.create_bind_group_layout(
             &BindGroupLayoutDescriptor {
                 label: None,
@@ -384,6 +411,7 @@ impl RendererBuilder {
     }
 
     fn create_bind_groups(&mut self) {
+        // Texture bind group.
         let scene = &self.context.scene;
         let texture_descriptors: Vec<TextureDescriptor> = scene.textures.textures().iter().map(|texture| texture.clone().into()).collect();
         let texture_extents: Vec<Extent3d> = scene.textures.textures().iter().map(|texture| Extent3d { 
@@ -441,6 +469,24 @@ impl RendererBuilder {
                 }
             ] 
         }));
+
+        // Skybox bind group.
+        let skybox_texture_view = self.device.create_skybox_view(&self.queue, &scene.skybox);
+        let skybox_sampler = self.device.create_sampler(&SamplerDescriptor::default());
+        self.skybox_bind_group = Some(self.device.create_bind_group(&BindGroupDescriptor {
+            label: None,
+            layout: &self.skybox_bind_group_layout.as_ref().unwrap(),
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::TextureView(&skybox_texture_view) 
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::Sampler(&skybox_sampler)
+                }
+            ]
+        }))
     }
 
     fn create_pipelines(&mut self) {
@@ -456,7 +502,8 @@ impl RendererBuilder {
                 bind_group_layouts: &[
                     self.ray_tracer_bind_group_layout.as_ref().unwrap(), 
                     self.mesh_bind_group_layout.as_ref().unwrap(),
-                    self.texture_bind_group_layout.as_ref().unwrap()
+                    self.texture_bind_group_layout.as_ref().unwrap(),
+                    self.skybox_bind_group_layout.as_ref().unwrap()
                 ],
                 push_constant_ranges: &[],
             });

@@ -4,7 +4,7 @@ extern crate lazy_static;
 use std::time::Instant;
 
 use prelude::{Camera, RenderContext, Scene};
-use renderer::{Renderer, RendererBuilder};
+use renderer::RendererBuilder;
 use winit::dpi::LogicalSize;
 use winit::{
     event::*,
