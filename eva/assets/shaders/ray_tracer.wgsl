@@ -80,14 +80,14 @@ struct GlobalConfig {
     ambient_light: vec3f,
 };
 
-struct MeshPoints {
+struct MeshPositions {
     length: u32,
-    points: array<vec3f>
+    positions: array<vec3f>
 };
 
 struct MeshTriangles {
     length: u32,
-    // vec3u -> triangle
+    // u32 -> MeshVertex
     triangles: array<vec3u> 
 };
 
@@ -97,15 +97,35 @@ struct MeshHeaders {
 };
 
 struct MeshModelHeader {
-    vertex_offset: u32,
-    vertex_count: u32,
-    triangle_offset: u32,
-    triangle_count: u32,
     material: PhongMaterial,
     transform: Transform,
-    bounding_box: Cube
+    bounding_box: Cube,
+
+    vertex_offset: u32,
+    triangle_offset: u32,
+    triangle_count: u32,
+
+    position_offset: u32,
+    normal_offset: u32,
+
+    // ShaderBool (0=false, 1=true)
+    has_normals: u32
 };
 
+struct MeshVertices {
+    length: u32,
+    vertices: array<MeshVertex>
+};
+
+struct MeshVertex {
+    position: u32,
+    normal: u32,
+};
+
+struct MeshNormals {
+    length: u32,
+    normals: array<vec3f>
+};
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
@@ -114,9 +134,11 @@ struct MeshModelHeader {
 @group(0) @binding(4) var<uniform> config: GlobalConfig;
 @group(0) @binding(5) var<storage, read> cubes: CubeModels; 
 
-@group(1) @binding(0) var<storage, read> mesh_points: MeshPoints;
+@group(1) @binding(0) var<storage, read> mesh_headers: MeshHeaders;
 @group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
-@group(1) @binding(2) var<storage, read> mesh_headers: MeshHeaders;
+@group(1) @binding(2) var<storage, read> mesh_vertices: MeshVertices;
+@group(1) @binding(3) var<storage, read> mesh_positions: MeshPositions;
+@group(1) @binding(4) var<storage, read> mesh_normals: MeshNormals;
 
 @group(2) @binding(0) var textures: binding_array<texture_2d<f32>, 12>;
 @group(2) @binding(1) var texture_samplers: binding_array<sampler, 12>;
@@ -321,11 +343,11 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
 
         for (var j: i32 = 0; j < i32(mesh.triangle_count); j = j + 1) {
             let triangle = mesh_triangles.triangles[i32(mesh.triangle_offset) + j];
-            let p1 = mesh_points.points[mesh.vertex_offset + triangle.x];
-            let p2 = mesh_points.points[mesh.vertex_offset + triangle.y];
-            let p3 = mesh_points.points[mesh.vertex_offset + triangle.z];
+            let v1 = mesh_vertices.vertices[mesh.vertex_offset + triangle.x];
+            let v2 = mesh_vertices.vertices[mesh.vertex_offset + triangle.y];
+            let v3 = mesh_vertices.vertices[mesh.vertex_offset + triangle.z];
 
-            let new_intersection = triangle_intersection(p1, p2, p3, transformed_ray);
+            let new_intersection = mesh_triangle_intersection(mesh, v1, v2, v3, transformed_ray);
             var transformed_intersection: Intersection = intersection_transform(new_intersection, mesh.transform);
 
             // Set the material of the object that was intersected with.
@@ -573,7 +595,11 @@ fn opposite_sign(v: f32) -> f32 {
 }
 
 
-fn triangle_intersection(p1: vec3f, p2: vec3f, p3: vec3f, ray: Ray) -> Intersection {
+fn mesh_triangle_intersection(mesh: MeshModelHeader, v1: MeshVertex, v2: MeshVertex, v3: MeshVertex, ray: Ray) -> Intersection {
+    let p1 = mesh_positions.positions[mesh.position_offset + v1.position];
+    let p2 = mesh_positions.positions[mesh.position_offset + v2.position];
+    let p3 = mesh_positions.positions[mesh.position_offset + v3.position];
+
     let EPSILON: f32 = 0.0000001;
 
     var intersection: Intersection;
@@ -611,12 +637,32 @@ fn triangle_intersection(p1: vec3f, p2: vec3f, p3: vec3f, ray: Ray) -> Intersect
         return intersection;
     }
 
+    let normal = normalize(cross(edge1, edge2));
     intersection.some = true;
     intersection.t = t;
     intersection.ray = ray;
-    intersection.normal = normalize(cross(edge1, edge2));
-    // TODO: Set proper UVs.
+    intersection.normal = normal;
     intersection.uv = vec2f(0.0, 0.0);
+
+    if (shader_bool(mesh.has_normals)) {
+        // Perform Phong Shading.
+        let n1 = mesh_normals.normals[mesh.normal_offset + v1.normal];
+        let n2 = mesh_normals.normals[mesh.normal_offset + v2.normal];
+        let n3 = mesh_normals.normals[mesh.normal_offset + v3.normal];
+        let p = ray_point(ray, t);
+
+        // Compute the barycentric coordinates using the triangle-area method.
+        let area = dot(normal, cross(p2 - p1, p3 - p1));
+        let area_23 = dot(normal, cross(p2 - p, p3 - p));
+        let area_13 = dot(normal, cross(p3 - p, p1 - p));
+
+        let bx = area_23 / area;
+        let by = area_13 / area;
+        let bz = 1.0 - bx - by;
+
+        // Compute the interpolated normal.
+        intersection.normal = normalize(n1 * bx + n2 * by + n3 * bz);
+    } 
     
     return intersection;
 }
@@ -624,4 +670,8 @@ fn triangle_intersection(p1: vec3f, p2: vec3f, p3: vec3f, ray: Ray) -> Intersect
 fn random01(seed: vec2<f32>) -> f32 {
     let x = dot(seed, vec2<f32>(12.9898, 78.233)) * 0.01267123 + 54.54321;
     return fract(sin(x) * 43758.5453);
+}
+
+fn shader_bool(boolean: u32) -> bool {
+    return boolean == u32(1);
 }

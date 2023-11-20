@@ -30,9 +30,9 @@ s3.translate(0, -1200, -500)
 scene_root.add_child(s3)
 
 
-b1 = Geometry('cube')
+b1 = Mesh('cube.obj')
 b1.set_material(mat4)
-b1.scale(100, 100, 100)
+b1.scale(90, 90, 90)
 b1.translate(-200, -125, 0)
 scene_root.add_child(b1)
 
@@ -48,7 +48,10 @@ s5.scale(25, 25, 25)
 s5.translate(0, 100, -250)
 scene_root.add_child(s5)
 
-steldodec = Mesh('smstdodeca.obj')
+# steldodec = Mesh('smstdodeca.obj')
+steldodec = Mesh('suzanne.obj')
+steldodec.scale(100, 100, 100)
+steldodec.translate(-200, 200, -100)
 steldodec.set_material(mat3)
 scene_root.add_child(steldodec)
 
