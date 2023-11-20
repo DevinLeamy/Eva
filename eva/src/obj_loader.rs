@@ -50,7 +50,7 @@ impl ObjLoader {
             assert!(shape.0.len() == 3);
             let base_vertex_index = vertices.len() as u32;
 
-            for IndexTuple(v_position, v_normal, _v_uv) in &shape.0 {
+            for IndexTuple(v_position, _v_uv, v_normal) in &shape.0 {
                 let mut normal_index = 0 as u32;
 
                 if let Some(normal) = v_normal {

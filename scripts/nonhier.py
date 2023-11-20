@@ -48,7 +48,10 @@ s5.scale(25, 25, 25)
 s5.translate(0, 100, -250)
 scene_root.add_child(s5)
 
-steldodec = Mesh('smstdodeca.obj')
+# steldodec = Mesh('smstdodeca.obj')
+steldodec = Mesh('suzanne.obj')
+steldodec.scale(100, 100, 100)
+steldodec.translate(-200, 200, -100)
 steldodec.set_material(mat3)
 scene_root.add_child(steldodec)
 

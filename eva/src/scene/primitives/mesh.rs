@@ -15,7 +15,6 @@ pub struct Mesh {
 impl Mesh {
     pub fn from_path<P: Into<PathBuf>>(path: P) -> Self {
         let obj_mesh = ObjLoader::load(path).unwrap();
-        // let mut vertices = Vec::new();
 
         Self {
             triangles: obj_mesh.triangles,

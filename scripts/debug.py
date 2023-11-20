@@ -6,6 +6,7 @@ earth = scene.add_texture("earth.jpg")
 mat1 = Material((0.7, 0.7, 0.7), (0.0, 0.0, 0.0), 25)
 # mat1 = Material((0.7, 0.7, 0.7), (0.5, 0.5, 0.5), 25)
 mat2 = Material((0.5, 0.5, 0.5), (0.5, 0.5, 0.5), 25)
+mat3 = Material((0.7, 0.0, 0.7), (0.5, 0.5, 0.5), 25)
 
 scene_root = Transform()
 
@@ -17,11 +18,18 @@ s1.scale(100, 100, 100)
 s1.translate(0, 0, -400)
 scene_root.add_child(s1)
 
-s2 = Mesh('cube.obj')
-s2.set_material(mat1)
+s2 = Mesh('suzanne.obj')
+# s2 = Mesh('cube.obj')
+s2.set_material(mat3)
 s2.scale(100, 100, 100)
 s2.translate(200, 50, -100)
 scene_root.add_child(s2)
+
+s4 = Geometry('cube')
+s4.set_material(mat1)
+s4.scale(100, 100, 100)
+s4.translate(100, 150, 100)
+scene_root.add_child(s4)
 
 s3 = Geometry('sphere')
 s3.set_material(mat2)
