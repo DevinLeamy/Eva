@@ -44,7 +44,7 @@ pub async fn ray_trace(camera: Camera, scene: Scene) {
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_title("Unnamed")
+        .with_title("Eva")
         .with_inner_size(LogicalSize::new(850, 850))
         .build(&event_loop)
         .unwrap();
