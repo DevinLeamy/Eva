@@ -1,7 +1,7 @@
 use std::num::NonZeroU32;
 
 use pollster::FutureExt;
-use wgpu::{*, util::DeviceExt};
+use wgpu::*;
 use winit::window::Window;
 
 use crate::prelude::*;
@@ -38,8 +38,10 @@ pub struct RendererBuilder {
     texture_bind_group: Option<BindGroup>,
     skybox_bind_group: Option<BindGroup>,
 
-    mesh_points_buffer: Option<Buffer>,
+    mesh_positions_buffer: Option<Buffer>,
     mesh_triangles_buffer: Option<Buffer>,
+    mesh_normals_buffer: Option<Buffer>,
+    mesh_vertices_buffer: Option<Buffer>,
     mesh_headers_buffer: Option<Buffer>,
 
     camera_buffer: Option<Buffer>,
@@ -117,9 +119,11 @@ impl RendererBuilder {
             texture_bind_group: None,
             skybox_bind_group: None,
 
-            mesh_points_buffer: None,
+            mesh_positions_buffer: None,
             mesh_triangles_buffer: None,
             mesh_headers_buffer: None,
+            mesh_normals_buffer: None,
+            mesh_vertices_buffer: None,
 
             camera_buffer: None,
             config_buffer: None,
@@ -154,9 +158,11 @@ impl RendererBuilder {
             texture_bind_group: self.texture_bind_group.unwrap(),
             skybox_bind_group: self.skybox_bind_group.unwrap(),
 
-            mesh_points_buffer: self.mesh_points_buffer.unwrap(),
+            mesh_positions_buffer: self.mesh_positions_buffer.unwrap(),
             mesh_triangles_buffer: self.mesh_triangles_buffer.unwrap(),
             mesh_headers_buffer: self.mesh_headers_buffer.unwrap(),
+            mesh_normals_buffer: self.mesh_normals_buffer.unwrap(),
+            mesh_vertices_buffer: self.mesh_vertices_buffer.unwrap(),
 
             camera_buffer: self.camera_buffer.unwrap(),
             config_buffer: self.config_buffer.unwrap(),
@@ -211,7 +217,7 @@ impl RendererBuilder {
             mapped_at_creation: false
         }));
 
-        self.mesh_points_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+        self.mesh_positions_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
             label: None,
             size: MESH_POINT_BUFFER_SIZE, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
@@ -228,6 +234,20 @@ impl RendererBuilder {
         self.mesh_headers_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
             label: None,
             size: MESH_HEADERS_BUFFER_SIZE, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
+            mapped_at_creation: false
+        }));
+        
+        self.mesh_normals_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None,
+            size: MESH_POINT_BUFFER_SIZE, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
+            mapped_at_creation: false
+        }));
+
+        self.mesh_vertices_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None,
+            size: MESH_POINT_BUFFER_SIZE, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
             mapped_at_creation: false
         }));
@@ -312,7 +332,27 @@ impl RendererBuilder {
                             min_binding_size: None,
                         },
                         count: None
-                    }
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 3,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 4,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None
+                    },
                 ]
             }
         ));

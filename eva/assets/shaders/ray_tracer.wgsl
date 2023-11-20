@@ -80,14 +80,14 @@ struct GlobalConfig {
     ambient_light: vec3f,
 };
 
-struct MeshPoints {
+struct MeshPositions {
     length: u32,
-    points: array<vec3f>
+    positions: array<vec3f>
 };
 
 struct MeshTriangles {
     length: u32,
-    // vec3u -> triangle
+    // u32 -> MeshVertex
     triangles: array<vec3u> 
 };
 
@@ -97,15 +97,32 @@ struct MeshHeaders {
 };
 
 struct MeshModelHeader {
-    vertex_offset: u32,
-    vertex_count: u32,
-    triangle_offset: u32,
-    triangle_count: u32,
     material: PhongMaterial,
     transform: Transform,
-    bounding_box: Cube
+    bounding_box: Cube,
+
+    vertex_offset: u32,
+    triangle_offset: u32,
+    triangle_count: u32,
+
+    position_offset: u32,
+    normal_offset: u32,
 };
 
+struct MeshVertices {
+    length: u32,
+    vertices: array<MeshVertex>
+};
+
+struct MeshVertex {
+    position: u32,
+    normal: u32,
+};
+
+struct MeshNormals {
+    length: u32,
+    normals: array<vec3f>
+};
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
@@ -114,9 +131,11 @@ struct MeshModelHeader {
 @group(0) @binding(4) var<uniform> config: GlobalConfig;
 @group(0) @binding(5) var<storage, read> cubes: CubeModels; 
 
-@group(1) @binding(0) var<storage, read> mesh_points: MeshPoints;
+@group(1) @binding(0) var<storage, read> mesh_headers: MeshHeaders;
 @group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
-@group(1) @binding(2) var<storage, read> mesh_headers: MeshHeaders;
+@group(1) @binding(2) var<storage, read> mesh_vertices: MeshVertices;
+@group(1) @binding(3) var<storage, read> mesh_positions: MeshPositions;
+@group(1) @binding(4) var<storage, read> mesh_normals: MeshNormals;
 
 @group(2) @binding(0) var textures: binding_array<texture_2d<f32>, 12>;
 @group(2) @binding(1) var texture_samplers: binding_array<sampler, 12>;
@@ -321,9 +340,13 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
 
         for (var j: i32 = 0; j < i32(mesh.triangle_count); j = j + 1) {
             let triangle = mesh_triangles.triangles[i32(mesh.triangle_offset) + j];
-            let p1 = mesh_points.points[mesh.vertex_offset + triangle.x];
-            let p2 = mesh_points.points[mesh.vertex_offset + triangle.y];
-            let p3 = mesh_points.points[mesh.vertex_offset + triangle.z];
+            let v1 = mesh_vertices.vertices[mesh.vertex_offset + triangle.x];
+            let v2 = mesh_vertices.vertices[mesh.vertex_offset + triangle.y];
+            let v3 = mesh_vertices.vertices[mesh.vertex_offset + triangle.z];
+
+            let p1 = mesh_positions.positions[mesh.position_offset + v1.position];
+            let p2 = mesh_positions.positions[mesh.position_offset + v2.position];
+            let p3 = mesh_positions.positions[mesh.position_offset + v3.position];
 
             let new_intersection = triangle_intersection(p1, p2, p3, transformed_ray);
             var transformed_intersection: Intersection = intersection_transform(new_intersection, mesh.transform);

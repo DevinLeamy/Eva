@@ -2,7 +2,7 @@ use nalgebra::{Vector2, Vector3};
 use obj::{IndexTuple, Obj};
 use std::{collections::HashMap, path::PathBuf, sync::Mutex};
 
-use crate::obj_mesh::{ObjMesh, ObjTriangle};
+use crate::{obj_mesh::ObjMesh, shader::ShaderMeshVertex};
 
 lazy_static! {
     static ref LOADED_MESHES: Mutex<HashMap<PathBuf, ObjMesh>> = Mutex::new(HashMap::new());
@@ -29,11 +29,12 @@ impl ObjLoader {
     fn load_mesh(path: &PathBuf) -> Result<ObjMesh, String> {
         let obj: Obj = Obj::load(path).map_err(|e| e.to_string())?;
         let obj_data = obj.data;
-        let mut triangles = Vec::new();
+        let mut vertices = Vec::<ShaderMeshVertex>::new();
 
         let mut positions = Vec::new();
         let mut normals = Vec::new();
         let mut uvs = Vec::new();
+        let mut triangles = Vec::new();
 
         for position in obj_data.position {
             positions.push(Vector3::new(position[0], position[1], position[2]));
@@ -47,27 +48,34 @@ impl ObjLoader {
 
         for shape in obj_data.objects.iter().flat_map(|o| &o.groups[0].polys) {
             assert!(shape.0.len() == 3);
-            let mut vertices = Vec::new();
-            let mut normals = Vec::new();
-            let mut uvs = Vec::new();
+            let base_vertex_index = vertices.len() as u32;
 
-            for IndexTuple(v_position, v_normal, v_uv) in &shape.0 {
-                vertices.push(*v_position);
+            for IndexTuple(v_position, v_normal, _v_uv) in &shape.0 {
+                let mut normal_index = 0 as u32;
+
                 if let Some(normal) = v_normal {
-                    normals.push(*normal);
+                    normal_index = *normal as u32;
                 }
-                if let Some(uv) = v_uv {
-                    uvs.push(*uv);
-                }
+
+                vertices.push(ShaderMeshVertex {
+                    position: *v_position as u32,
+                    normal: normal_index,
+                })
             }
 
-            triangles.push(ObjTriangle {
-                vertices,
-                normals,
-                uvs,
-            });
+            triangles.push(Vector3::new(
+                base_vertex_index,
+                base_vertex_index + 1,
+                base_vertex_index + 2,
+            ))
         }
 
-        Ok(ObjMesh::new(positions, normals, uvs, triangles))
+        Ok(ObjMesh {
+            triangles,
+            vertices,
+            positions,
+            normals,
+            uvs,
+        })
     }
 }

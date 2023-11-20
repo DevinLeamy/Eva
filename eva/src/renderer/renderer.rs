@@ -31,9 +31,11 @@ pub struct Renderer {
     pub texture_bind_group: BindGroup,
     pub skybox_bind_group: BindGroup,
 
-    pub mesh_points_buffer: Buffer,
+    pub mesh_positions_buffer: Buffer,
     pub mesh_triangles_buffer: Buffer,
     pub mesh_headers_buffer: Buffer,
+    pub mesh_normals_buffer: Buffer,
+    pub mesh_vertices_buffer: Buffer,
 
     pub camera_buffer: Buffer,
     pub config_buffer: Buffer,
@@ -200,9 +202,11 @@ impl Renderer {
         self.queue.write_buffer(&self.cubes_buffer, 0, &flat_scene.cubes.as_bytes().unwrap());
         self.queue.write_buffer(&self.lights_buffer, 0, &flat_scene.lights.as_bytes().unwrap());
 
-        self.queue.write_buffer(&self.mesh_points_buffer, 0, &flat_scene.meshes.points.as_bytes().unwrap());
-        self.queue.write_buffer(&self.mesh_triangles_buffer, 0, &flat_scene.meshes.triangles.as_bytes().unwrap());
         self.queue.write_buffer(&self.mesh_headers_buffer, 0, &flat_scene.meshes.headers.as_bytes().unwrap());
+        self.queue.write_buffer(&self.mesh_triangles_buffer, 0, &flat_scene.meshes.triangles.as_bytes().unwrap());
+        self.queue.write_buffer(&self.mesh_vertices_buffer, 0, &flat_scene.meshes.vertices.as_bytes().unwrap());
+        self.queue.write_buffer(&self.mesh_positions_buffer, 0, &flat_scene.meshes.positions.as_bytes().unwrap());
+        self.queue.write_buffer(&self.mesh_normals_buffer, 0, &flat_scene.meshes.normals.as_bytes().unwrap());
 
         let mesh_bind_group = self.device.create_bind_group(&BindGroupDescriptor { 
             label: None, 
@@ -210,7 +214,7 @@ impl Renderer {
             entries: &[
                 BindGroupEntry {
                     binding: 0,
-                    resource: self.mesh_points_buffer.as_entire_binding()
+                    resource: self.mesh_headers_buffer.as_entire_binding()
                 },
                 BindGroupEntry {
                     binding: 1,
@@ -218,8 +222,16 @@ impl Renderer {
                 },
                 BindGroupEntry {
                     binding: 2,
-                    resource: self.mesh_headers_buffer.as_entire_binding()
+                    resource: self.mesh_vertices_buffer.as_entire_binding(),
                 },
+                BindGroupEntry {
+                    binding: 3,
+                    resource: self.mesh_positions_buffer.as_entire_binding()
+                },
+                BindGroupEntry {
+                    binding: 4,
+                    resource: self.mesh_normals_buffer.as_entire_binding()
+                } 
             ]
         });
 

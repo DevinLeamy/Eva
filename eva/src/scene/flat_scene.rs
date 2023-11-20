@@ -116,14 +116,17 @@ impl SceneFlattener {
                 });
             }
             Primitive::Mesh(mesh) => {
-                let (min, max) = extents(&mesh.points);
+                let (min, max) = extents(&mesh.positions);
 
                 self.meshes.add(ShaderMeshModel {
-                    points: mesh.points,
-                    triangles: mesh.triangles,
-                    transform: self.top_transform().into(),
                     material: geometry.material().clone(),
                     bounding_box: Cube::from_points(min, max),
+                    transform: self.top_transform().into(),
+                    triangles: mesh.triangles,
+                    vertices: mesh.vertices,
+
+                    positions: mesh.positions,
+                    normals: mesh.normals,
                 });
             }
         }

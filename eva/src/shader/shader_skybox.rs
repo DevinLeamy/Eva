@@ -28,7 +28,8 @@ impl SkyboxExtension for Device {
                     buffer: &buffer,
                     layout: ImageDataLayout {
                         offset: 0,
-                        bytes_per_row: Some(bytes + 256 - (bytes % 256)),
+                        // bytes_per_row: Some(bytes + 256 - (bytes % 256)),
+                        bytes_per_row: Some(bytes),
                         rows_per_image: Some(size),
                     },
                 },
