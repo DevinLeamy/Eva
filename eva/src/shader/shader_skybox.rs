@@ -22,12 +22,13 @@ impl SkyboxExtension for Device {
                 usage: BufferUsages::COPY_DST | BufferUsages::COPY_SRC,
             });
 
+            let bytes = 4 * 4 * size;
             encoder.copy_buffer_to_texture(
                 ImageCopyBuffer {
                     buffer: &buffer,
                     layout: ImageDataLayout {
                         offset: 0,
-                        bytes_per_row: Some(4 * 4 * size),
+                        bytes_per_row: Some(bytes + 256 - (bytes % 256)),
                         rows_per_image: Some(size),
                     },
                 },
@@ -65,7 +66,8 @@ pub struct ShaderSkybox {
 }
 
 impl ShaderSkybox {
-    pub fn create_skybox(images: [PathBuf; 6]) -> Option<Self> {
+    pub fn create_skybox(images: Vec<PathBuf>) -> Option<Self> {
+        assert!(images.len() == 6);
         let images: Vec<DynamicImage> = images
             .iter()
             .map(|path| Reader::open(path).unwrap().decode().unwrap())

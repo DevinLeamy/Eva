@@ -3,6 +3,7 @@ mod py_geometry;
 mod py_light;
 mod py_material;
 mod py_mesh;
+mod py_scene;
 mod py_transform;
 
 mod prelude {
@@ -11,93 +12,27 @@ mod prelude {
     pub use crate::py_light::PyLight;
     pub use crate::py_material::PyMaterial;
     pub use crate::py_mesh::PyMesh;
+    pub use crate::py_scene::PyScene;
     pub use crate::py_transform::PyTransform;
-    pub use eva::prelude::{
-        Camera, Cube, Geometry, Light, Mesh, PhongMaterial, Primitive, Scene, Sphere,
-        Transformation,
-    };
+    pub use eva::prelude::*;
     pub use nalgebra::Vector3;
     pub use pyo3::prelude::*;
 
     pub use eva_py_macros::PyNode;
 }
 
-use std::path::PathBuf;
-
-use eva::prelude::{Node, ShaderSkybox, TextureLoader};
-
 use crate::prelude::*;
 
-const TEXTURE_PATH: &str = "./eva/assets/textures";
-const SKYBOX_PATH: &str = "./eva/assets/skybox";
-
-#[pyclass]
-#[pyo3(name = "Scene")]
-struct PyScene {
-    root: Node,
-    ambient: Vector3<f32>,
-    texture_loader: TextureLoader,
-}
-
-#[pymethods]
-impl PyScene {
-    #[new]
-    fn new() -> Self {
-        let mut texture_loader = TextureLoader::new();
-        let mut path = PathBuf::from(format!("{TEXTURE_PATH}/missing.png"));
-        texture_loader.load(path);
-
-        Self {
-            root: Node::Transformation(Transformation::new()),
-            ambient: Vector3::new(0.1, 0.1, 0.1),
-            texture_loader,
-        }
-    }
-
-    fn set_root(&mut self, py: Python, root: PyObject) {
-        if let Ok(child) = root.extract::<PyRef<PyGeometry>>(py) {
-            self.root = child.inner.clone().into();
-        } else if let Ok(child) = root.extract::<PyRef<PyTransform>>(py) {
-            self.root = child.inner.clone().into();
-        } else if let Ok(child) = root.extract::<PyRef<PyLight>>(py) {
-            self.root = child.inner.clone().into();
-        } else if let Ok(child) = root.extract::<PyRef<PyMesh>>(py) {
-            self.root = child.inner.clone().into();
-        } else {
-            panic!("add_child only accepts PyGeometry, PyTransform, PyLight, or PyMesh");
-        }
-    }
-
-    fn set_ambient(&mut self, r: f32, g: f32, b: f32) {
-        self.ambient = Vector3::new(r, g, b);
-    }
-
-    fn add_texture(&mut self, texture_name: String) -> u32 {
-        let mut path = PathBuf::from(TEXTURE_PATH);
-        path.push(texture_name);
-        self.texture_loader.load(path)
-    }
-}
-
 #[pyfunction]
-fn ray_trace(scene: &PyScene, camera: &PyCamera) -> PyResult<()> {
-    let skybox = ShaderSkybox::create_skybox([
-        PathBuf::from(format!("{SKYBOX_PATH}/blue/x.png")),
-        PathBuf::from(format!("{SKYBOX_PATH}/blue/-x.png")),
-        PathBuf::from(format!("{SKYBOX_PATH}/blue/y.png")),
-        PathBuf::from(format!("{SKYBOX_PATH}/blue/-y.png")),
-        PathBuf::from(format!("{SKYBOX_PATH}/blue/z.png")),
-        PathBuf::from(format!("{SKYBOX_PATH}/blue/-z.png")),
-    ])
-    .unwrap();
-
+#[pyo3(name = "ray_trace")]
+fn eva_py_ray_trace(scene: &PyScene, camera: &PyCamera) -> PyResult<()> {
     pollster::block_on(eva::prelude::ray_trace(
         camera.inner.clone(),
         Scene {
             ambient: scene.ambient,
             root: scene.root.clone(),
+            skybox: scene.skybox.clone(),
             textures: scene.texture_loader.clone().textures(),
-            skybox,
         },
     ));
 
@@ -113,7 +48,7 @@ fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyCamera>()?;
     m.add_class::<PyMaterial>()?;
     m.add_class::<PyMesh>()?;
-    m.add_function(wrap_pyfunction!(ray_trace, m)?)?;
+    m.add_function(wrap_pyfunction!(eva_py_ray_trace, m)?)?;
 
     Ok(())
 }
