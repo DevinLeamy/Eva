@@ -4,7 +4,7 @@ mat1 = Material((0.7, 1.0, 0.7), (0.5, 0.7, 0.5), 25)
 mat2 = Material((0.5, 0.5, 0.5), (0.5, 0.7, 0.5), 25)
 mat3 = Material((1.0, 0.6, 0.1), (0.5, 0.7, 0.5), 25)
 mat4 = Material((0.7, 0.6, 1.0), (0.5, 0.4, 0.8), 25)
-mat5 = Material((0.7, 0.2, 0.5), (0.0, 0.0, 0.0), 25)
+mat5 = Material((0.7, 0.7, 0.5), (0.0, 0.0, 0.0), 25)
 
 scene = Scene()
 earth = scene.add_texture("earth.jpg")
@@ -66,23 +66,14 @@ scene_root.add_child(magenta_light)
 camera = Camera((0, 0, 800), (0, 0, -1), (0, 1, 0), 50)
 
 scene.set_root(scene_root)
-scene.set_ambient(0.5, 0.5, 0.5)
-# scene.set_skybox([
-#     "blue/x.png",
-#     "blue/-x.png",
-#     "blue/y.png",
-#     "blue/-y.png",
-#     "blue/z.png",
-#     "blue/-z.png",
-# ])
+scene.set_ambient(0.4, 0.4, 0.4)
 scene.set_skybox([
-    "sky/x.tga",
-    "sky/-x.tga",
-    "sky/y.tga",
-    "sky/-y.tga",
-    "sky/-z.tga",
-    "sky/z.tga",
+    "blue/x.png",
+    "blue/-x.png",
+    "blue/y.png",
+    "blue/-y.png",
+    "blue/z.png",
+    "blue/-z.png",
 ])
-
 
 ray_trace(scene, camera)

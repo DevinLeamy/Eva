@@ -252,7 +252,7 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
     var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
     var total_reflectance: vec3f = vec3(0.5); 
 
-    for (var i: i32 = 0; i < 2; i = i + 1) {
+    for (var i: i32 = 0; i < 3; i = i + 1) {
         let intersection = compute_ray_intersection(ray);
         if (!intersection.some) {
             total_light = total_light + total_reflectance * compute_skybox_colour(ray.direction);

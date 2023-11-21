@@ -61,7 +61,7 @@ impl Renderer {
 
     // Temporary: just for testing.
     pub fn update(&mut self, key: VirtualKeyCode, state: ElementState) {
-        let speed = 10.0;
+        let speed = 90.0;
 
         match (key, state) {
             (VirtualKeyCode::A, ElementState::Pressed) => {
@@ -95,7 +95,7 @@ impl Renderer {
             _ => {}
         };
 
-        self.context.camera.look_at(Vector3::new(0.0, 0.0, 0.0));
+        // self.context.camera.look_at(Vector3::new(0.0, 0.0, 0.0));
     }
 }
 
