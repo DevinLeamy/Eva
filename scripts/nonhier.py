@@ -4,7 +4,7 @@ mat1 = Material((0.7, 1.0, 0.7), (0.5, 0.7, 0.5), 25)
 mat2 = Material((0.5, 0.5, 0.5), (0.5, 0.7, 0.5), 25)
 mat3 = Material((1.0, 0.6, 0.1), (0.5, 0.7, 0.5), 25)
 mat4 = Material((0.7, 0.6, 1.0), (0.5, 0.4, 0.8), 25)
-mat5 = Material((0.7, 1.0, 0.7), (0.0, 0.0, 0.0), 25)
+mat5 = Material((0.7, 0.2, 0.5), (0.0, 0.0, 0.0), 25)
 
 scene = Scene()
 earth = scene.add_texture("earth.jpg")
@@ -52,28 +52,37 @@ scene_root.add_child(s5)
 steldodec = Mesh('suzanne.obj')
 steldodec.scale(100, 100, 100)
 steldodec.translate(-200, 200, -100)
-steldodec.set_material(mat3)
+steldodec.set_material(mat5)
 scene_root.add_child(steldodec)
 
 white_light = Light((0.9, 0.9, 0.9), (1.0, 0, 0))
 white_light.translate(-100.0, 150.0, 400.0)
 
-magenta_light = Light((0.7, 0, 0.7), (1, 0, 0))
-magenta_light.translate(400.0, 100.0, 150.0)
+magenta_light = Light((0.4, 0.4, 0.7), (1, 0, 0))
+magenta_light.translate(400.0, 400.0, -200.0)
 
 scene_root.add_child(white_light)
-# scene_root.add_child(magenta_light)
+scene_root.add_child(magenta_light)
 camera = Camera((0, 0, 800), (0, 0, -1), (0, 1, 0), 50)
 
 scene.set_root(scene_root)
-scene.set_ambient(0.3, 0.3, 0.3)
+scene.set_ambient(0.5, 0.5, 0.5)
+# scene.set_skybox([
+#     "blue/x.png",
+#     "blue/-x.png",
+#     "blue/y.png",
+#     "blue/-y.png",
+#     "blue/z.png",
+#     "blue/-z.png",
+# ])
 scene.set_skybox([
-    "blue/x.png",
-    "blue/-x.png",
-    "blue/y.png",
-    "blue/-y.png",
-    "blue/z.png",
-    "blue/-z.png",
+    "sky/x.tga",
+    "sky/-x.tga",
+    "sky/y.tga",
+    "sky/-y.tga",
+    "sky/-z.tga",
+    "sky/z.tga",
 ])
+
 
 ray_trace(scene, camera)
