@@ -24,7 +24,7 @@ use crate::prelude::*;
 #[pyfunction]
 #[pyo3(name = "ray_trace")]
 fn eva_py_ray_trace(scene: &EvaScene, camera: &EvaCamera) -> PyResult<()> {
-    pollster::block_on(eva::prelude::ray_trace(
+    pollster::block_on(eva::prelude::main(
         camera.inner.clone(),
         Scene {
             ambient: scene.ambient,
@@ -32,6 +32,7 @@ fn eva_py_ray_trace(scene: &EvaScene, camera: &EvaCamera) -> PyResult<()> {
             skybox: scene.skybox.clone(),
             textures: scene.texture_loader.clone().textures(),
         },
+        update,
     ));
 
     Ok(())
@@ -48,4 +49,8 @@ fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(eva_py_ray_trace, m)?)?;
 
     Ok(())
+}
+
+fn update() {
+    println!("FOOBAR");
 }

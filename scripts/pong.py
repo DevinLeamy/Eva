@@ -71,4 +71,9 @@ scene.add(white_light)
 camera = Camera((75, 0, 200))
 camera.look_at(0, 0, 0)
 
+
+def foo():
+    print("bar")
+
+
 Eva.run()

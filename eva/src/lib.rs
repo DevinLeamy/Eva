@@ -34,11 +34,11 @@ pub mod prelude {
     pub use crate::texture_loader::*;
     pub use crate::utils::*;
 
-    pub use crate::ray_trace;
+    pub use crate::main;
     pub use eva_macros::*;
 }
 
-pub async fn ray_trace(camera: Camera, scene: Scene) {
+pub async fn main(camera: Camera, scene: Scene, update: fn()) {
     env_logger::init();
 
     let context = RenderContext { camera, scene };
@@ -74,6 +74,7 @@ pub async fn ray_trace(camera: Camera, scene: Scene) {
             _ => {}
         }
         let now = Instant::now();
+        update();
         if now.duration_since(last_frame_time).as_millis() > 32 {
             renderer.render().unwrap();
             last_frame_time = Instant::now();
