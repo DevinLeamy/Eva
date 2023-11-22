@@ -1,5 +1,5 @@
 use encase::{internal::WriteInto, ArrayLength, ShaderSize, ShaderType};
-use std::fmt::Debug;
+use std::{fmt::Debug, slice::Iter};
 
 use super::ShaderStruct;
 
@@ -34,6 +34,10 @@ impl<T: ShaderType + Debug + ShaderSize> ShaderBuffer<T> {
 
     pub fn len(&self) -> u32 {
         self.data.len() as u32
+    }
+
+    pub fn iter(&self) -> Iter<'_, T> {
+        self.data.iter()
     }
 }
 

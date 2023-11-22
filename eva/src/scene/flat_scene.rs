@@ -3,8 +3,8 @@ use nalgebra::Vector3;
 use crate::{
     prelude::extents,
     shader::{
-        ShaderCubeModel, ShaderCubeModels, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
-        ShaderPointLights, ShaderSphereModel, ShaderSphereModels, ShaderTextures,
+        ShaderBuffer, ShaderCubeModel, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
+        ShaderSphereModel, ShaderTextures,
     },
 };
 
@@ -12,9 +12,9 @@ use super::{Cube, Geometry, Light, Node, Primitive, Scene, Transform};
 
 #[derive(Debug)]
 pub struct FlatScene {
-    pub lights: ShaderPointLights,
-    pub spheres: ShaderSphereModels,
-    pub cubes: ShaderCubeModels,
+    pub lights: ShaderBuffer<ShaderPointLight>,
+    pub spheres: ShaderBuffer<ShaderSphereModel>,
+    pub cubes: ShaderBuffer<ShaderCubeModel>,
     pub meshes: ShaderMeshModels,
     pub ambient: Vector3<f32>,
     pub textures: ShaderTextures,
@@ -22,10 +22,10 @@ pub struct FlatScene {
 
 impl std::fmt::Display for FlatScene {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for light in &self.lights.lights {
+        for light in self.lights.iter() {
             writeln!(f, "Light: {:?}", light)?;
         }
-        for geometry in &self.spheres.spheres {
+        for geometry in self.spheres.iter() {
             writeln!(f, "Object: {:?}", geometry)?;
         }
 
@@ -41,9 +41,9 @@ impl From<Scene> for FlatScene {
 
 struct SceneFlattener {
     transforms: Vec<Transform>,
-    lights: ShaderPointLights,
-    spheres: ShaderSphereModels,
-    cubes: ShaderCubeModels,
+    lights: ShaderBuffer<ShaderPointLight>,
+    spheres: ShaderBuffer<ShaderSphereModel>,
+    cubes: ShaderBuffer<ShaderCubeModel>,
     meshes: ShaderMeshModels,
 }
 
@@ -51,9 +51,9 @@ impl SceneFlattener {
     fn new() -> Self {
         Self {
             transforms: vec![Transform::default()],
-            lights: ShaderPointLights::new(),
-            spheres: ShaderSphereModels::new(),
-            cubes: ShaderCubeModels::new(),
+            lights: ShaderBuffer::new(),
+            spheres: ShaderBuffer::new(),
+            cubes: ShaderBuffer::new(),
             meshes: ShaderMeshModels::new(),
         }
     }
@@ -93,7 +93,7 @@ impl SceneFlattener {
     }
 
     fn handle_light(&mut self, light: &Light) {
-        self.lights.add(ShaderPointLight {
+        self.lights.push(ShaderPointLight {
             position: self.top_transform().translation(),
             colour: light.colour().clone(),
         });
@@ -102,14 +102,14 @@ impl SceneFlattener {
     fn handle_geometry(&mut self, geometry: &Geometry) {
         match geometry.primitive().clone() {
             Primitive::Cube(cube) => {
-                self.cubes.add(ShaderCubeModel {
+                self.cubes.push(ShaderCubeModel {
                     cube,
                     transform: self.top_transform().into(),
                     material: geometry.material().clone(),
                 });
             }
             Primitive::Sphere(sphere) => {
-                self.spheres.add(ShaderSphereModel {
+                self.spheres.push(ShaderSphereModel {
                     sphere,
                     transform: self.top_transform().into(),
                     material: geometry.material().clone(),

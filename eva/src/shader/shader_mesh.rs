@@ -1,9 +1,9 @@
-use encase::{ArrayLength, ShaderType};
+use encase::ShaderType;
 use nalgebra::Vector3;
 
 use crate::prelude::{Cube, PhongMaterial};
 
-use super::{IntoShaderBool, ShaderBool, ShaderBuffer, ShaderStruct, ShaderTransform};
+use super::{IntoShaderBool, ShaderBool, ShaderBuffer, ShaderTransform};
 
 #[derive(Debug, Default)]
 pub struct ShaderMeshModels {
@@ -52,30 +52,6 @@ impl ShaderMeshModels {
 
             has_normals,
         });
-    }
-}
-
-#[derive(ShaderType, Debug, Default)]
-pub struct ShaderMeshVertices {
-    length: ArrayLength,
-    #[size(runtime)]
-    vertices: Vec<ShaderMeshVertex>,
-}
-
-impl ShaderMeshVertices {
-    pub fn extend<'a>(&mut self, vertices: impl IntoIterator<Item = ShaderMeshVertex>) -> u32 {
-        let offset = self.vertices.len();
-        self.vertices.extend(vertices);
-
-        offset as u32
-    }
-}
-
-impl ShaderStruct for ShaderMeshVertices {
-    fn as_bytes(&self) -> Option<Vec<u8>> {
-        let mut buffer = encase::StorageBuffer::new(Vec::new());
-        buffer.write(self).ok()?;
-        Some(buffer.into_inner())
     }
 }
 
