@@ -4,8 +4,8 @@ const TEXTURE_PATH: &str = "./eva/assets/textures";
 const SKYBOX_PATH: &str = "./eva/assets/skybox";
 
 #[pyclass]
-#[pyo3(name = "Scene")]
-pub struct PyScene {
+#[pyo3(name = "EvaScene")]
+pub struct EvaScene {
     pub root: Node,
     pub ambient: Vector3<f32>,
     pub texture_loader: TextureLoader,
@@ -17,7 +17,7 @@ fn skybox_image_path(name: &str) -> PathBuf {
 }
 
 #[pymethods]
-impl PyScene {
+impl EvaScene {
     #[new]
     fn new() -> Self {
         let mut texture_loader = TextureLoader::new();

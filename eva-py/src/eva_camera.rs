@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[pyclass]
-#[pyo3(name = "Camera")]
-pub struct PyCamera {
+#[pyo3(name = "EvaCamera")]
+pub struct EvaCamera {
     pub inner: Camera,
 }
 
 #[pymethods]
-impl PyCamera {
+impl EvaCamera {
     #[new]
     fn new(
         position: (f32, f32, f32),
