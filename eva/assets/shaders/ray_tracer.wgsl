@@ -554,22 +554,28 @@ fn cube_intersection(cube: Cube, ray: Ray) -> Intersection {
     }
 
     var normal: vec3f = vec3(0.0, 0.0, 0.0);
+    let p = ray_point(ray, tmin);
+    let p_normalized = p - min;
+    let size = max - min;
+    var uv: vec2f = vec2f(0.0, 0.0);
 
     // Flip the sign based on the direction of the incoming ray.
     if (tmin > tmin_y && tmin > tmin_z) {
         normal.x = opposite_sign(ray.direction.x);
+        uv = p_normalized.yz / size.yz;
     } else if tmin_y > tmin_z {
         normal.y = opposite_sign(ray.direction.y);
+        uv = p_normalized.xz / size.xz;
     } else {
         normal.z = opposite_sign(ray.direction.z);
+        uv = p_normalized.xy / size.xy;
     }
 
     intersection.some = true;
     intersection.t = tmin;
     intersection.normal = normal;
     intersection.ray = ray;
-    // TODO: Set proper UVs.
-    intersection.uv = vec2f(0.0, 0.0);
+    intersection.uv = uv;
 
     return intersection;
 }

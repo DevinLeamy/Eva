@@ -8,6 +8,7 @@ mat5 = Material((0.7, 0.7, 0.5), (0.0, 0.0, 0.0), 25)
 
 scene = Scene()
 earth = scene.add_texture("earth.jpg")
+wood = scene.add_texture("wood.jpeg")
 scene_root = Transform()
 
 s1 = Mesh('buckyball.obj')
@@ -30,10 +31,12 @@ s3.translate(0, -1200, -500)
 scene_root.add_child(s3)
 
 
-b1 = Mesh('cube.obj')
+# b1 = Mesh('cube.obj')
+b1 = Geometry("cube")
 b1.set_material(mat4)
-b1.scale(90, 90, 90)
-b1.translate(-200, -125, 0)
+b1.scale(120, 120, 120)
+b1.translate(-200, -125, 40)
+b1.set_texture(wood)
 scene_root.add_child(b1)
 
 s4 = Geometry('sphere')

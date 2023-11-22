@@ -3,12 +3,14 @@ import random
 
 AMBIENT = 0.3
 
+
 ground = Material((0, 0.3, 0.3), (0.3, 0.3, 0.3), 10)
 red = Material((0.7, 0.0, 0.0), (0.3, 0.3, 0.3), 10)
 green = Material((0.0, 0.7, 0.0), (0.3, 0.3, 0.3), 10)
 blue = Material((0.0, 0.0, 0.7), (0.3, 0.3, 0.3), 10)
 
 scene = Scene()
+wood = scene.add_texture("wood.jpeg")
 scene.set_skybox([
     "blue/x.png",
     "blue/-x.png",
@@ -36,6 +38,7 @@ center = [-plane_size / 2, -plane_size / 2]
 plane.translate(-plane_size / 2, -100, -plane_size / 2)
 plane.scale(plane_size, 5, plane_size)
 plane.set_material(ground)
+plane.set_texture(wood)
 scene_root.add_child(plane)
 
 cube_size = 500
@@ -48,13 +51,16 @@ def random_color():
         random.random(),
     )
 
+
 def random_shape():
     return random.sample(["cube", "sphere"], 1)[0]
+
 
 def random_material():
     m = Material(random_color(), (0.1, 0.1, 0.1), 25)
     # m = Material(random_color(), (0.0, 0.0, 0.0), 10)
     return m
+
 
 def random_offset():
     return (
@@ -71,7 +77,8 @@ for i in range(4):
 
         cube = Geometry(random_shape())
         offset = random_offset()
-        cube.translate(center[0] + x + offset[0], cube_size / 2 + offset[1] + 500, center[0] + z + offset[2])
+        cube.translate(center[0] + x + offset[0], cube_size /
+                       2 + offset[1] + 500, center[0] + z + offset[2])
         cube.scale(cube_size, cube_size, cube_size)
         cube.set_material(random_material())
         scene_root.add_child(cube)
@@ -84,7 +91,7 @@ camera = Camera(
 )
 
 white_light = Light((0.9, 0.9, 0.9), (1.0, 0, 0))
-white_light.translate(-100.0, 400.0, 400.0)
+white_light.translate(0, 1200.0, 0)
 scene_root.add_child(white_light)
 
 scene.set_root(scene_root)
