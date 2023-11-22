@@ -1,4 +1,4 @@
-from eva_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
+from eva_py import Scene, Transform, Geometry, Light, ray_trace, Camera, Material
 
 stone = Material((0.8, 0.7, 0.7), (0.0, 0.0, 0.0), 0)
 grass = Material((0.1, 0.7, 0.1), (0.0, 0.0, 0.0), 0)
@@ -7,12 +7,12 @@ scene = Scene()
 n_scene = Transform()
 n_scene.rotate('X', 23)
 
-plane = Mesh('plane.obj')
+plane = Geometry('plane.obj')
 plane.set_material(grass)
 plane.scale(30, 30, 30)
 n_scene.add_child(plane)
 
-sphere = Mesh('buckyball.obj')
+sphere = Geometry('buckyball.obj')
 sphere.scale(1.5, 1.5, 1.5)
 sphere.set_material(stone)
 n_scene.add_child(sphere)

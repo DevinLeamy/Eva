@@ -1,4 +1,4 @@
-from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
+from eva_py import Scene, Transform, Light, Camera, Material, Geometry, ray_trace
 import random
 
 wood = Material((0.8, 0.7, 0.7), (0.0, 0.0, 0.0), 0)
@@ -14,7 +14,7 @@ water = Material((0.1, 0.1, 0.7), (0.2, 0.2, 0.2), 20)
 
 scene_root = Transform()
 
-plane = Mesh('plane.obj')
+plane = Geometry('plane.obj')
 plane.set_material(grass)
 plane.scale(90, 90, 90)
 scene_root.add_child(plane)
@@ -145,7 +145,7 @@ rock_positions = [
 ]
 
 for position, rotation, scale in rock_positions:
-    rock_instance = Mesh('buckyball.obj')
+    rock_instance = Geometry('buckyball.obj')
     rock_instance.set_material(stone)
     rock_instance.scale(scale, scale, scale)
     rock_instance.rotate('Y', rotation)

@@ -1,4 +1,4 @@
-from eva_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
+from eva_py import Scene, Transform, Geometry, Light, ray_trace, Camera, Material
 import random
 
 AMBIENT = 0.5

@@ -2,7 +2,6 @@ mod py_camera;
 mod py_geometry;
 mod py_light;
 mod py_material;
-mod py_mesh;
 mod py_scene;
 mod py_transform;
 
@@ -11,7 +10,6 @@ mod prelude {
     pub use crate::py_geometry::PyGeometry;
     pub use crate::py_light::PyLight;
     pub use crate::py_material::PyMaterial;
-    pub use crate::py_mesh::PyMesh;
     pub use crate::py_scene::PyScene;
     pub use crate::py_transform::PyTransform;
     pub use eva::prelude::*;
@@ -47,7 +45,6 @@ fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyTransform>()?;
     m.add_class::<PyCamera>()?;
     m.add_class::<PyMaterial>()?;
-    m.add_class::<PyMesh>()?;
     m.add_function(wrap_pyfunction!(eva_py_ray_trace, m)?)?;
 
     Ok(())

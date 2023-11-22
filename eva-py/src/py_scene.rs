@@ -47,10 +47,8 @@ impl PyScene {
             self.root = child.inner.clone().into();
         } else if let Ok(child) = root.extract::<PyRef<PyLight>>(py) {
             self.root = child.inner.clone().into();
-        } else if let Ok(child) = root.extract::<PyRef<PyMesh>>(py) {
-            self.root = child.inner.clone().into();
         } else {
-            panic!("add_child only accepts PyGeometry, PyTransform, PyLight, or PyMesh");
+            panic!("add_child only accepts PyGeometry, PyTransform, or PyLight");
         }
     }
 

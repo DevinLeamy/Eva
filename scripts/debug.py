@@ -1,4 +1,4 @@
-from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
+from eva_py import Scene, Transform, Light, Camera, Material, Geometry, ray_trace
 
 scene = Scene()
 earth = scene.add_texture("earth.jpg")
@@ -18,8 +18,8 @@ s1.scale(100, 100, 100)
 s1.translate(0, 0, -400)
 scene_root.add_child(s1)
 
-s2 = Mesh('suzanne.obj')
-# s2 = Mesh('cube.obj')
+s2 = Geometry('suzanne.obj')
+# s2 = Geometry('cube.obj')
 s2.set_material(mat3)
 s2.scale(100, 100, 100)
 s2.translate(200, 50, -100)

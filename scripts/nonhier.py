@@ -1,4 +1,4 @@
-from eva_py import Mesh, Scene, Transform, Light, Camera, Material, Geometry, ray_trace
+from eva_py import Scene, Transform, Light, Camera, Material, Geometry, ray_trace
 
 mat1 = Material((0.7, 1.0, 0.7), (0.5, 0.7, 0.5), 25)
 mat2 = Material((0.5, 0.5, 0.5), (0.5, 0.7, 0.5), 25)
@@ -11,7 +11,7 @@ earth = scene.add_texture("earth.jpg")
 wood = scene.add_texture("wood.jpeg")
 scene_root = Transform()
 
-s1 = Mesh('buckyball.obj')
+s1 = Geometry('buckyball.obj')
 s1.set_material(mat1)
 s1.scale(45, 45, 45)
 s1.translate(0, 0, -400)
@@ -31,7 +31,7 @@ s3.translate(0, -1200, -500)
 scene_root.add_child(s3)
 
 
-# b1 = Mesh('cube.obj')
+# b1 = Geometry('cube.obj')
 b1 = Geometry("cube")
 b1.set_material(mat4)
 b1.scale(120, 120, 120)
@@ -51,8 +51,8 @@ s5.scale(25, 25, 25)
 s5.translate(0, 100, -250)
 scene_root.add_child(s5)
 
-# steldodec = Mesh('smstdodeca.obj')
-steldodec = Mesh('suzanne.obj')
+# steldodec = Geometry('smstdodeca.obj')
+steldodec = Geometry('suzanne.obj')
 steldodec.scale(100, 100, 100)
 steldodec.translate(-200, 200, -100)
 steldodec.set_material(mat5)

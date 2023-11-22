@@ -1,4 +1,4 @@
-from eva_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
+from eva_py import Scene, Transform, Geometry, Light, ray_trace, Camera, Material
 
 stone = Material((0.8, 0.7, 0.7), (0.0, 0.0, 0.0), 0)
 grass = Material((0.1, 0.7, 0.1), (0.0, 0.0, 0.0), 0)
@@ -7,12 +7,12 @@ hide = Material((0.84, 0.6, 0.53), (0.3, 0.3, 0.3), 20)
 scene_root = Transform()
 scene_root.rotate('X', 23)
 
-plane = Mesh('plane.obj')
+plane = Geometry('plane.obj')
 plane.set_material(grass)
 plane.scale(30, 30, 30)
 scene_root.add_child(plane)
 
-buckyball = Mesh('buckyball.obj')
+buckyball = Geometry('buckyball.obj')
 buckyball.set_material(stone)
 buckyball.scale(1.5, 1.5, 1.5)
 scene_root.add_child(buckyball)
@@ -46,7 +46,7 @@ for i in range(6):
 
 
 factor = 2.0/(2.76+3.637)
-cow_poly = Mesh("cow.obj")
+cow_poly = Geometry("cow.obj")
 cow_poly.set_material(hide)
 cow_poly.translate(0.0, 3.637, 0.0)
 cow_poly.scale(factor, factor, factor)

@@ -1,16 +1,19 @@
 pub use crate::prelude::*;
 
-enum PrimitiveType {
+const MESH_PATH: &str = "./eva-py/assets/meshes/";
+
+enum GeometryType {
     Sphere,
     Cube,
+    Mesh(String),
 }
 
-impl From<&str> for PrimitiveType {
+impl From<&str> for GeometryType {
     fn from(val: &str) -> Self {
         match val {
-            "sphere" => PrimitiveType::Sphere,
-            "cube" => PrimitiveType::Cube,
-            _ => panic!("invalid primitive type: {val}"),
+            "sphere" => GeometryType::Sphere,
+            "cube" => GeometryType::Cube,
+            name => GeometryType::Mesh(name.to_string()),
         }
     }
 }
@@ -25,11 +28,16 @@ pub struct PyGeometry {
 #[pymethods]
 impl PyGeometry {
     #[new]
-    fn new(primitive_type: &str) -> PyResult<Self> {
-        let primitive_type: PrimitiveType = primitive_type.into();
-        let primitive: Primitive = match primitive_type {
-            PrimitiveType::Sphere => Primitive::Sphere(Sphere::new(1.0)),
-            PrimitiveType::Cube => Primitive::Cube(Cube::new(1.0)),
+    fn new(geometry_type: &str) -> PyResult<Self> {
+        let geometry_type: GeometryType = geometry_type.into();
+        let primitive: Primitive = match geometry_type {
+            GeometryType::Sphere => Primitive::Sphere(Sphere::new(1.0)),
+            GeometryType::Cube => Primitive::Cube(Cube::new(1.0)),
+            GeometryType::Mesh(name) => {
+                let mut path = PathBuf::from(MESH_PATH);
+                path.push(name);
+                Primitive::Mesh(Mesh::from_path(path))
+            }
         };
 
         Ok(Self {

@@ -1,4 +1,4 @@
-use encase::{ArrayLength, ShaderType};
+use encase::ShaderType;
 
 use crate::prelude::{PhongMaterial, Sphere};
 
@@ -9,4 +9,10 @@ pub struct ShaderSphereModel {
     pub sphere: Sphere,
     pub transform: ShaderTransform,
     pub material: PhongMaterial,
+}
+
+impl ShaderStruct for ShaderSphereModel {
+    fn as_bytes(&self) -> Option<Vec<u8>> {
+        todo!()
+    }
 }
