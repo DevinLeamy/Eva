@@ -1,17 +1,17 @@
 from eva_py.utils import Singleton
 from .eva_py import EvaScene, Transform
+from eva_py.node import Node
 
 
 class Scene(Singleton):
     inner: EvaScene
 
     def init(self):
-        print("INITIALIZED SCENE")
         self.inner = EvaScene()
         self.root = Transform()
 
-    def add(self, node):
-        self.root.add_child(node)
+    def add(self, node: Node):
+        self.root.add_child(node.inner)
 
     def set_ambient(self, strength):
         self.inner.set_ambient(strength, strength, strength)

@@ -45,10 +45,10 @@ impl EvaScene {
             self.root = child.inner.clone().into();
         } else if let Ok(child) = root.extract::<PyRef<PyTransform>>(py) {
             self.root = child.inner.clone().into();
-        } else if let Ok(child) = root.extract::<PyRef<PyLight>>(py) {
+        } else if let Ok(child) = root.extract::<PyRef<EvaLight>>(py) {
             self.root = child.inner.clone().into();
         } else {
-            panic!("add_child only accepts PyGeometry, PyTransform, or PyLight");
+            panic!("add_child only accepts PyGeometry, PyTransform, or EvaLight");
         }
     }
 
