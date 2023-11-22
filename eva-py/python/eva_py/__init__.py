@@ -1,4 +1,4 @@
-from .eva_py import Material, Geometry
+from .eva_py import Material
 from eva_py.texture_builder import TextureBuilder
 from eva_py.scene import Scene
 from eva_py.camera import Camera
