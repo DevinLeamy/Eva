@@ -35,6 +35,7 @@ pub mod prelude {
     pub use crate::utils::*;
 
     pub use crate::ray_trace;
+    pub use eva_macros::*;
 }
 
 pub async fn ray_trace(camera: Camera, scene: Scene) {

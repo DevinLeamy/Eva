@@ -1,18 +1,13 @@
 use encase::ShaderType;
+use eva_macros::ShaderStructMacro;
 
 use crate::prelude::{Cube, PhongMaterial};
 
-use super::{ShaderTransform, ShaderStruct};
+use super::{ShaderStruct, ShaderTransform};
 
-#[derive(ShaderType, Debug)]
+#[derive(ShaderType, Debug, ShaderStructMacro)]
 pub struct ShaderCubeModel {
     pub cube: Cube,
     pub transform: ShaderTransform,
     pub material: PhongMaterial,
-}
-
-impl ShaderStruct for ShaderCubeModel {
-    fn as_bytes(&self) -> Option<Vec<u8>> {
-        todo!()
-    }
 }

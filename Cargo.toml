@@ -1,6 +1,7 @@
 [workspace]
 members = [
-    "eva",
+    "eva", 
+    "eva-macros",
     "eva-py",
     "eva-py-macros"
 ]

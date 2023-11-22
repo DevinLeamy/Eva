@@ -492,6 +492,7 @@ dependencies = [
  "bytemuck",
  "encase",
  "env_logger",
+ "eva-macros",
  "image",
  "lazy_static",
  "log",
@@ -500,6 +501,14 @@ dependencies = [
  "pollster",
  "wgpu",
  "winit",
+]
+
+[[package]]
+name = "eva-macros"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn 2.0.39",
 ]
 
 [[package]]
