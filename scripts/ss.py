@@ -1,7 +1,7 @@
 from eva_py import Mesh, Scene, Transform, Geometry, Light, ray_trace, Camera, Material
 import random
 
-AMBIENT = 0.3
+AMBIENT = 0.5
 
 
 ground = Material((0, 0.3, 0.3), (0.3, 0.3, 0.3), 10)
@@ -33,9 +33,9 @@ scene_root = Transform()
 scene_size = 10000
 plane_size = scene_size
 plane = Geometry("cube")
-center = [-plane_size / 2, -plane_size / 2]
+center = [0, 0]
 
-plane.translate(-plane_size / 2, -100, -plane_size / 2)
+plane.translate(center[0], -100, center[1])
 plane.scale(plane_size, 5, plane_size)
 plane.set_material(ground)
 plane.set_texture(wood)
@@ -91,7 +91,7 @@ camera = Camera(
 )
 
 white_light = Light((0.9, 0.9, 0.9), (1.0, 0, 0))
-white_light.translate(0, 1200.0, 0)
+white_light.translate(0, 500.0, 0)
 scene_root.add_child(white_light)
 
 scene.set_root(scene_root)

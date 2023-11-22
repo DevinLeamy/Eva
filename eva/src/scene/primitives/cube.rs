@@ -9,10 +9,7 @@ pub struct Cube {
 
 impl Default for Cube {
     fn default() -> Self {
-        Self {
-            min: Vector3::zeros(),
-            max: Vector3::new(1.0, 1.0, 1.0),
-        }
+        Self::new(1.0)
     }
 }
 
@@ -20,8 +17,8 @@ impl Cube {
     /// Create a cube with a given side length.
     pub fn new(size: f32) -> Self {
         Self {
-            min: Vector3::zeros(),
-            max: Vector3::new(size, size, size),
+            min: Vector3::new(-size / 2.0, -size / 2.0, -size / 2.0),
+            max: Vector3::new(size / 2.0, size / 2.0, size / 2.0),
         }
     }
 
