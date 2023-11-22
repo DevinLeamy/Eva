@@ -1,4 +1,5 @@
 mod shader_bool;
+mod shader_buffer;
 mod shader_camera;
 mod shader_cube;
 mod shader_global_config;
@@ -13,6 +14,7 @@ mod shader_transform;
 mod shader_utils;
 
 pub use shader_bool::*;
+pub use shader_buffer::*;
 pub use shader_camera::*;
 pub use shader_cube::*;
 pub use shader_global_config::*;
