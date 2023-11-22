@@ -7,3 +7,6 @@ class Camera(Singleton):
 
     def init(self, translation):
         self.inner = EvaCamera(translation, (0, 0, -1), (0, 1, 0), 50)
+    
+    def look_at(self, x, y, z):
+        self.inner.look_at(x, y, z)
