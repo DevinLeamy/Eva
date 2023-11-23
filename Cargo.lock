@@ -499,6 +499,7 @@ dependencies = [
  "nalgebra",
  "obj",
  "pollster",
+ "pyo3",
  "wgpu",
  "winit",
 ]

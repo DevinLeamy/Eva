@@ -1,9 +1,12 @@
 #[macro_use]
 extern crate lazy_static;
 
+use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use prelude::{Camera, RenderContext, Scene};
+use pyo3::types::PyFunction;
+use pyo3::{PyObject, PyResult, Python};
 use renderer::RendererBuilder;
 use winit::dpi::LogicalSize;
 use winit::{
@@ -11,6 +14,8 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
+
+use crate::renderer::Renderer;
 
 mod config;
 mod obj_loader;
@@ -38,8 +43,9 @@ pub mod prelude {
     pub use eva_macros::*;
 }
 
-pub async fn main(camera: Camera, scene: Scene, update: fn()) {
+pub fn main(camera: Camera, scene: Scene, update: PyObject) {
     env_logger::init();
+    let py_update_arc = Arc::new(Mutex::new(update));
 
     let context = RenderContext { camera, scene };
 
@@ -52,6 +58,8 @@ pub async fn main(camera: Camera, scene: Scene, update: fn()) {
 
     let mut renderer = RendererBuilder::new(window, context).build();
     let mut last_frame_time: Instant = Instant::now();
+
+    let py_update_clone = Arc::clone(&py_update_arc);
 
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -74,7 +82,14 @@ pub async fn main(camera: Camera, scene: Scene, update: fn()) {
             _ => {}
         }
         let now = Instant::now();
-        update();
+        Python::with_gil(|py| -> PyResult<()> {
+            let py_update_inner = py_update_clone.lock();
+            let py_func_ref: &PyFunction = py_update_inner.as_ref().unwrap().downcast(py)?;
+            py_func_ref.call1(())?;
+
+            Ok(())
+        })
+        .unwrap();
         if now.duration_since(last_frame_time).as_millis() > 32 {
             renderer.render().unwrap();
             last_frame_time = Instant::now();

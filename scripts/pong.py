@@ -72,8 +72,8 @@ camera = Camera((75, 0, 200))
 camera.look_at(0, 0, 0)
 
 
-def foo():
+def update():
     print("bar")
 
 
-Eva.run()
+Eva.run(update)

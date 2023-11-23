@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-const TEXTURE_PATH: &str = "./eva/assets/textures";
-const SKYBOX_PATH: &str = "./eva/assets/skybox";
+#[rustfmt::skip]
+const TEXTURE_PATH: &'static str = "/Users/Devin/Desktop/Github/DevinLeamy/eva/eva/assets/textures";
+const SKYBOX_PATH: &'static str = "/Users/Devin/Desktop/Github/DevinLeamy/eva/eva/assets/skybox";
 
 #[pyclass]
 #[pyo3(name = "EvaScene")]

@@ -1,7 +1,8 @@
 use crate::prelude::*;
 use std::collections::HashMap;
 
-const FILLER_TEXTURE_PATH: &'static str = "./eva/assets/textures/filler.png";
+#[rustfmt::skip]
+const FILLER_TEXTURE_PATH: &'static str = "/Users/Devin/Desktop/Github/DevinLeamy/eva/eva/assets/textures/filler.png";
 
 #[derive(Clone)]
 pub struct TextureLoader {
