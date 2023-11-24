@@ -6,7 +6,7 @@ use winit::window::Window;
 
 use crate::prelude::*;
 
-use super::RenderContext;
+use super::StaticRenderContext;
 
 const SPHERE_COUNT: u64 = 100;
 const CUBE_COUNT: u64 = 25;
@@ -21,7 +21,7 @@ pub struct RendererBuilder {
     queue: Queue,
     window: Window,
     adapter: Adapter,
-    context: RenderContext,
+    context: StaticRenderContext,
 
     ray_tracer_shader: Option<ShaderModule>,
     display_shader: Option<ShaderModule>,
@@ -52,7 +52,7 @@ pub struct RendererBuilder {
 }
 
 impl RendererBuilder {
-    pub fn new(window: Window, context: RenderContext) -> Self {
+    pub fn new(window: Window, context: StaticRenderContext) -> Self {
         let size = window.inner_size();
         let instance = Instance::new(InstanceDescriptor {
             backends: Backends::all(),
@@ -144,7 +144,7 @@ impl RendererBuilder {
             device: self.device,
             queue: self.queue,
             window: self.window,
-            context: self.context,
+            static_context: self.context,
 
             ray_tracer_pipeline: self.ray_tracer_pipeline.unwrap(),
             display_pipeline: self.display_pipeline.unwrap(),
@@ -452,14 +452,13 @@ impl RendererBuilder {
 
     fn create_bind_groups(&mut self) {
         // Texture bind group.
-        let scene = &self.context.scene;
-        let texture_descriptors: Vec<TextureDescriptor> = scene.textures.textures().iter().map(|texture| texture.clone().into()).collect();
-        let texture_extents: Vec<Extent3d> = scene.textures.textures().iter().map(|texture| Extent3d { 
+        let texture_descriptors: Vec<TextureDescriptor> = self.context.textures.textures().iter().map(|texture| texture.clone().into()).collect();
+        let texture_extents: Vec<Extent3d> = self.context.textures.textures().iter().map(|texture| Extent3d { 
             width: texture.width(), 
             height: texture.height(), 
             depth_or_array_layers: 1, 
         }).collect();
-        let texture_data: Vec<Vec<f32>> = scene.textures.textures().iter().map(|texture| texture.as_bytes()).collect();
+        let texture_data: Vec<Vec<f32>> = self.context.textures.textures().iter().map(|texture| texture.as_bytes()).collect();
 
         let textures: Vec<Texture> = texture_descriptors.into_iter().map(|descriptor| self.device.create_texture(&descriptor)).collect();
         let texture_views: Vec<TextureView> = textures.iter().map(|texture| texture.create_view(&TextureViewDescriptor {
@@ -511,7 +510,7 @@ impl RendererBuilder {
         }));
 
         // Skybox bind group.
-        let skybox_texture_view = self.device.create_skybox_view(&self.queue, &scene.skybox);
+        let skybox_texture_view = self.device.create_skybox_view(&self.queue, &self.context.skybox);
         let skybox_sampler = self.device.create_sampler(&SamplerDescriptor::default());
         self.skybox_bind_group = Some(self.device.create_bind_group(&BindGroupDescriptor {
             label: None,

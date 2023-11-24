@@ -13,3 +13,5 @@ eva = { path = "../eva" }
 nalgebra = "0.32.3"
 eva-py-macros = { path = "../eva-py-macros" }
 pollster = "0.3.0"
+winit = { version = "0.28.0"}
+env_logger = "0.10.1"

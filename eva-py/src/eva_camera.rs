@@ -1,13 +1,14 @@
 use crate::prelude::*;
 
 #[pyclass]
-#[pyo3(name = "Camera")]
-pub struct PyCamera {
+#[pyo3(name = "EvaCamera")]
+#[derive(Clone)]
+pub struct EvaCamera {
     pub inner: Camera,
 }
 
 #[pymethods]
-impl PyCamera {
+impl EvaCamera {
     #[new]
     fn new(
         position: (f32, f32, f32),
@@ -43,5 +44,9 @@ impl PyCamera {
 
     fn look_at(&mut self, x: f32, y: f32, z: f32) {
         self.inner.look_at(Vector3::new(x, y, z));
+    }
+
+    fn translate(&mut self, x: f32, y: f32, z: f32) {
+        self.inner.translate(Vector3::new(x, y, z));
     }
 }

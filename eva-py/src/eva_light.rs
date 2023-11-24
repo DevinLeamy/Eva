@@ -2,14 +2,14 @@ pub use crate::prelude::*;
 use eva::prelude::Transform;
 
 #[pyclass]
-#[pyo3(name = "Light")]
+#[pyo3(name = "EvaLight")]
 #[derive(PyNode)]
-pub struct PyLight {
+pub struct EvaLight {
     pub inner: Light,
 }
 
 #[pymethods]
-impl PyLight {
+impl EvaLight {
     #[new]
     fn new(colour: (f32, f32, f32), attenuation: (f32, f32, f32)) -> Self {
         let (r, g, b) = colour;

@@ -3,21 +3,18 @@ use crate::{
     shader::{ShaderCamera, ShaderGlobalConfig, ShaderStruct},
 };
 
-use nalgebra::Vector3;
 use wgpu::*;
-use winit::{
-    event::{ElementState, VirtualKeyCode},
-    window::Window,
-};
+use winit::window::Window;
 
-use super::RenderContext;
+use super::{StaticRenderContext, DynamicRenderContext};
+
 
 pub struct Renderer {
     pub surface: Surface,
     pub device: Device,
     pub queue: Queue,
     pub window: Window,
-    pub context: RenderContext,
+    pub static_context: StaticRenderContext,
 
     pub ray_tracer_pipeline: ComputePipeline,
     pub display_pipeline: RenderPipeline,
@@ -45,62 +42,23 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub fn render(&mut self) -> Result<(), SurfaceError> {
+    pub fn render(&mut self, context: &DynamicRenderContext) -> Result<(), SurfaceError> {
         let surface_texture = self.surface.get_current_texture().unwrap();
 
         let mut encoder = self
             .device
             .create_command_encoder(&CommandEncoderDescriptor::default());
-        self.encode_pass(&mut encoder, &surface_texture);
+        self.encode_pass(&mut encoder, &surface_texture, context);
         self.queue.submit([encoder.finish()]);
 
         surface_texture.present();
 
         Ok(())
     }
-
-    // Temporary: just for testing.
-    pub fn update(&mut self, key: VirtualKeyCode, state: ElementState) {
-        let speed = 90.0;
-
-        match (key, state) {
-            (VirtualKeyCode::A, ElementState::Pressed) => {
-                self.context.camera.translate(Vector3::new(speed, 0.0, 0.0))
-            }
-            (VirtualKeyCode::D, ElementState::Pressed) => self
-                .context
-                .camera
-                .translate(Vector3::new(-speed, 0.0, 0.0)),
-            (VirtualKeyCode::W, ElementState::Pressed) => {
-                self.context.camera.translate(Vector3::new(0.0, speed, 0.0))
-            }
-            (VirtualKeyCode::S, ElementState::Pressed) => self
-                .context
-                .camera
-                .translate(Vector3::new(0.0, -speed, 0.0)),
-            (VirtualKeyCode::M, ElementState::Pressed) => self
-                .context
-                .camera
-                .translate(Vector3::new(0.0, 0.0, speed)),
-            (VirtualKeyCode::K, ElementState::Pressed) => self
-                .context
-                .camera
-                .translate(Vector3::new(0.0, 0.0, -speed)),
-            (VirtualKeyCode::Space, ElementState::Pressed) => self
-                .context
-                .scene
-                .root_mut()
-                .transform_mut()
-                .rotate_y(1.0f32.to_radians()),
-            _ => {}
-        };
-
-        // self.context.camera.look_at(Vector3::new(0.0, 0.0, 0.0));
-    }
 }
 
 impl Renderer {
-    fn encode_pass(&self, encoder: &mut CommandEncoder, surface_texture: &SurfaceTexture) {
+    fn encode_pass(&self, encoder: &mut CommandEncoder, surface_texture: &SurfaceTexture, context: &DynamicRenderContext) {
         let window_size = self.window.inner_size();
         let texture = self.device.create_texture(&TextureDescriptor {
             label: Some("display texture"),
@@ -129,7 +87,7 @@ impl Renderer {
             array_layer_count: None,
         });
 
-        self.ray_tracer_pass(encoder, &texture_view);
+        self.ray_tracer_pass(encoder, &texture_view, context);
         self.display_pass(encoder, &surface_texture, &texture_view);
     }
 
@@ -188,12 +146,12 @@ impl Renderer {
     }
 
     #[rustfmt::skip]
-    fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView) {
-        let shader_camera: ShaderCamera = self.context.camera.clone().into();
-        let flat_scene: FlatScene = self.context.scene.clone().into();
+    fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView, context: &DynamicRenderContext) {
+        let shader_camera: ShaderCamera = context.camera.clone().into();
+        let flat_scene: FlatScene = context.scene.clone().into();
 
         let config = ShaderGlobalConfig {
-            ambient: flat_scene.ambient,
+            ambient: self.static_context.ambient
         };
 
         self.queue.write_buffer(&self.config_buffer, 0, &config.as_bytes().unwrap());
