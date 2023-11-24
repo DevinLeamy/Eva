@@ -155,8 +155,8 @@ fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     var y = f32(GlobalInvocationID.y) + 0.5;
 
     // Jitter.
-    x = x + (random01(vec2f(GlobalInvocationID.xy)) - 0.5) / 3.0;
-    y = y + (random01(vec2f(GlobalInvocationID.yx)) - 0.5) / 3.0;
+    // x = x + (random01(vec2f(GlobalInvocationID.xy)) - 0.5) / 3.0;
+    // y = y + (random01(vec2f(GlobalInvocationID.yx)) - 0.5) / 3.0;
 
     let screen_coord = vec2<i32>(i32(GlobalInvocationID.x), i32(GlobalInvocationID.y));
     let pixel_position = compute_pixel_position(x, y);

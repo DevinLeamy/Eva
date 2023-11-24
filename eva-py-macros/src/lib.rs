@@ -34,6 +34,10 @@ pub fn node_methods_derive(input: TokenStream) -> TokenStream {
                 self.inner.transform_mut().translate(Vector3::new(x, y, z));
             }
 
+            fn set_translation(&mut self, x: f32, y: f32, z: f32) {
+                self.inner.transform_mut().set_translation(Vector3::new(x, y, z));
+            }
+
             fn rotate(&mut self, axis: &str, degrees: f32) {
                 let rad = degrees.to_radians();
                 match axis {
@@ -42,6 +46,15 @@ pub fn node_methods_derive(input: TokenStream) -> TokenStream {
                     "z" | "Z" => self.inner.transform_mut().rotate_z(rad),
                     _ => panic!("Invalid axis: {axis}")
                 }
+            }
+
+            fn translation(&self) -> [f32; 3] {
+                self.inner.transform().translation().into()
+            }
+
+            // TODO: Renamed scale() to set_scale() and renamed this method to scale()
+            fn get_scale(&self) -> [f32; 3] {
+                self.inner.transform().scale().into()
             }
         }
     };

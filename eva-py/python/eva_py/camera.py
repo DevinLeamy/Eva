@@ -12,5 +12,4 @@ class Camera(Singleton):
         self.inner.look_at(x, y, z)
 
     def translate(self, x, y, z):
-        # print("Translate Camera", x, y, z)
         self.inner.translate(x, y, z)

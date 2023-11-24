@@ -47,7 +47,6 @@ def handle_input(key: str, state: str):
     if state != "Pressed":
         return
 
-    # print("Handle input", key, state)
     if key == "J":
         ball.translate(1, 0, 0)
     elif key == "L":
