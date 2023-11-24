@@ -9,4 +9,4 @@ class Eva:
         scene = Scene()
         camera = Camera()
 
-        ray_trace(scene.build(), camera.inner, update)
+        ray_trace(scene.build(), camera, update)

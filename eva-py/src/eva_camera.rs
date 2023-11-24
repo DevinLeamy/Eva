@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[pyclass]
 #[pyo3(name = "EvaCamera")]
+#[derive(Clone)]
 pub struct EvaCamera {
     pub inner: Camera,
 }

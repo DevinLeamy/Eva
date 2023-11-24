@@ -21,15 +21,14 @@ mod prelude {
 }
 
 use crate::eva_main::EvaRunDescriptor;
-use pyo3::types::PyFunction;
 
 use crate::prelude::*;
 
 #[pyfunction]
 #[pyo3(name = "ray_trace")]
-fn eva_py_ray_trace(scene: &EvaScene, camera: &EvaCamera, update: PyObject) -> PyResult<()> {
+fn eva_py_ray_trace(scene: &EvaScene, camera: PyObject, update: PyObject) -> PyResult<()> {
     eva_main::main(EvaRunDescriptor {
-        camera: camera.inner.clone(),
+        camera,
         scene: Scene {
             ambient: scene.ambient,
             root: scene.root.clone(),

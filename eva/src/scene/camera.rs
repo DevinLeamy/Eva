@@ -20,6 +20,17 @@ impl Camera {
     }
 }
 
+impl Default for Camera {
+    fn default() -> Self {
+        Self {
+            position: Default::default(),
+            fov: 50.0,
+            target: Unit::new_normalize(Vector3::new(0., 0., -1.)),
+            up: Unit::new_normalize(Vector3::new(0., 1., 0.)),
+        }
+    }
+}
+
 impl Camera {
     pub fn set_position(&mut self, position: Vector3<f32>) {
         self.position = position;

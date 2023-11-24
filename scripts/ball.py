@@ -44,7 +44,7 @@ camera.look_at(0, 0, 0)
 
 def update():
     print("Start update")
-    # camera.translate(1, 1, 1)
+    camera.translate(0.0000, 0.0000, 0.001)
     print("End update")
 
 
