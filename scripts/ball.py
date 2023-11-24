@@ -2,6 +2,7 @@ from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
 
 Eva.set_ambient(0.3)
 wood = Eva.add_texture("wood.jpeg")
+earth_handle = Eva.add_texture("earth.jpg")
 
 scene = Scene()
 ball_mat = Material(
@@ -29,6 +30,7 @@ scene.add(table)
 ball = Sphere(radius=ball_size)
 ball.set_material(ball_mat)
 ball.translate(0, 0, game_z)
+ball.set_texture(earth_handle)
 
 scene.add(ball)
 
@@ -41,7 +43,7 @@ camera = Camera((75, 0, 200))
 camera.look_at(0, 0, 0)
 
 
-def handle_input(key, state):
+def handle_input(key: str, state: str):
     if state != "Pressed":
         return
 
@@ -66,9 +68,7 @@ def handle_input(key, state):
 
 
 def update():
-    pass
-    # print("Start update")
-    # print("End update")
+    ball.rotate_y(0.5)
 
 
 Eva.run(update, handle_input)

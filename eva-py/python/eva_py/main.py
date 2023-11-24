@@ -16,7 +16,7 @@ class Eva(Singleton):
 
     @staticmethod
     def add_texture(name: str):
-        Eva().inner.add_texture(name)
+        return Eva().inner.add_texture(name)
 
     @staticmethod
     def add_skybox(images: [str]):
