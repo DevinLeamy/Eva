@@ -104,9 +104,6 @@ camera.look_at(0, 0, 0)
 
 
 def handle_input(key, state):
-    # Paddles moving.
-    print("Handle input:", key, state)
-
     paddle_delta_x = 0
     top_paddle_delta_x = 0
 
