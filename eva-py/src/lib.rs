@@ -1,5 +1,6 @@
 mod eva_camera;
 mod eva_light;
+mod eva_main;
 mod eva_scene;
 mod py_geometry;
 mod py_material;
@@ -19,22 +20,15 @@ mod prelude {
     pub use eva_py_macros::PyNode;
 }
 
-use eva::EvaRunDescriptor;
+use crate::eva_main::EvaRunDescriptor;
 use pyo3::types::PyFunction;
 
 use crate::prelude::*;
 
 #[pyfunction]
 #[pyo3(name = "ray_trace")]
-fn eva_py_ray_trace(
-    py: Python,
-    scene: &EvaScene,
-    camera: &EvaCamera,
-    update: &PyFunction,
-) -> PyResult<()> {
-    let object = update.to_object(py);
-
-    eva::prelude::main(EvaRunDescriptor {
+fn eva_py_ray_trace(scene: &EvaScene, camera: &EvaCamera, update: PyObject) -> PyResult<()> {
+    eva_main::main(EvaRunDescriptor {
         camera: camera.inner.clone(),
         scene: Scene {
             ambient: scene.ambient,
@@ -42,7 +36,7 @@ fn eva_py_ray_trace(
         },
         skybox: scene.skybox.clone(),
         textures: scene.texture_loader.clone().textures(),
-        update: object,
+        update,
     });
 
     Ok(())

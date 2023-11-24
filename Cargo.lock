@@ -491,7 +491,6 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "encase",
- "env_logger",
  "eva-macros",
  "image",
  "lazy_static",
@@ -499,7 +498,6 @@ dependencies = [
  "nalgebra",
  "obj",
  "pollster",
- "pyo3",
  "wgpu",
  "winit",
 ]
@@ -516,11 +514,13 @@ dependencies = [
 name = "eva-py"
 version = "0.1.0"
 dependencies = [
+ "env_logger",
  "eva",
  "eva-py-macros",
  "nalgebra",
  "pollster",
  "pyo3",
+ "winit",
 ]
 
 [[package]]
@@ -1347,9 +1347,9 @@ checksum = "de3145af08024dea9fa9914f381a17b8fc6034dfb00f3a84013f7ff43f29ed4c"
 
 [[package]]
 name = "percent-encoding"
-version = "2.3.0"
+version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b2a4787296e9989611394c33f193f676704af1686e70b8f8033ab5ba9a35a94"
+checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
 
 [[package]]
 name = "pkg-config"

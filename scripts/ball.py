@@ -44,7 +44,7 @@ camera.look_at(0, 0, 0)
 
 def update():
     print("Start update")
-    # ball.translate(1, 1, 1)
+    # camera.translate(1, 1, 1)
     print("End update")
 
 

@@ -44,4 +44,8 @@ impl EvaCamera {
     fn look_at(&mut self, x: f32, y: f32, z: f32) {
         self.inner.look_at(Vector3::new(x, y, z));
     }
+
+    fn translate(&mut self, x: f32, y: f32, z: f32) {
+        self.inner.translate(Vector3::new(x, y, z));
+    }
 }
