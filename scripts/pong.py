@@ -10,7 +10,6 @@ Eva.add_skybox([
 ])
 
 Eva.set_ambient(0.3)
-
 wood = Eva.add_texture("wood.jpeg")
 
 scene = Scene()
@@ -72,8 +71,12 @@ camera = Camera((75, 0, 200))
 camera.look_at(0, 0, 0)
 
 
+def handle_input(key, state):
+    print("Handle input:", key, state)
+
+
 def update():
     print("bar")
 
 
-Eva.run(update)
+Eva.run(update, handle_input)
