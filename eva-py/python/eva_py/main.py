@@ -5,8 +5,8 @@ from eva_py.scene import Scene
 
 class Eva:
     @staticmethod
-    def run(update):
+    def run(update, handle_input):
         scene = Scene()
         camera = Camera()
 
-        ray_trace(scene.build(), camera, update)
+        ray_trace(scene.build(), camera, update, handle_input)

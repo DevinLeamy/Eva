@@ -42,10 +42,25 @@ camera = Camera((75, 0, 200))
 camera.look_at(0, 0, 0)
 
 
+def handle_input(key, state):
+    # print("Handle input", key, state)
+    if state != "Pressed":
+        return
+
+    if key == "A":
+        camera.translate(1, 0, 0)
+    elif key == "D":
+        camera.translate(-1, 0, 0)
+    elif key == "W":
+        camera.translate(0, 1, 0)
+    elif key == "S":
+        camera.translate(0, -1, 0)
+
+
 def update():
-    print("Start update")
-    camera.translate(0.0000, 0.0000, 0.001)
-    print("End update")
+    pass
+    # print("Start update")
+    # print("End update")
 
 
-Eva.run(update)
+Eva.run(update, handle_input)
