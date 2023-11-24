@@ -18,6 +18,9 @@ def vec3_mult(a: [float], b: [float]) -> [float]:
 
 
 def vec3_normalize(v: [float]) -> [float]:
-    vv = vec3_mult(v, v)
-    length = math.sqrt(vv[0] + vv[1] + vv[2])
+    length = vec3_length(v)
     return [v[0] / length, v[1] / length, v[2] / length]
+
+def vec3_length(v: [float]) -> [float]:
+    vv = vec3_mult(v, v)
+    return math.sqrt(vv[0] + vv[1] + vv[2])

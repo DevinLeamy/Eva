@@ -34,6 +34,10 @@ pub fn node_methods_derive(input: TokenStream) -> TokenStream {
                 self.inner.transform_mut().translate(Vector3::new(x, y, z));
             }
 
+            fn set_translation(&mut self, x: f32, y: f32, z: f32) {
+                self.inner.transform_mut().set_translation(Vector3::new(x, y, z));
+            }
+
             fn rotate(&mut self, axis: &str, degrees: f32) {
                 let rad = degrees.to_radians();
                 match axis {

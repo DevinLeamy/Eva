@@ -1,14 +1,14 @@
 from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
-from eva_py import vec3_sub, vec3_mult, vec3_normalize, vec3_scalar_mult
+from eva_py import vec3_sub, vec3_mult, vec3_normalize, vec3_scalar_mult, vec3_length
 
-# Eva.add_skybox([
-#     "blue/x.png",
-#     "blue/-x.png",
-#     "blue/y.png",
-#     "blue/-y.png",
-#     "blue/z.png",
-#     "blue/-z.png",
-# ])
+Eva.add_skybox([
+    "blue/x.png",
+    "blue/-x.png",
+    "blue/y.png",
+    "blue/-y.png",
+    "blue/z.png",
+    "blue/-z.png",
+])
 # Bottom paddle.
 MOVE_LEFT: str = "A"
 MOVE_RIGHT: str = "D"
@@ -17,7 +17,7 @@ TOP_MOVE_LEFT: str = "J"
 TOP_MOVE_RIGHT: str = "L"
 
 PADDLE_SPEED: float = 3.0
-BALL_SPEED: float = 3.0
+BALL_SPEED: float = 2.0
 
 Eva.set_ambient(0.3)
 
@@ -28,13 +28,13 @@ ball_mat = Material(
     10
 )
 paddle_mat = Material(
+    (0.0, 0.0, 1.0),
     (0.5, 0.5, 0.5),
-    (0.0, 0.0, 0.0),
     0
 )
 table_mat = Material(
     (1.0, 1.0, 1.0),
-    (0.4, 0.4, 0.4),
+    (1.0, 1.0, 1.0),
     10
 )
 
@@ -46,8 +46,8 @@ wall_mat = Material(
 
 ball_size = 4
 paddle_width = 40
-paddle_height = 6
-paddle_depth = 10
+paddle_height = 3
+paddle_depth = 15
 board_size = 100
 game_z = 20
 
@@ -137,8 +137,10 @@ def next_ball_color(color: [float]) -> [float]:
     return color
 
 
+ball_escaping = False
+
 def update():
-    global ball_color, ball_velocity
+    global ball_color, ball_velocity, ball_escaping
 
     color = ball_color
     ball_mat = Material(
@@ -154,21 +156,33 @@ def update():
 
     # Check for ball-paddle intersections.
     if ball.intersects_with(bottom_paddle):
-        x_offset = vec3_sub(ball.translation(), bottom_paddle.translation())[0]
-        ball_velocity[0] = (-x_offset) / 30.0
-        ball_velocity[1] = ball_velocity[1] * -1
-        ball_velocity = vec3_normalize(
-            vec3_scalar_mult(ball_velocity, BALL_SPEED))
+        if not ball_escaping:
+            x_offset = vec3_sub(ball.translation(),
+                                bottom_paddle.translation())[0]
+            ball_velocity[0] = (-x_offset) / 30.0
+            ball_velocity[1] = ball_velocity[1] * -1
+            ball_velocity = vec3_scalar_mult(
+                vec3_normalize(ball_velocity), BALL_SPEED)
+        ball_escaping = True
+    elif ball.intersects_with(top_paddle):
+        if not ball_escaping:
+            x_offset = vec3_sub(ball.translation(),
+                                top_paddle.translation())[0]
+            ball_velocity[0] = (-x_offset) / 30.0
+            ball_velocity[1] = ball_velocity[1] * -1
+            ball_velocity = vec3_scalar_mult(
+                vec3_normalize(ball_velocity), BALL_SPEED)
+        ball_escaping = True
+    elif ball.intersects_with(left_wall) or ball.intersects_with(right_wall):
+        if not ball_escaping:
+            ball_velocity[0] = ball_velocity[0] * -1
+        ball_escaping = True
+    else:
+        ball_escaping = False
 
-    if ball.intersects_with(top_paddle):
-        x_offset = vec3_sub(ball.translation(), top_paddle.translation())[0]
-        ball_velocity[0] = (-x_offset) / 30.0
-        ball_velocity[1] = ball_velocity[1] * -1
-        ball_velocity = vec3_normalize(
-            vec3_scalar_mult(ball_velocity, BALL_SPEED))
-
-    if ball.intersects_with(left_wall) or ball.intersects_with(right_wall):
-        ball_velocity[0] = ball_velocity[0] * -1
+    if vec3_length(ball.translation()) > board_size:
+        ball.set_translation(0, 0, game_z)
+        ball_velocity = [0, -BALL_SPEED, 0]
 
 
 Eva.run(update, handle_input)

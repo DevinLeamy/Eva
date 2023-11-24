@@ -15,3 +15,6 @@ class Node:
 
     def translation(self) -> [float]:
         return self.inner().translation()
+
+    def set_translation(self, x: float, y: float, z: float):
+        self.inner().set_translation(x, y, z)
