@@ -3,12 +3,8 @@ use crate::{
     shader::{ShaderCamera, ShaderGlobalConfig, ShaderStruct},
 };
 
-use nalgebra::Vector3;
 use wgpu::*;
-use winit::{
-    event::{ElementState, VirtualKeyCode},
-    window::Window,
-};
+use winit::window::Window;
 
 use super::{StaticRenderContext, DynamicRenderContext};
 

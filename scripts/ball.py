@@ -43,7 +43,9 @@ camera.look_at(0, 0, 0)
 
 
 def update():
-    ball.translate(1, 1, 1)
+    print("Start update")
+    # ball.translate(1, 1, 1)
+    print("End update")
 
 
 Eva.run(update)

@@ -51,32 +51,36 @@ pub struct EvaRunDescriptor {
     pub update: PyObject,
 }
 
+pub struct ThreadSyncContext {
+    pub update: PyObject,
+    pub context: DynamicRenderContext,
+}
+
 pub fn main(run: EvaRunDescriptor) {
     env_logger::init();
-    let py_update_arc = Arc::new(Mutex::new(run.update));
-
-    let context = StaticRenderContext {
-        textures: run.textures.clone(),
-        skybox: run.skybox.clone(),
-    };
-
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_title("Eva")
         .with_inner_size(LogicalSize::new(850, 850))
         .build(&event_loop)
         .unwrap();
+    let static_context = StaticRenderContext {
+        textures: run.textures.clone(),
+        skybox: run.skybox.clone(),
+    };
+    let mut renderer = RendererBuilder::new(window, static_context).build();
 
-    let mut renderer = RendererBuilder::new(window, context).build();
-    let mut last_frame_time: Instant = Instant::now();
-
-    let py_update_clone = Arc::clone(&py_update_arc);
-    let context_arc = Arc::new(Mutex::new(DynamicRenderContext {
-        scene: run.scene,
-        camera: run.camera,
+    let context = DynamicRenderContext {
+        scene: run.scene.clone(),
+        camera: run.camera.clone(),
+    };
+    let sync_arc = Arc::new(Mutex::new(ThreadSyncContext {
+        update: run.update,
+        context,
     }));
-    let context_arc_clone = Arc::clone(&context_arc);
+    let sync_arc_clone = Arc::clone(&sync_arc);
 
+    let mut last_frame_time: Instant = Instant::now();
     event_loop.run(move |event, _, control_flow| {
         match event {
             Event::WindowEvent {
@@ -98,21 +102,30 @@ pub fn main(run: EvaRunDescriptor) {
             _ => {}
         }
         let now = Instant::now();
+        let sync = sync_arc_clone.lock();
         Python::with_gil(|py| -> PyResult<()> {
-            let py_update_inner = py_update_clone.lock();
-            let py_func_ref: &PyFunction = py_update_inner.as_ref().unwrap().downcast(py)?;
+            let py_func_ref: &PyFunction = sync.as_ref().unwrap().update.downcast(py)?;
             py_func_ref.call1(())?;
+            // let context = &DynamicRenderContext {
+            //     camera: context_arc_clone.lock().unwrap().camera.clone(),
+            //     scene: context_arc_clone.lock().unwrap().scene.clone(),
+            // };
 
             Ok(())
         })
         .unwrap();
         if now.duration_since(last_frame_time).as_millis() > 32 {
-            renderer
-                .render(&DynamicRenderContext {
-                    camera: context_arc_clone.lock().unwrap().camera.clone(),
-                    scene: context_arc_clone.lock().unwrap().scene.clone(),
-                })
-                .unwrap();
+            // let context = &DynamicRenderContext {
+            //     camera: context_arc_clone.lock().unwrap().camera.clone(),
+            //     scene: context_arc_clone.lock().unwrap().scene.clone(),
+            // };
+            renderer.render(&sync.as_ref().unwrap().context).unwrap();
+            // renderer
+            //     .render(&DynamicRenderContext {
+            //         camera: context_arc_clone.lock().unwrap().camera.clone(),
+            //         scene: context_arc_clone.lock().unwrap().scene.clone(),
+            //     })
+            //     .unwrap();
             last_frame_time = Instant::now();
         }
     });
