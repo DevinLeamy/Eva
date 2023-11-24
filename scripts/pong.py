@@ -1,11 +1,6 @@
-from eva_py import TextureBuilder, Scene, Light, Camera, Material, Eva, Box, Sphere
+from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
 
-AMBIENT = 0.3
-wood = TextureBuilder.build("wood.jpeg")
-
-scene = Scene()
-scene.set_ambient(AMBIENT)
-scene.set_skybox([
+Eva.add_skybox([
     "blue/x.png",
     "blue/-x.png",
     "blue/y.png",
@@ -13,6 +8,10 @@ scene.set_skybox([
     "blue/z.png",
     "blue/-z.png",
 ])
+wood = Eva.add_texture("wood.jpeg")
+
+scene = Scene()
+scene.set_ambient(0.3)
 
 ball_mat = Material(
     (0.4, 0.0, 0.8),

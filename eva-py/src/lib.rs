@@ -1,4 +1,5 @@
 mod eva_camera;
+mod eva_global;
 mod eva_light;
 mod eva_main;
 mod eva_scene;
@@ -8,6 +9,7 @@ mod py_transform;
 
 mod prelude {
     pub use crate::eva_camera::EvaCamera;
+    pub use crate::eva_global::EvaGlobal;
     pub use crate::eva_light::EvaLight;
     pub use crate::eva_scene::EvaScene;
     pub use crate::py_geometry::PyGeometry;
@@ -25,18 +27,21 @@ use crate::eva_main::EvaRunDescriptor;
 use crate::prelude::*;
 
 #[pyfunction]
-#[pyo3(name = "ray_trace")]
-fn eva_py_ray_trace(scene: &EvaScene, camera: PyObject, update: PyObject, input_handler: PyObject) -> PyResult<()> {
+#[pyo3(name = "eva_main")]
+fn eva_py_main(
+    global: &EvaGlobal,
+    scene: PyObject,
+    camera: PyObject,
+    update: PyObject,
+    input_handler: PyObject,
+) -> PyResult<()> {
     eva_main::main(EvaRunDescriptor {
         camera,
-        scene: Scene {
-            ambient: scene.ambient,
-            root: scene.root.clone(),
-        },
-        skybox: scene.skybox.clone(),
-        textures: scene.texture_loader.clone().textures(),
+        scene,
+        skybox: global.skybox.clone(),
+        textures: global.texture_loader.clone().textures(),
         update,
-        input_handler
+        input_handler,
     });
 
     Ok(())
@@ -50,7 +55,8 @@ fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyTransform>()?;
     m.add_class::<EvaCamera>()?;
     m.add_class::<PyMaterial>()?;
-    m.add_function(wrap_pyfunction!(eva_py_ray_trace, m)?)?;
+    m.add_class::<EvaGlobal>()?;
+    m.add_function(wrap_pyfunction!(eva_py_main, m)?)?;
 
     Ok(())
 }

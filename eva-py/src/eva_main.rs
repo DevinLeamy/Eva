@@ -11,11 +11,11 @@ use winit::{
     window::WindowBuilder,
 };
 
-use crate::prelude::EvaCamera;
+use crate::prelude::{EvaCamera, EvaScene};
 
 pub struct EvaRunDescriptor {
     pub camera: PyObject,
-    pub scene: Scene,
+    pub scene: PyObject,
     pub textures: ShaderTextures,
     pub skybox: ShaderSkybox,
     pub update: PyObject,
@@ -24,8 +24,8 @@ pub struct EvaRunDescriptor {
 
 pub struct ThreadSyncContext {
     pub update: PyObject,
-    pub context: DynamicRenderContext,
     pub camera: PyObject,
+    pub scene: PyObject,
     pub input_handler: PyObject,
 }
 
@@ -44,14 +44,10 @@ pub fn main(run: EvaRunDescriptor) {
     };
     let mut renderer = RendererBuilder::new(window, static_context).build();
 
-    let context = DynamicRenderContext {
-        scene: run.scene.clone(),
-        camera: Camera::default(),
-    };
     let sync_arc = Arc::new(Mutex::new(ThreadSyncContext {
         update: run.update,
-        context,
         camera: run.camera,
+        scene: run.scene,
         input_handler: run.input_handler,
     }));
     let sync_arc_clone = Arc::clone(&sync_arc);
@@ -92,27 +88,28 @@ pub fn main(run: EvaRunDescriptor) {
         }
 
         if now.duration_since(last_frame_time).as_millis() > 32 {
-            let mut camera = Camera::default();
-            Python::with_gil(|py| -> PyResult<()> {
+            let (camera, scene) = Python::with_gil(|py| -> PyResult<(Camera, Scene)> {
                 let py_func_ref: &PyFunction = sync.as_ref().unwrap().update.downcast(py)?;
                 py_func_ref.call1(())?;
 
                 let py_camera_ref = &sync.as_ref().unwrap().camera;
+                let py_scene_ref = &sync.as_ref().unwrap().scene;
                 let eva_camera: EvaCamera = py_camera_ref
                     .getattr(py, "inner")
                     .unwrap()
                     .extract(py)
                     .unwrap();
-                camera = eva_camera.inner;
+                let eva_scene: EvaScene = py_scene_ref
+                    .getattr(py, "inner")
+                    .unwrap()
+                    .extract(py)
+                    .unwrap();
 
-                Ok(())
+                Ok((eva_camera.inner, eva_scene.inner))
             })
             .unwrap();
 
-            let context = DynamicRenderContext {
-                scene: sync.as_ref().unwrap().context.scene.clone(),
-                camera,
-            };
+            let context = DynamicRenderContext { scene, camera };
             renderer.render(&context).unwrap();
             last_frame_time = Instant::now();
         }
