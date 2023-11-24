@@ -66,7 +66,6 @@ def handle_input(key: str, state: str):
     elif key == "S":
         camera.translate(0, -1, 0)
 
-
 def update():
     ball.rotate_y(0.5)
 

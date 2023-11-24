@@ -14,5 +14,5 @@ class GeometryNode(Node):
     def set_material(self, material):
         self.inner().set_material(material)
 
-    def set_texture(self, texture):
+    def set_texture(self, texture: int):
         self.inner().set_texture(texture)
