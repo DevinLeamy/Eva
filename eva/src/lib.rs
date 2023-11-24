@@ -44,11 +44,11 @@ pub mod prelude {
 }
 
 pub struct EvaRunDescriptor {
-    camera: Camera,
-    scene: Scene,
-    textures: ShaderTextures,
-    skybox: ShaderSkybox,
-    update: PyObject,
+    pub camera: Camera,
+    pub scene: Scene,
+    pub textures: ShaderTextures,
+    pub skybox: ShaderSkybox,
+    pub update: PyObject,
 }
 
 pub fn main(run: EvaRunDescriptor) {

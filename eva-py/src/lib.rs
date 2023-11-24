@@ -19,6 +19,7 @@ mod prelude {
     pub use eva_py_macros::PyNode;
 }
 
+use eva::EvaRunDescriptor;
 use pyo3::types::PyFunction;
 
 use crate::prelude::*;
