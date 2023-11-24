@@ -52,7 +52,8 @@ board_size = 100
 game_z = 20
 
 wall_height = board_size - 10
-wall_width = 5
+wall_width = 2 
+wall_depth = paddle_depth 
 
 table = Box()
 table.scale(board_size, board_size, 2)
@@ -74,14 +75,14 @@ bottom_paddle.translate(0.0, -board_size / 2.0, game_z)
 scene.add(bottom_paddle)
 
 left_wall = Box()
-left_wall.scale(wall_width, wall_height, paddle_depth)
+left_wall.scale(wall_width, wall_height, wall_depth)
 left_wall.translate(-board_size / 2.0, 0.0, game_z)
 left_wall.set_material(wall_mat)
 
 scene.add(left_wall)
 
 right_wall = Box()
-right_wall.scale(wall_width, wall_height, paddle_depth)
+right_wall.scale(wall_width, wall_height, wall_depth)
 right_wall.translate(board_size / 2.0, 0.0, game_z)
 right_wall.set_material(wall_mat)
 
@@ -99,7 +100,7 @@ white_light.translate(-100.0, 150.0, 400.0)
 
 scene.add(white_light)
 
-camera = Camera((75, 0, 200))
+camera = Camera((0, 0, 200))
 camera.look_at(0, 0, 0)
 
 
