@@ -1,8 +1,11 @@
 class Node:
-    inner = None
+    _inner = None
 
     def __init__(self, inner):
-        self.inner = inner
+        self._inner = inner
 
     def translate(self, x: float, y: float, z: float):
-        self.inner.translate(x, y, z)
+        self._inner.translate(x, y, z)
+
+    def inner(self) -> any:
+        return self._inner

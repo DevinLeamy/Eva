@@ -12,11 +12,7 @@ class Eva(Singleton):
 
     @staticmethod
     def run(update, handle_input):
-        eva = Eva()
-        scene = Scene()
-        camera = Camera()
-
-        eva_main(eva.inner, scene, camera, update, handle_input)
+        eva_main(Eva().inner, Scene(), Camera(), update, handle_input)
 
     @staticmethod
     def add_texture(name: str):

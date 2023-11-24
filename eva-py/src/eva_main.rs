@@ -100,7 +100,7 @@ pub fn main(run: EvaRunDescriptor) {
                     .extract(py)
                     .unwrap();
                 let eva_scene: EvaScene = py_scene_ref
-                    .getattr(py, "inner")
+                    .call_method1(py, "inner", ())
                     .unwrap()
                     .extract(py)
                     .unwrap();

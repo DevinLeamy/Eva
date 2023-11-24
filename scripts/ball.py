@@ -43,9 +43,18 @@ camera.look_at(0, 0, 0)
 
 
 def handle_input(key, state):
-    # print("Handle input", key, state)
     if state != "Pressed":
         return
+
+    # print("Handle input", key, state)
+    if key == "J":
+        ball.translate(1, 0, 0)
+    elif key == "L":
+        ball.translate(-1, 0, 0)
+    elif key == "I":
+        ball.translate(0, 1, 0)
+    elif key == "K":
+        ball.translate(0, -1, 0)
 
     if key == "A":
         camera.translate(1, 0, 0)

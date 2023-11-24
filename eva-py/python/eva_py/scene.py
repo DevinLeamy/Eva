@@ -4,21 +4,25 @@ from eva_py.node import Node
 
 
 class Scene(Singleton):
-    inner: EvaScene
+    _inner: EvaScene
+
+    children: [Node]
 
     def init(self):
-        self.inner = EvaScene()
-        self.root = Transform()
+        self._inner = EvaScene()
+        self.children = []
 
     def add(self, node: Node):
-        self.root.add_child(node.inner)
+        self.children.append(node)
 
     def set_ambient(self, strength):
-        self.inner.set_ambient(strength, strength, strength)
+        self._inner.set_ambient(strength, strength, strength)
 
-    def set_skybox(self, images: [str]):
-        self.inner.set_skybox(images)
+    def inner(self) -> EvaScene:
+        # Construct the entire scene hierarchy.
+        root = Transform()
+        for node in self.children:
+            root.add_child(node.inner())
 
-    def build(self):
-        self.inner.set_root(self.root)
-        return self.inner
+        self._inner.set_root(root)
+        return self._inner

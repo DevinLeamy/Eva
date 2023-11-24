@@ -7,12 +7,12 @@ class GeometryNode(Node):
 
     def scale(self, x, y=None, z=None):
         if y != None and z != None:
-            self.inner.scale(x, y, z)
+            self.inner().scale(x, y, z)
         else:
-            self.inner.scale(x, x, x)
+            self.inner().scale(x, x, x)
 
     def set_material(self, material):
-        self.inner.set_material(material)
+        self.inner().set_material(material)
 
     def set_texture(self, texture):
-        self.inner.set_texture(texture)
+        self.inner().set_texture(texture)
