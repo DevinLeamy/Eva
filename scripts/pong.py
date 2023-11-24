@@ -1,4 +1,5 @@
 from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
+from eva_py import vec3_sub, vec3_mult, vec3_normalize, vec3_scalar_mult
 
 # Eva.add_skybox([
 #     "blue/x.png",
@@ -8,10 +9,15 @@ from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
 #     "blue/z.png",
 #     "blue/-z.png",
 # ])
+# Bottom paddle.
 MOVE_LEFT: str = "A"
 MOVE_RIGHT: str = "D"
+# Top paddle.
+TOP_MOVE_LEFT: str = "J"
+TOP_MOVE_RIGHT: str = "L"
+
 PADDLE_SPEED: float = 3.0
-BALL_SPEED: float = 1.0
+BALL_SPEED: float = 2.0
 
 Eva.set_ambient(0.3)
 
@@ -32,12 +38,21 @@ table_mat = Material(
     10
 )
 
-ball_size = 8
+wall_mat = Material(
+    (1.0, 1.0, 1.0),
+    (0.4, 0.4, 0.4),
+    10
+)
+
+ball_size = 4
 paddle_width = 40
-paddle_height = 10
+paddle_height = 6
 paddle_depth = 10
 board_size = 100
 game_z = 20
+
+wall_height = board_size - 10
+wall_width = 5
 
 table = Box()
 table.scale(board_size, board_size, 2)
@@ -58,10 +73,24 @@ bottom_paddle.translate(0.0, -board_size / 2.0, game_z)
 
 scene.add(bottom_paddle)
 
+left_wall = Box()
+left_wall.scale(wall_width, wall_height, paddle_depth)
+left_wall.translate(-board_size / 2.0, 0.0, game_z)
+left_wall.set_material(wall_mat)
+
+scene.add(left_wall)
+
+right_wall = Box()
+right_wall.scale(wall_width, wall_height, paddle_depth)
+right_wall.translate(board_size / 2.0, 0.0, game_z)
+right_wall.set_material(wall_mat)
+
+scene.add(right_wall)
+
 ball = Sphere(radius=ball_size)
 ball.set_material(ball_mat)
 ball.translate(0, 0, game_z)
-ball_velocity = [0, -BALL_SPEED]
+ball_velocity = [0, -BALL_SPEED, 0]
 
 scene.add(ball)
 
@@ -79,13 +108,20 @@ def handle_input(key, state):
     print("Handle input:", key, state)
 
     paddle_delta_x = 0
+    top_paddle_delta_x = 0
 
     if key == MOVE_LEFT:
         paddle_delta_x = -PADDLE_SPEED
     elif key == MOVE_RIGHT:
         paddle_delta_x = PADDLE_SPEED
 
+    if key == TOP_MOVE_LEFT:
+        top_paddle_delta_x = -PADDLE_SPEED
+    elif key == TOP_MOVE_RIGHT:
+        top_paddle_delta_x = PADDLE_SPEED
+
     bottom_paddle.translate(paddle_delta_x, 0.0, 0.0)
+    top_paddle.translate(top_paddle_delta_x, 0.0, 0.0)
 
 
 ball_color = [0.1, 0, 0]
@@ -102,7 +138,7 @@ def next_ball_color(color: [float]) -> [float]:
 
 
 def update():
-    global ball_color
+    global ball_color, ball_velocity
 
     color = ball_color
     ball_mat = Material(
@@ -117,9 +153,22 @@ def update():
     ball.translate(ball_velocity[0], ball_velocity[1], 0.0)
 
     # Check for ball-paddle intersections.
-    if ball.intersects_with(bottom_paddle) or ball.intersects_with(top_paddle):
-        # Update the ball.
+    if ball.intersects_with(bottom_paddle):
+        x_offset = vec3_sub(ball.translation(), bottom_paddle.translation())[0]
+        ball_velocity[0] = (-x_offset) / 30.0
         ball_velocity[1] = ball_velocity[1] * -1
+        ball_velocity = vec3_normalize(
+            vec3_scalar_mult(ball_velocity, BALL_SPEED))
+
+    if ball.intersects_with(top_paddle):
+        x_offset = vec3_sub(ball.translation(), top_paddle.translation())[0]
+        ball_velocity[0] = (-x_offset) / 30.0
+        ball_velocity[1] = ball_velocity[1] * -1
+        ball_velocity = vec3_normalize(
+            vec3_scalar_mult(ball_velocity, BALL_SPEED))
+
+    if ball.intersects_with(left_wall) or ball.intersects_with(right_wall):
+        ball_velocity[0] = ball_velocity[0] * -1
 
 
 Eva.run(update, handle_input)
