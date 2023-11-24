@@ -5,8 +5,6 @@ use nalgebra::Vector3;
 pub struct Scene {
     pub ambient: Vector3<f32>,
     pub root: Node,
-    pub textures: ShaderTextures,
-    pub skybox: ShaderSkybox,
 }
 
 impl Scene {
@@ -24,10 +22,6 @@ impl Scene {
 
     pub fn set_ambient(&mut self, ambient: Vector3<f32>) {
         self.ambient = ambient;
-    }
-
-    pub fn textures(&self) -> &ShaderTextures {
-        &self.textures
     }
 }
 

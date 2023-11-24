@@ -4,7 +4,9 @@ extern crate lazy_static;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
-use prelude::{Camera, RenderContext, Scene};
+use prelude::{
+    Camera, DynamicRenderContext, Scene, ShaderSkybox, ShaderTextures, StaticRenderContext,
+};
 use pyo3::types::PyFunction;
 use pyo3::{PyObject, PyResult, Python};
 use renderer::RendererBuilder;
@@ -14,8 +16,6 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
-
-use crate::renderer::Renderer;
 
 mod config;
 mod obj_loader;
@@ -43,11 +43,22 @@ pub mod prelude {
     pub use eva_macros::*;
 }
 
-pub fn main(camera: Camera, scene: Scene, update: PyObject) {
-    env_logger::init();
-    let py_update_arc = Arc::new(Mutex::new(update));
+pub struct EvaRunDescriptor {
+    camera: Camera,
+    scene: Scene,
+    textures: ShaderTextures,
+    skybox: ShaderSkybox,
+    update: PyObject,
+}
 
-    let context = RenderContext { camera, scene };
+pub fn main(run: EvaRunDescriptor) {
+    env_logger::init();
+    let py_update_arc = Arc::new(Mutex::new(run.update));
+
+    let context = StaticRenderContext {
+        textures: run.textures.clone(),
+        skybox: run.skybox.clone(),
+    };
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
@@ -60,6 +71,11 @@ pub fn main(camera: Camera, scene: Scene, update: PyObject) {
     let mut last_frame_time: Instant = Instant::now();
 
     let py_update_clone = Arc::clone(&py_update_arc);
+    let context_arc = Arc::new(Mutex::new(DynamicRenderContext {
+        scene: run.scene,
+        camera: run.camera,
+    }));
+    let context_arc_clone = Arc::clone(&context_arc);
 
     event_loop.run(move |event, _, control_flow| {
         match event {
@@ -71,7 +87,7 @@ pub fn main(camera: Camera, scene: Scene, update: PyObject) {
                 WindowEvent::KeyboardInput { input, .. } => {
                     match (input.virtual_keycode, input.state) {
                         (Some(key), state) => {
-                            renderer.update(key, state);
+                            // renderer.update(key, state);
                         }
 
                         _ => {}
@@ -91,7 +107,12 @@ pub fn main(camera: Camera, scene: Scene, update: PyObject) {
         })
         .unwrap();
         if now.duration_since(last_frame_time).as_millis() > 32 {
-            renderer.render().unwrap();
+            renderer
+                .render(&DynamicRenderContext {
+                    camera: context_arc_clone.lock().unwrap().camera.clone(),
+                    scene: context_arc_clone.lock().unwrap().scene.clone(),
+                })
+                .unwrap();
             last_frame_time = Instant::now();
         }
     });

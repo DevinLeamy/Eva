@@ -33,16 +33,16 @@ fn eva_py_ray_trace(
 ) -> PyResult<()> {
     let object = update.to_object(py);
 
-    eva::prelude::main(
-        camera.inner.clone(),
-        Scene {
+    eva::prelude::main(EvaRunDescriptor {
+        camera: camera.inner.clone(),
+        scene: Scene {
             ambient: scene.ambient,
             root: scene.root.clone(),
-            skybox: scene.skybox.clone(),
-            textures: scene.texture_loader.clone().textures(),
         },
-        object,
-    );
+        skybox: scene.skybox.clone(),
+        textures: scene.texture_loader.clone().textures(),
+        update: object,
+    });
 
     Ok(())
 }
