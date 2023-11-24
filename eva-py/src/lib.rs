@@ -6,6 +6,7 @@ mod eva_scene;
 mod py_geometry;
 mod py_material;
 mod py_transform;
+mod utils;
 
 mod prelude {
     pub use crate::eva_camera::EvaCamera;
@@ -15,6 +16,7 @@ mod prelude {
     pub use crate::py_geometry::PyGeometry;
     pub use crate::py_material::PyMaterial;
     pub use crate::py_transform::PyTransform;
+    pub use crate::utils::*;
     pub use eva::prelude::*;
     pub use nalgebra::Vector3;
     pub use pyo3::prelude::*;

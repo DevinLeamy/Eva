@@ -5,3 +5,6 @@ from eva_py.geometry_node import GeometryNode
 class Box(GeometryNode):
     def __init__(self):
         super().__init__(Geometry("cube"))
+
+    def size(self) -> [float]:
+        return self.inner().get_scale()

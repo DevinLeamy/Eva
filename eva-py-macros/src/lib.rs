@@ -43,6 +43,15 @@ pub fn node_methods_derive(input: TokenStream) -> TokenStream {
                     _ => panic!("Invalid axis: {axis}")
                 }
             }
+
+            fn translation(&self) -> [f32; 3] {
+                self.inner.transform().translation().into()
+            }
+
+            // TODO: Renamed scale() to set_scale() and renamed this method to scale()
+            fn get_scale(&self) -> [f32; 3] {
+                self.inner.transform().scale().into()
+            }
         }
     };
 

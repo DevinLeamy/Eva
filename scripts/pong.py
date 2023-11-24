@@ -95,7 +95,7 @@ def next_ball_color(color: [float]) -> [float]:
     for i in range(3):
         if color[i] != 0:
             color[i] += 0.04
-            if abs(1.1 - color[i])  < 0.05:
+            if abs(1.1 - color[i]) < 0.05:
                 color[i] = 0
                 color[(i + 1) % 3] = 0.04
     return color
@@ -103,6 +103,7 @@ def next_ball_color(color: [float]) -> [float]:
 
 def update():
     global ball_color
+
     color = ball_color
     ball_mat = Material(
         (color[0], color[1], color[2]),
@@ -116,9 +117,9 @@ def update():
     ball.translate(ball_velocity[0], ball_velocity[1], 0.0)
 
     # Check for ball-paddle intersections.
-    if ball.intersects_with(bottom_paddle):
+    if ball.intersects_with(bottom_paddle) or ball.intersects_with(top_paddle):
         # Update the ball.
-        pass
+        ball_velocity[1] = ball_velocity[1] * -1
 
 
 Eva.run(update, handle_input)
