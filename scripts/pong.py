@@ -17,7 +17,7 @@ TOP_MOVE_LEFT: str = "J"
 TOP_MOVE_RIGHT: str = "L"
 
 PADDLE_SPEED: float = 3.0
-BALL_SPEED: float = 2.0
+BALL_SPEED: float = 3.0
 
 Eva.set_ambient(0.3)
 
