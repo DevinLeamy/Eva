@@ -11,13 +11,12 @@ use winit::{
     window::WindowBuilder,
 };
 
-use crate::prelude::{EvaCamera, EvaScene};
+use crate::prelude::{EvaCamera, EvaGlobal, EvaScene};
 
-pub struct EvaRunDescriptor {
+pub struct EvaRunDescriptor<'a> {
+    pub global: &'a EvaGlobal,
     pub camera: PyObject,
     pub scene: PyObject,
-    pub textures: ShaderTextures,
-    pub skybox: ShaderSkybox,
     pub update: PyObject,
     pub input_handler: PyObject,
 }
@@ -39,8 +38,9 @@ pub fn main(run: EvaRunDescriptor) {
         .build(&event_loop)
         .unwrap();
     let static_context = StaticRenderContext {
-        textures: run.textures.clone(),
-        skybox: run.skybox.clone(),
+        skybox: run.global.skybox.clone(),
+        ambient: run.global.ambient,
+        textures: run.global.texture_loader.clone().textures(),
     };
     let mut renderer = RendererBuilder::new(window, static_context).build();
 

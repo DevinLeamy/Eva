@@ -21,3 +21,7 @@ class Eva(Singleton):
     @staticmethod
     def add_skybox(images: [str]):
         Eva().inner.add_skybox(images)
+
+    @staticmethod
+    def set_ambient(strength: float):
+        Eva().inner.set_ambient(strength, strength, strength)

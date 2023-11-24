@@ -9,11 +9,15 @@ fn skybox_image_path(name: &str) -> PathBuf {
     PathBuf::from(format!("{SKYBOX_PATH}/{name}"))
 }
 
+const DEFAULT_AMBIENT: Vector3<f32> = Vector3::new(0.3, 0.3, 0.3);
+
 #[pyclass]
 #[pyo3(name = "EvaGlobal")]
+#[derive(Clone)]
 pub struct EvaGlobal {
     pub texture_loader: TextureLoader,
     pub skybox: ShaderSkybox,
+    pub ambient: Vector3<f32>,
 }
 
 #[pymethods]
@@ -35,6 +39,7 @@ impl EvaGlobal {
                 skybox_image_path("filler.png"),
             ])
             .unwrap(),
+            ambient: DEFAULT_AMBIENT,
         }
     }
 
@@ -47,5 +52,9 @@ impl EvaGlobal {
     fn add_skybox(&mut self, faces: Vec<String>) {
         let paths: Vec<PathBuf> = faces.iter().map(|face| skybox_image_path(face)).collect();
         self.skybox = ShaderSkybox::create_skybox(paths).unwrap();
+    }
+
+    fn set_ambient(&mut self, r: f32, g: f32, b: f32) {
+        self.ambient = Vector3::new(r, g, b);
     }
 }

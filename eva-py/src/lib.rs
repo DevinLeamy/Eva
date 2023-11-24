@@ -36,10 +36,9 @@ fn eva_py_main(
     input_handler: PyObject,
 ) -> PyResult<()> {
     eva_main::main(EvaRunDescriptor {
+        global,
         camera,
         scene,
-        skybox: global.skybox.clone(),
-        textures: global.texture_loader.clone().textures(),
         update,
         input_handler,
     });

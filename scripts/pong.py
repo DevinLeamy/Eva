@@ -8,11 +8,12 @@ Eva.add_skybox([
     "blue/z.png",
     "blue/-z.png",
 ])
+
+Eva.set_ambient(0.3)
+
 wood = Eva.add_texture("wood.jpeg")
 
 scene = Scene()
-scene.set_ambient(0.3)
-
 ball_mat = Material(
     (0.4, 0.0, 0.8),
     (0.0, 0.0, 0.0),

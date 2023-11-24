@@ -151,7 +151,7 @@ impl Renderer {
         let flat_scene: FlatScene = context.scene.clone().into();
 
         let config = ShaderGlobalConfig {
-            ambient: flat_scene.ambient,
+            ambient: self.static_context.ambient
         };
 
         self.queue.write_buffer(&self.config_buffer, 0, &config.as_bytes().unwrap());

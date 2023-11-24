@@ -14,7 +14,6 @@ impl EvaScene {
         Self {
             inner: Scene {
                 root: Node::Transformation(Transformation::new()),
-                ambient: Vector3::new(0.1, 0.1, 0.1),
             },
         }
     }
@@ -29,9 +28,5 @@ impl EvaScene {
         } else {
             panic!("add_child only accepts PyGeometry, PyTransform, or EvaLight");
         }
-    }
-
-    fn set_ambient(&mut self, r: f32, g: f32, b: f32) {
-        self.inner.ambient = Vector3::new(r, g, b);
     }
 }

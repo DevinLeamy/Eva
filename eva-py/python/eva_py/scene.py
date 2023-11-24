@@ -15,9 +15,6 @@ class Scene(Singleton):
     def add(self, node: Node):
         self.children.append(node)
 
-    def set_ambient(self, strength):
-        self._inner.set_ambient(strength, strength, strength)
-
     def inner(self) -> EvaScene:
         # Construct the entire scene hierarchy.
         root = Transform()
