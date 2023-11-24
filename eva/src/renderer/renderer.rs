@@ -55,45 +55,6 @@ impl Renderer {
 
         Ok(())
     }
-
-    // Temporary: just for testing.
-    // pub fn update(&mut self, key: VirtualKeyCode, state: ElementState) {
-    //     let speed = 90.0;
-
-    //     match (key, state) {
-    //         (VirtualKeyCode::A, ElementState::Pressed) => {
-    //             self.context.camera.translate(Vector3::new(speed, 0.0, 0.0))
-    //         }
-    //         (VirtualKeyCode::D, ElementState::Pressed) => self
-    //             .context
-    //             .camera
-    //             .translate(Vector3::new(-speed, 0.0, 0.0)),
-    //         (VirtualKeyCode::W, ElementState::Pressed) => {
-    //             self.context.camera.translate(Vector3::new(0.0, speed, 0.0))
-    //         }
-    //         (VirtualKeyCode::S, ElementState::Pressed) => self
-    //             .context
-    //             .camera
-    //             .translate(Vector3::new(0.0, -speed, 0.0)),
-    //         (VirtualKeyCode::M, ElementState::Pressed) => self
-    //             .context
-    //             .camera
-    //             .translate(Vector3::new(0.0, 0.0, speed)),
-    //         (VirtualKeyCode::K, ElementState::Pressed) => self
-    //             .context
-    //             .camera
-    //             .translate(Vector3::new(0.0, 0.0, -speed)),
-    //         (VirtualKeyCode::Space, ElementState::Pressed) => self
-    //             .context
-    //             .scene
-    //             .root_mut()
-    //             .transform_mut()
-    //             .rotate_y(1.0f32.to_radians()),
-    //         _ => {}
-    //     };
-
-    //     // self.context.camera.look_at(Vector3::new(0.0, 0.0, 0.0));
-    // }
 }
 
 impl Renderer {
