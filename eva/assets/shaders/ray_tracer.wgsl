@@ -257,19 +257,19 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 
 fn compute_ray_colour(_ray: Ray) -> vec3f {
     var ray: Ray = _ray;
-    // let max_reflections = 3;
-    let max_reflections = 1;
+    let max_reflections = 3;
+    // let max_reflections = 1;
 
-    var total_light: vec3f = vec3f(1.0, 1.0, 1.0);
+    var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
 
     for (var i: i32 = 0; i < max_reflections; i = i + 1) {
         let intersection = compute_ray_intersection(ray);
         if (!intersection.some) {
-            total_light = total_light * compute_skybox_colour(ray.direction);
+            total_light = total_light + compute_skybox_colour(ray.direction);
             break;
         }
 
-        total_light = total_light * compute_light_at_intersection(intersection);
+        total_light = total_light + compute_light_at_intersection(intersection);
         ray = compute_reflected_ray(ray, intersection);
     }
 
@@ -393,7 +393,7 @@ fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
     colour = colour / (colour + vec3(1.0));
     colour = pow(colour, vec3(1.0/2.0));
 
-    return total_light;
+    return colour;
 }
 
 fn compute_light_contribution_at_intersection(intersection: Intersection, light: PointLight) -> vec3f {
