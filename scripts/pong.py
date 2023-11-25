@@ -1,14 +1,14 @@
 from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
 from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 
-Eva.add_skybox([
-    "blue/x.png",
-    "blue/-x.png",
-    "blue/y.png",
-    "blue/-y.png",
-    "blue/z.png",
-    "blue/-z.png",
-])
+# Eva.add_skybox([
+#     "blue/x.png",
+#     "blue/-x.png",
+#     "blue/y.png",
+#     "blue/-y.png",
+#     "blue/z.png",
+#     "blue/-z.png",
+# ])
 
 # Bottom paddle.
 MOVE_LEFT: str = "A"
@@ -18,7 +18,7 @@ TOP_MOVE_LEFT: str = "J"
 TOP_MOVE_RIGHT: str = "L"
 
 PADDLE_SPEED: float = 3.0
-BALL_SPEED: float = 2.0
+BALL_SPEED: float = 3.0
 
 # Eva.set_ambient(0.10)
 Eva.set_ambient(0.03)
@@ -98,7 +98,7 @@ ball_velocity = [0, -BALL_SPEED, 0]
 scene.add(ball)
 
 white_light = Light(1)
-white_light.translate(50.0, 97.0, 200.0)
+white_light.translate(50.0, 97.0, 50.0)
 
 scene.add(white_light)
 

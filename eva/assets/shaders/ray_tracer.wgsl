@@ -282,9 +282,13 @@ fn compute_skybox_colour(coords: vec3f) -> vec3f {
 
 fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     var reflected_ray: Ray;
-    reflected_ray.direction = normalize(ray.direction - intersection.normal * 2.0 * dot(ray.direction, intersection.normal));
+    let N = intersection.normal;
+    let R = ray.direction;
+    let perfect_reflection = normalize(R - N * 2.0 * dot(R, N));
+
     // Offset to avoid floating point errors.
-    reflected_ray.origin = ray_point(ray, intersection.t) + reflected_ray.direction;
+    reflected_ray.direction = perfect_reflection;
+    reflected_ray.origin = ray_point(ray, intersection.t) + reflected_ray.direction * 0.1;
 
     return reflected_ray;
 }
