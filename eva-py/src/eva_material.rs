@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[pyclass]
-#[pyo3(name = "Material")]
-pub struct PyMaterial {
+#[derive(Clone)]
+pub struct EvaMaterial {
     pub inner: PbrMaterial,
 }
 
 #[pymethods]
-impl PyMaterial {
+impl EvaMaterial {
     #[new]
     fn new(roughness: f32, metallic: f32, albedo: (f32, f32, f32)) -> Self {
         Self {

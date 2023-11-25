@@ -24,7 +24,6 @@ pub struct Renderer {
     pub mesh_bind_group_layout: BindGroupLayout,
     pub texture_bind_group_layout: BindGroupLayout,
     pub skybox_bind_group_layout: BindGroupLayout,
-    pub materials_bind_group_layout: BindGroupLayout,
 
     pub texture_bind_group: BindGroup,
     pub skybox_bind_group: BindGroup,
@@ -224,18 +223,11 @@ impl Renderer {
                     binding: 5,
                     resource: self.cubes_buffer.as_entire_binding(),
                 },
-            ],
-        });
-
-        let materials_bind_group = self.device.create_bind_group(&BindGroupDescriptor { 
-            label: None, 
-            layout: &self.materials_bind_group_layout, 
-            entries: &[
                 BindGroupEntry {
-                    binding: 0,
+                    binding: 6,
                     resource: self.materials_buffer.as_entire_binding()
                 }
-            ] 
+            ],
         });
 
         // Invoke the compute shader.
@@ -248,7 +240,6 @@ impl Renderer {
         ray_tracer_pass.set_bind_group(1, &mesh_bind_group, &[]);
         ray_tracer_pass.set_bind_group(2, &self.texture_bind_group, &[]);
         ray_tracer_pass.set_bind_group(3, &self.skybox_bind_group, &[]);
-        ray_tracer_pass.set_bind_group(4, &materials_bind_group, &[]);
 
         let window_size = self.window.inner_size();
         ray_tracer_pass.dispatch_workgroups(window_size.width, window_size.height, 1);

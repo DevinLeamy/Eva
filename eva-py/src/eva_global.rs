@@ -18,6 +18,7 @@ pub struct EvaGlobal {
     pub texture_loader: TextureLoader,
     pub skybox: ShaderSkybox,
     pub ambient: Vector3<f32>,
+    pub materials: ShaderBuffer<PbrMaterial>,
 }
 
 #[pymethods]
@@ -40,6 +41,7 @@ impl EvaGlobal {
             ])
             .unwrap(),
             ambient: DEFAULT_AMBIENT,
+            materials: ShaderBuffer::new(),
         }
     }
 
@@ -47,6 +49,10 @@ impl EvaGlobal {
         let mut path = PathBuf::from(TEXTURE_PATH);
         path.push(texture_name);
         self.texture_loader.load(path)
+    }
+
+    fn add_material(&mut self, material: PyRef<EvaMaterial>) -> u32 {
+        self.materials.push(material.inner.clone())
     }
 
     fn add_skybox(&mut self, faces: Vec<String>) {

@@ -3,7 +3,7 @@ use std::{fmt::Debug, slice::Iter};
 
 use super::ShaderStruct;
 
-#[derive(ShaderType, Debug, Default)]
+#[derive(ShaderType, Debug, Default, Clone)]
 pub struct ShaderBuffer<T: ShaderType + Debug + ShaderSize> {
     length: ArrayLength,
     #[size(runtime)]

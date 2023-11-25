@@ -41,6 +41,7 @@ pub fn main(run: EvaRunDescriptor) {
         skybox: run.global.skybox.clone(),
         ambient: run.global.ambient,
         textures: run.global.texture_loader.clone().textures(),
+        materials: run.global.materials.clone(),
     };
     let mut renderer = RendererBuilder::new(window, static_context).build();
 

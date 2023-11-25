@@ -35,7 +35,6 @@ pub struct RendererBuilder {
     texture_bind_group_layout: Option<BindGroupLayout>,
     skybox_bind_group_layout: Option<BindGroupLayout>,
     display_bind_group_layout: Option<BindGroupLayout>,
-    material_bind_group_layout: Option<BindGroupLayout>,
 
     texture_bind_group: Option<BindGroup>,
     skybox_bind_group: Option<BindGroup>,
@@ -118,7 +117,6 @@ impl RendererBuilder {
             texture_bind_group_layout: None,
             skybox_bind_group_layout: None,
             display_bind_group_layout: None,
-            material_bind_group_layout: None,
 
             texture_bind_group: None,
             skybox_bind_group: None,
@@ -159,7 +157,6 @@ impl RendererBuilder {
             texture_bind_group_layout: self.texture_bind_group_layout.unwrap(),
             skybox_bind_group_layout: self.skybox_bind_group_layout.unwrap(),
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
-            materials_bind_group_layout: self.material_bind_group_layout.unwrap(),
 
             texture_bind_group: self.texture_bind_group.unwrap(),
             skybox_bind_group: self.skybox_bind_group.unwrap(),
@@ -434,7 +431,17 @@ impl RendererBuilder {
                             min_binding_size: None 
                         },
                         count: None
-                    }
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 6,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None
+                    },
                 ],
             },
         ));
@@ -462,22 +469,6 @@ impl RendererBuilder {
                 ],
             },
         ));
-
-        self.material_bind_group_layout = Some(self.device.create_bind_group_layout(&BindGroupLayoutDescriptor { 
-            label: None, 
-            entries: &[
-                BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: ShaderStages::COMPUTE,
-                    ty: BindingType::Buffer {
-                        ty: BufferBindingType::Storage { read_only: true },
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
-                    },
-                    count: None
-                },
-            ] 
-        }));
     }
 
     fn create_bind_groups(&mut self) {
@@ -573,7 +564,6 @@ impl RendererBuilder {
                     self.mesh_bind_group_layout.as_ref().unwrap(),
                     self.texture_bind_group_layout.as_ref().unwrap(),
                     self.skybox_bind_group_layout.as_ref().unwrap(),
-                    self.material_bind_group_layout.as_ref().unwrap()
                 ],
                 push_constant_ranges: &[],
             });
