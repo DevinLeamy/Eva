@@ -6,11 +6,13 @@ const TEXTURE_MARKER: f32 = -1.0;
 
 #[derive(Clone, Debug, ShaderType, ShaderStructMacro)]
 pub struct PbrMaterial {
-    /// Varies [0-1].
-    pub roughness: f32,
     /// Varies [0-1] for rgb channels.
     pub albedo: Vector3<f32>,
     /// Varies [0-1].
+    #[align(16)]
+    pub roughness: f32,
+    /// Varies [0-1].
+    #[align(16)]
     pub metallic: f32,
 }
 

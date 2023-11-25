@@ -126,8 +126,8 @@ struct Materials {
 }
 
 struct Material {
-    roughness: f32,
     albedo: vec3f,
+    roughness: f32,
     metallic: f32
 }
 
@@ -257,8 +257,8 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 
 fn compute_ray_colour(_ray: Ray) -> vec3f {
     var ray: Ray = _ray;
-    let max_reflections = 3;
-    // let max_reflections = 1;
+    // let max_reflections = 3;
+    let max_reflections = 1;
 
     var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
 
@@ -376,8 +376,10 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
 }
 
 fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
+    let albedo = intersection_material_colour(intersection);
+    let ambient = config.ambient * albedo;
     if (!intersection.some) {
-        return vec3f(0.0, 0.0, 0.0);
+        return ambient;
     }
 
     var total_light: vec3f = vec3f(0.0);
@@ -386,12 +388,10 @@ fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
         total_light = total_light + compute_light_contribution_at_intersection(intersection, light);
     }
 
-    let albedo = intersection_material_colour(intersection);
-    let ambient = config.ambient;
 
     var colour: vec3f = ambient + total_light;
     colour = colour / (colour + vec3(1.0));
-    colour = pow(colour, vec3(1.0/2.0));
+    colour = pow(colour, vec3(1.0/2.2));
 
     return colour;
 }
