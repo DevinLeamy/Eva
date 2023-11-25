@@ -1,4 +1,4 @@
-from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
+from eva_py import Scene, Camera, Material, Eva, Box, Sphere
 from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 
 # Eva.add_skybox([
@@ -26,6 +26,7 @@ ball_mat = Eva.add_material(Material(
     1.0,
     0.0,
     (0.0, 0.0, 1.0),
+    # (1.0, 1.0, 1.0)
 ))
 paddle_mat = Eva.add_material(Material(
     1.0,
@@ -36,12 +37,19 @@ table_mat = Eva.add_material(Material(
     0.0,
     1.0,
     (1.0, 1.0, 1.0),
+    (0.1, 0.1, 0.1)
 ))
 
 wall_mat = Eva.add_material(Material(
-    0.0,
     1.0,
+    0.0,
     (0.0, 1.0, 0.0),
+))
+light_mat = Eva.add_material(Material(
+    0.0,
+    0.0,
+    (0.0, 0.0, 0.0),
+    (0.6, 0.6, 0.6)
 ))
 
 scene = Scene()
@@ -97,12 +105,22 @@ ball_velocity = [0, -BALL_SPEED, 0]
 
 scene.add(ball)
 
-white_light = Light(1)
-white_light.translate(50.0, 97.0, 50.0)
+top_light = Box()
+top_light.scale(wall_height, paddle_height, paddle_depth)
+top_light.set_material(light_mat)
+top_light.translate(0.0, board_size / 2.0, 90)
 
-scene.add(white_light)
+scene.add(top_light)
 
-camera = Camera((0, 0, 200))
+bottom_light = Box()
+bottom_light.scale(wall_height, paddle_height, paddle_depth)
+bottom_light.set_material(light_mat)
+bottom_light.translate(0.0, -board_size / 2.0, 90)
+
+scene.add(bottom_light)
+
+
+camera = Camera((0, 0, 220))
 camera.look_at(0, 0, 0)
 
 

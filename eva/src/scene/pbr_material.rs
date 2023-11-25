@@ -12,6 +12,7 @@ pub struct PbrMaterial {
     pub metallic: f32,
     /// Varies [0-1] for rgb channels.
     pub albedo: Vector3<f32>,
+    pub light: Vector3<f32>,
 }
 
 impl PbrMaterial {
@@ -27,6 +28,7 @@ impl Default for PbrMaterial {
             albedo: Vector3::new(1.0, 1.0, 1.0),
             roughness: 0.0,
             metallic: 0.0,
+            light: Vector3::new(0.0, 0.0, 0.0)
         }
     }
 }

@@ -1,6 +1,5 @@
 mod eva_camera;
 mod eva_global;
-mod eva_light;
 mod eva_main;
 mod eva_material;
 mod eva_scene;
@@ -11,7 +10,6 @@ mod utils;
 mod prelude {
     pub use crate::eva_camera::EvaCamera;
     pub use crate::eva_global::EvaGlobal;
-    pub use crate::eva_light::EvaLight;
     pub use crate::eva_material::EvaMaterial;
     pub use crate::eva_scene::EvaScene;
     pub use crate::py_geometry::PyGeometry;
@@ -52,7 +50,6 @@ fn eva_py_main(
 fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyGeometry>()?;
     m.add_class::<EvaScene>()?;
-    m.add_class::<EvaLight>()?;
     m.add_class::<PyTransform>()?;
     m.add_class::<EvaCamera>()?;
     m.add_class::<EvaMaterial>()?;

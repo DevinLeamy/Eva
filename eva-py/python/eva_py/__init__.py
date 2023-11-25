@@ -5,6 +5,5 @@ from eva_py.main import Eva
 from eva_py.box import Box
 from eva_py.sphere import Sphere
 from eva_py.mesh import Mesh
-from eva_py.light import Light
 from eva_py.material import Material
 from eva_py.eva_math import *

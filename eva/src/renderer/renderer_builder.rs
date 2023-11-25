@@ -10,7 +10,6 @@ use super::StaticRenderContext;
 
 const SPHERE_COUNT: u64 = 100;
 const CUBE_COUNT: u64 = 25;
-const LIGHT_COUNT: u64 = 5;
 const MATERIAL_COUNT: u64 = 60;
 const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
 const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;
@@ -48,7 +47,6 @@ pub struct RendererBuilder {
     camera_buffer: Option<Buffer>,
     spheres_buffer: Option<Buffer>,
     cubes_buffer: Option<Buffer>,
-    lights_buffer: Option<Buffer>,
     config_buffer: Option<Buffer>,
     materials_buffer: Option<Buffer>,    
 }
@@ -131,7 +129,6 @@ impl RendererBuilder {
             config_buffer: None,
             spheres_buffer: None,
             cubes_buffer: None,
-            lights_buffer: None,
             materials_buffer: None
         }
     }
@@ -171,7 +168,6 @@ impl RendererBuilder {
             config_buffer: self.config_buffer.unwrap(),
             cubes_buffer: self.cubes_buffer.unwrap(),
             spheres_buffer: self.spheres_buffer.unwrap(),
-            lights_buffer: self.lights_buffer.unwrap(),
             materials_buffer: self.materials_buffer.unwrap()
         }
     }
@@ -211,13 +207,6 @@ impl RendererBuilder {
             // Must be larger than the size of any data used.
             size: ShaderCubeModel::size() * CUBE_COUNT, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST,
-            mapped_at_creation: false
-        }));
-
-        self.lights_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
-            label: Some("lights buffer"), 
-            size: ShaderPointLight::size() * LIGHT_COUNT, 
-            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
             mapped_at_creation: false
         }));
 
@@ -406,7 +395,7 @@ impl RendererBuilder {
                         binding: 3,
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::Buffer { 
-                            ty: BufferBindingType::Storage { read_only: true }, 
+                            ty: BufferBindingType::Uniform, 
                             has_dynamic_offset: false, 
                             min_binding_size: None 
                         },
@@ -416,16 +405,6 @@ impl RendererBuilder {
                         binding: 4,
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::Buffer { 
-                            ty: BufferBindingType::Uniform, 
-                            has_dynamic_offset: false, 
-                            min_binding_size: None 
-                        },
-                        count: None
-                    },
-                    BindGroupLayoutEntry {
-                        binding: 5,
-                        visibility: ShaderStages::COMPUTE,
-                        ty: BindingType::Buffer { 
                             ty: BufferBindingType::Storage { read_only: true }, 
                             has_dynamic_offset: false, 
                             min_binding_size: None 
@@ -433,7 +412,7 @@ impl RendererBuilder {
                         count: None
                     },
                     BindGroupLayoutEntry {
-                        binding: 6,
+                        binding: 5,
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::Buffer {
                             ty: BufferBindingType::Storage { read_only: true },
