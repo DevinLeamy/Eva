@@ -65,7 +65,7 @@ impl Renderer {
             size: Extent3d {
                 width: window_size.width,
                 height: window_size.height,
-                depth_or_array_layers: 1, // not sure why.
+                depth_or_array_layers: 1,
             },
             mip_level_count: 1,
             sample_count: 1,
@@ -127,9 +127,9 @@ impl Renderer {
                 resolve_target: None,
                 ops: Operations {
                     load: LoadOp::Clear(Color {
-                        r: 1.0,
+                        r: 0.0,
                         g: 0.0,
-                        b: 1.0,
+                        b: 0.0,
                         a: 1.0,
                     }),
                     store: true,
@@ -236,7 +236,7 @@ impl Renderer {
         ray_tracer_pass.set_bind_group(3, &self.skybox_bind_group, &[]);
 
         let window_size = self.window.inner_size();
-        ray_tracer_pass.dispatch_workgroups(window_size.width / 3, window_size.height / 3, 1);
+        ray_tracer_pass.dispatch_workgroups(window_size.width, window_size.height, 1);
 
         drop(ray_tracer_pass);
     }

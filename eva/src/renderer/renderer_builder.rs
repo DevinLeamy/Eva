@@ -73,7 +73,7 @@ impl RendererBuilder {
         let (device, queue) = adapter
             .request_device(
                 &DeviceDescriptor {
-                    features: Features::SAMPLED_TEXTURE_AND_STORAGE_BUFFER_ARRAY_NON_UNIFORM_INDEXING | Features::TEXTURE_BINDING_ARRAY | Features::TEXTURE_ADAPTER_SPECIFIC_FORMAT_FEATURES,
+                    features: Features::SAMPLED_TEXTURE_AND_STORAGE_BUFFER_ARRAY_NON_UNIFORM_INDEXING | Features::TEXTURE_BINDING_ARRAY,
                     limits: Limits::default(),
                     label: None,
                 },
@@ -365,7 +365,7 @@ impl RendererBuilder {
                         binding: 0,
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::StorageTexture {
-                            access: StorageTextureAccess::ReadWrite,
+                            access: StorageTextureAccess::WriteOnly,
                             format: TextureFormat::Rgba16Float,
                             view_dimension: TextureViewDimension::D2,
                         },

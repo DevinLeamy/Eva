@@ -127,7 +127,7 @@ struct MeshNormals {
     normals: array<vec3f>
 };
 
-@group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, read_write>;
+@group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
 @group(0) @binding(3) var<storage, read> lights: PointLights;
@@ -146,23 +146,29 @@ struct MeshNormals {
 @group(3) @binding(0) var skybox: texture_cube<f32>;
 @group(3) @binding(1) var skybox_sampler: sampler;
 
-@compute @workgroup_size(3, 3, 1)
+@compute @workgroup_size(1, 1, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
-    let screen_size: vec2<i32> = vec2<i32>(textureDimensions(colour_buffer));
-
-    // Add 0.5 to get the center of the pixel.
-    var x = f32(GlobalInvocationID.x) + 0.5;
-    var y = f32(GlobalInvocationID.y) + 0.5;
-
     let screen_coord = vec2<i32>(i32(GlobalInvocationID.x), i32(GlobalInvocationID.y));
-    let pixel_position = compute_pixel_position(x, y);
+    let samples_per_row = 2;
 
-    let ray = ray_from_points(camera.position, pixel_position);
-    let ray_colour = compute_ray_colour(ray);
+    let segment = (1.0 / f32(samples_per_row + 2));  
+    var colour: vec3f = vec3f(0.0, 0.0, 0.0);
 
-    var existingColour: vec3<f32> = textureLoad(colour_buffer, screen_coord).xyz;
-    let new_colour = existingColour + ray_colour;
-    textureStore(colour_buffer, screen_coord, vec4<f32>(new_colour, 1.0));
+    for (var i: i32 = 0; i < samples_per_row; i = i + 1) {
+        for (var j: i32 = 0; j < samples_per_row; j = j + 1) {
+            // Add 0.5 to get the center of the pixel.
+            var x = f32(screen_coord.x) + segment + segment * f32(i);
+            var y = f32(screen_coord.y) + segment + segment * f32(j);
+
+            let pixel_position = compute_pixel_position(x, y);
+
+            let ray = ray_from_points(camera.position, pixel_position);
+            let ray_colour = compute_ray_colour(ray);
+            colour = colour + ray_colour;
+        }
+    }
+
+    textureStore(colour_buffer, screen_coord, vec4<f32>(colour / f32(samples_per_row * samples_per_row), 1.0));
 }
 
 fn compute_pixel_position(x: f32, y: f32) -> vec3f {
