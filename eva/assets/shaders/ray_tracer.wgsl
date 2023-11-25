@@ -70,7 +70,7 @@ struct PointLight {
 };
 
 struct GlobalConfig {
-    ambient_light: vec3f,
+    ambient: vec3f,
 };
 
 struct MeshPositions {
@@ -257,10 +257,12 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 
 fn compute_ray_colour(_ray: Ray) -> vec3f {
     var ray: Ray = _ray;
+    // let max_reflections = 3;
+    let max_reflections = 1;
 
     var total_light: vec3f = vec3f(1.0, 1.0, 1.0);
 
-    for (var i: i32 = 0; i < 3; i = i + 1) {
+    for (var i: i32 = 0; i < max_reflections; i = i + 1) {
         let intersection = compute_ray_intersection(ray);
         if (!intersection.some) {
             total_light = total_light * compute_skybox_colour(ray.direction);
@@ -378,12 +380,18 @@ fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
         return vec3f(0.0, 0.0, 0.0);
     }
 
-    var total_light: vec3f = vec3f();
-
+    var total_light: vec3f = vec3f(0.0);
     for (var i: i32 = 0; i < i32(lights.length); i = i + 1) {
         let light = lights.lights[i];
         total_light = total_light + compute_light_contribution_at_intersection(intersection, light);
     }
+
+    let albedo = intersection_material_colour(intersection);
+    let ambient = config.ambient;
+
+    var colour: vec3f = ambient + total_light;
+    colour = colour / (colour + vec3(1.0));
+    colour = pow(colour, vec3(1.0/2.0));
 
     return total_light;
 }
@@ -402,32 +410,79 @@ fn compute_light_contribution_at_intersection(intersection: Intersection, light:
     let ray_to_light = ray_from_points(offset_intersection_point, light.position);
 
     let ray_to_light_intersection = compute_ray_intersection(ray_to_light);
-    return phong_illumination(intersection, light, ray_to_light_intersection.some);
+    return pbr_illumination(intersection, light, ray_to_light_intersection.some);
 }
 
-fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: bool) -> vec3f {
-    let material_colour = intersection_material_colour(intersection);
+fn pbr_illumination(intersection: Intersection, light: PointLight, in_shadow: bool) -> vec3f {
+    if (in_shadow) {
+        return vec3f(0.0);
+    }
+
+    let albedo = intersection_material_colour(intersection);
     let material = material_by_id(intersection.material_id);
+    let metallic = material.metallic;
+    let roughness = material.roughness;
 
-    return material_colour;
-    // let ambient = config.ambient_light * material_colour;
-    // if (in_shadow) {
-    //     return ambient;
-    // }
+    let intersection_point = ray_point(intersection.ray, intersection.t);
+    let to_view = normalize(camera.position - intersection_point);
+    let f0 = lerp_vec3(vec3f(0.04), albedo, metallic);
 
-    // let intersection_point = ray_point(intersection.ray, intersection.t);
-    // let to_light = normalize(light.position - intersection_point);
-    // let to_view = normalize(camera.position - intersection_point);
+    let to_light = normalize(light.position - intersection_point);
+    let half_vector = normalize(to_view + to_light);
 
+    let distance = length(light.position - camera.position);
+    let attenuation = 1.0; 
+    let radiance = light.colour * attenuation;
 
-    // let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
-    // let diffuse = diffuse_strength * light.colour * material_colour;
+    // Cook-Torrance BRDF
+    let N = intersection.normal;
 
-    // let half_vector = normalize(to_view + to_light);
-    // let specular_strength = pow(max(0.0, dot(intersection.normal, half_vector)), intersection.material.shininess);
-    // let specular = light.colour * specular_strength * intersection.material.specular;
+    let NDF = distribution_ggx(N, half_vector, roughness);
+    let G = geometry_smith(N, to_view, to_light, roughness);
+    let F = fresnel_schlick(max(0.0, dot(to_view, half_vector)), f0);
 
-    // return diffuse + specular + ambient;
+    let ks = F;
+    let kd = (vec3f(1.0, 1.0, 1.0) - ks) * (1.0 - metallic); 
+
+    let numerator = NDF * G * F;
+    let denominator = 4.0 * max(0.0, dot(to_view, N)) + 0.0001;
+    let specular = numerator / denominator;
+
+    let PI = radians(180.0);
+    return (kd * albedo / PI + specular) * radiance * max(0.0, dot(N, to_light));
+}
+
+fn distribution_ggx(n: vec3f, h: vec3f, roughness: f32) -> f32 {
+    let PI = radians(180.0);
+    let alpha = roughness * roughness;
+    let alpha_2 = alpha * alpha;
+    let n_dot_h = max(0.0, dot(n, h));
+    let n_dot_h_2 = n_dot_h * n_dot_h;
+
+    let numerator = alpha_2;
+    let denominator = (n_dot_h_2 * (alpha_2 - 1.0) + 1.0) * (n_dot_h_2 * (alpha_2 - 1.0) + 1.0) * PI;
+    return numerator / denominator;
+}
+
+fn geometry_smith(n: vec3f, v: vec3f, l: vec3f, roughness: f32) -> f32 {
+    let n_dot_v = max(0.0, dot(n, v));
+    let n_dot_l = max(0.0, dot(n, l));
+
+    return geometry_schlick_ggx(n_dot_v, roughness) * geometry_schlick_ggx(n_dot_l, roughness);
+}
+
+fn geometry_schlick_ggx(n_dot_v: f32, roughness: f32) -> f32 {
+    let r = (roughness + 1.0);
+    let k = (r * r) / 8.0;
+
+    let numerator = n_dot_v;
+    let denominator = n_dot_v * (1.0 - k) + k;
+
+    return numerator / denominator;
+}
+
+fn fresnel_schlick(cos_theta: f32, f0: vec3f) -> vec3f {
+    return f0 + (1.0 - f0) * pow(clamp(1.0 - cos_theta, 0.0, 1.0), 5.0);
 }
 
 fn intersection_material_colour(intersection: Intersection) -> vec3f {
@@ -694,4 +749,16 @@ fn shader_bool(boolean: u32) -> bool {
 
 fn material_by_id(material_id: u32) -> Material {
     return materials.materials[material_id];
+}
+
+fn lerp_vec3(a: vec3f, b: vec3f, l: f32) -> vec3f {
+    return vec3f(
+        lerp(a.x, b.x, l),
+        lerp(a.y, b.y, l),
+        lerp(a.z, b.z, l),
+    );
+}
+
+fn lerp(a: f32, b: f32, l: f32) -> f32 {
+    return a + (b - a) * l;
 }
