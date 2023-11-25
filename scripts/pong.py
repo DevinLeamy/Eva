@@ -1,14 +1,14 @@
 from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
 from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 
-# Eva.add_skybox([
-#     "blue/x.png",
-#     "blue/-x.png",
-#     "blue/y.png",
-#     "blue/-y.png",
-#     "blue/z.png",
-#     "blue/-z.png",
-# ])
+Eva.add_skybox([
+    "blue/x.png",
+    "blue/-x.png",
+    "blue/y.png",
+    "blue/-y.png",
+    "blue/z.png",
+    "blue/-z.png",
+])
 
 # Bottom paddle.
 MOVE_LEFT: str = "A"
@@ -20,8 +20,8 @@ TOP_MOVE_RIGHT: str = "L"
 PADDLE_SPEED: float = 3.0
 BALL_SPEED: float = 2.0
 
-Eva.set_ambient(0.10)
-# Eva.set_ambient(0.03)
+# Eva.set_ambient(0.10)
+Eva.set_ambient(0.03)
 ball_mat = Eva.add_material(Material(
     1.0,
     0.0,
@@ -30,10 +30,10 @@ ball_mat = Eva.add_material(Material(
 paddle_mat = Eva.add_material(Material(
     1.0,
     0.0,
-    (0.0, 1.0, 1.0),
+    (1.0, 1.0, 1.0),
 ))
 table_mat = Eva.add_material(Material(
-    0.3,
+    0.0,
     1.0,
     (1.0, 1.0, 1.0),
 ))
