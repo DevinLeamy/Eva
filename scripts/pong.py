@@ -1,14 +1,14 @@
 from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
 from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 
-Eva.add_skybox([
-    "blue/x.png",
-    "blue/-x.png",
-    "blue/y.png",
-    "blue/-y.png",
-    "blue/z.png",
-    "blue/-z.png",
-])
+# Eva.add_skybox([
+#     "blue/x.png",
+#     "blue/-x.png",
+#     "blue/y.png",
+#     "blue/-y.png",
+#     "blue/z.png",
+#     "blue/-z.png",
+# ])
 
 # Bottom paddle.
 MOVE_LEFT: str = "A"

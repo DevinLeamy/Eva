@@ -11,7 +11,7 @@ use super::StaticRenderContext;
 const SPHERE_COUNT: u64 = 100;
 const CUBE_COUNT: u64 = 25;
 const LIGHT_COUNT: u64 = 5;
-const MATERIAL_COUNT: u64 = 20;
+const MATERIAL_COUNT: u64 = 60;
 const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
 const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;
 const MESH_HEADERS_BUFFER_SIZE: u64 = 5_000;

@@ -126,9 +126,9 @@ struct Materials {
 }
 
 struct Material {
-    albedo: vec3f,
     roughness: f32,
-    metallic: f32
+    metallic: f32,
+    albedo: vec3f,
 }
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
@@ -442,10 +442,10 @@ fn pbr_illumination(intersection: Intersection, light: PointLight, in_shadow: bo
     let F = fresnel_schlick(max(0.0, dot(to_view, half_vector)), f0);
 
     let ks = F;
-    let kd = (vec3f(1.0, 1.0, 1.0) - ks) * (1.0 - metallic); 
+    let kd = (vec3f(1.0) - ks) * (1.0 - metallic); 
 
     let numerator = NDF * G * F;
-    let denominator = 4.0 * max(0.0, dot(to_view, N)) + 0.0001;
+    let denominator = 4.0 * max(0.0, dot(to_view, N)) * max(dot(N, to_light), 0.0) + 0.0001;
     let specular = numerator / denominator;
 
     let PI = radians(180.0);
