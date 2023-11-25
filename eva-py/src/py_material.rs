@@ -3,19 +3,23 @@ use crate::prelude::*;
 #[pyclass]
 #[pyo3(name = "Material")]
 pub struct PyMaterial {
-    pub inner: PhongMaterial,
+    pub inner: PbrMaterial,
 }
 
 #[pymethods]
 impl PyMaterial {
     #[new]
-    fn new(kd: (f32, f32, f32), ks: (f32, f32, f32), shininess: f32) -> Self {
+    fn new(roughness: f32, metallic: f32, albedo: (f32, f32, f32)) -> Self {
         Self {
-            inner: PhongMaterial::new(
-                Vector3::new(kd.0, kd.1, kd.2),
-                Vector3::new(ks.0, ks.1, ks.2),
-                shininess,
-            ),
+            inner: PbrMaterial {
+                roughness,
+                albedo: Vector3::new(albedo.0, albedo.1, albedo.2),
+                metallic,
+            },
         }
+    }
+
+    fn set_texture(&mut self, texture_id: u32) {
+        self.inner.set_texture(texture_id)
     }
 }

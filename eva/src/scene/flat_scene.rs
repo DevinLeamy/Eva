@@ -4,7 +4,7 @@ use crate::{
     prelude::extents,
     shader::{
         ShaderBuffer, ShaderCubeModel, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
-        ShaderSphereModel
+        ShaderSphereModel,
     },
 };
 
@@ -101,21 +101,20 @@ impl SceneFlattener {
                 self.cubes.push(ShaderCubeModel {
                     cube,
                     transform: self.top_transform().into(),
-                    material: geometry.material().clone(),
+                    material_id: geometry.material_id,
                 });
             }
             Primitive::Sphere(sphere) => {
                 self.spheres.push(ShaderSphereModel {
                     sphere,
                     transform: self.top_transform().into(),
-                    material: geometry.material().clone(),
+                    material_id: geometry.material_id,
                 });
             }
             Primitive::Mesh(mesh) => {
                 let (min, max) = extents(&mesh.positions);
 
                 self.meshes.add(ShaderMeshModel {
-                    material: geometry.material().clone(),
                     bounding_box: Cube::from_points(min, max),
                     transform: self.top_transform().into(),
                     triangles: mesh.triangles,
@@ -123,6 +122,7 @@ impl SceneFlattener {
 
                     positions: mesh.positions,
                     normals: mesh.normals,
+                    material_id: geometry.material_id,
                 });
             }
         }

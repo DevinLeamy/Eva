@@ -1,7 +1,7 @@
 use encase::ShaderType;
 use nalgebra::Vector3;
 
-use crate::prelude::{Cube, PhongMaterial};
+use crate::prelude::Cube;
 
 use super::{IntoShaderBool, ShaderBool, ShaderBuffer, ShaderTransform};
 
@@ -16,7 +16,7 @@ pub struct ShaderMeshModels {
 
 pub struct ShaderMeshModel {
     pub transform: ShaderTransform,
-    pub material: PhongMaterial,
+    pub material_id: u32,
     pub bounding_box: Cube,
     pub positions: Vec<Vector3<f32>>,
     pub normals: Vec<Vector3<f32>>,
@@ -38,7 +38,7 @@ impl ShaderMeshModels {
         let triangle_offset = self.triangles.extend(mesh.triangles);
 
         self.headers.push(ShaderMeshModelHeader {
-            material: mesh.material,
+            material_id: mesh.material_id,
             transform: mesh.transform,
             bounding_box: mesh.bounding_box,
 
@@ -63,7 +63,7 @@ pub struct ShaderMeshVertex {
 
 #[derive(ShaderType, Debug, Default)]
 pub struct ShaderMeshModelHeader {
-    material: PhongMaterial,
+    material_id: u32,
     transform: ShaderTransform,
     bounding_box: Cube,
 

@@ -11,6 +11,7 @@ use super::StaticRenderContext;
 const SPHERE_COUNT: u64 = 100;
 const CUBE_COUNT: u64 = 25;
 const LIGHT_COUNT: u64 = 5;
+const MATERIAL_COUNT: u64 = 20;
 const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
 const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;
 const MESH_HEADERS_BUFFER_SIZE: u64 = 5_000;
@@ -34,6 +35,7 @@ pub struct RendererBuilder {
     texture_bind_group_layout: Option<BindGroupLayout>,
     skybox_bind_group_layout: Option<BindGroupLayout>,
     display_bind_group_layout: Option<BindGroupLayout>,
+    material_bind_group_layout: Option<BindGroupLayout>,
 
     texture_bind_group: Option<BindGroup>,
     skybox_bind_group: Option<BindGroup>,
@@ -49,6 +51,7 @@ pub struct RendererBuilder {
     cubes_buffer: Option<Buffer>,
     lights_buffer: Option<Buffer>,
     config_buffer: Option<Buffer>,
+    materials_buffer: Option<Buffer>,    
 }
 
 impl RendererBuilder {
@@ -115,6 +118,7 @@ impl RendererBuilder {
             texture_bind_group_layout: None,
             skybox_bind_group_layout: None,
             display_bind_group_layout: None,
+            material_bind_group_layout: None,
 
             texture_bind_group: None,
             skybox_bind_group: None,
@@ -130,6 +134,7 @@ impl RendererBuilder {
             spheres_buffer: None,
             cubes_buffer: None,
             lights_buffer: None,
+            materials_buffer: None
         }
     }
 
@@ -154,6 +159,7 @@ impl RendererBuilder {
             texture_bind_group_layout: self.texture_bind_group_layout.unwrap(),
             skybox_bind_group_layout: self.skybox_bind_group_layout.unwrap(),
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
+            materials_bind_group_layout: self.material_bind_group_layout.unwrap(),
 
             texture_bind_group: self.texture_bind_group.unwrap(),
             skybox_bind_group: self.skybox_bind_group.unwrap(),
@@ -169,6 +175,7 @@ impl RendererBuilder {
             cubes_buffer: self.cubes_buffer.unwrap(),
             spheres_buffer: self.spheres_buffer.unwrap(),
             lights_buffer: self.lights_buffer.unwrap(),
+            materials_buffer: self.materials_buffer.unwrap()
         }
     }
 }
@@ -250,6 +257,13 @@ impl RendererBuilder {
             size: MESH_POINT_BUFFER_SIZE, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
             mapped_at_creation: false
+        }));
+
+        self.materials_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None, 
+            size: PbrMaterial::size() * MATERIAL_COUNT, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
+            mapped_at_creation: false 
         }));
     }
 
@@ -448,6 +462,22 @@ impl RendererBuilder {
                 ],
             },
         ));
+
+        self.material_bind_group_layout = Some(self.device.create_bind_group_layout(&BindGroupLayoutDescriptor { 
+            label: None, 
+            entries: &[
+                BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: ShaderStages::COMPUTE,
+                    ty: BindingType::Buffer {
+                        ty: BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None
+                },
+            ] 
+        }));
     }
 
     fn create_bind_groups(&mut self) {
@@ -542,7 +572,8 @@ impl RendererBuilder {
                     self.ray_tracer_bind_group_layout.as_ref().unwrap(), 
                     self.mesh_bind_group_layout.as_ref().unwrap(),
                     self.texture_bind_group_layout.as_ref().unwrap(),
-                    self.skybox_bind_group_layout.as_ref().unwrap()
+                    self.skybox_bind_group_layout.as_ref().unwrap(),
+                    self.material_bind_group_layout.as_ref().unwrap()
                 ],
                 push_constant_ranges: &[],
             });

@@ -19,7 +19,7 @@ TOP_MOVE_RIGHT: str = "L"
 PADDLE_SPEED: float = 3.0
 BALL_SPEED: float = 2.0
 
-Eva.set_ambient(0.3)
+Eva.set_ambient(0.1)
 
 scene = Scene()
 ball_mat = Material(
@@ -95,7 +95,7 @@ ball_velocity = [0, -BALL_SPEED, 0]
 
 scene.add(ball)
 
-white_light = Light(0.9)
+white_light = Light(1)
 white_light.translate(-100.0, 150.0, 400.0)
 
 scene.add(white_light)

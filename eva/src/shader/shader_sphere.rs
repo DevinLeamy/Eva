@@ -1,13 +1,13 @@
 use encase::ShaderType;
 use eva_macros::ShaderStructMacro;
 
-use crate::prelude::{PhongMaterial, Sphere};
+use crate::prelude::Sphere;
 
-use super::{ShaderStruct, ShaderTransform};
+use super::{ShaderTransform};
 
 #[derive(ShaderType, Debug, ShaderStructMacro)]
 pub struct ShaderSphereModel {
     pub sphere: Sphere,
     pub transform: ShaderTransform,
-    pub material: PhongMaterial,
+    pub material_id: u32,
 }

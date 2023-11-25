@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use nalgebra::Vector3;
 
 #[derive(Clone)]
 pub struct Scene {

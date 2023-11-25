@@ -14,13 +14,6 @@ struct Transform {
     m_normal_inverse: mat3x3f,
 };
 
-struct PhongMaterial {
-    diffuse: vec3f,
-    specular: vec3f,
-    shininess: f32,
-    texture_id: u32,
-};
-
 struct CubeModels {
     length: u32,
     cubes: array<CubeModel>,
@@ -29,7 +22,7 @@ struct CubeModels {
 struct CubeModel {
     cube: Cube,
     transform: Transform,
-    material: PhongMaterial
+    material: u32 
 };
 
 struct Cube {
@@ -45,7 +38,7 @@ struct SphereModels {
 struct SphereModel {
     sphere: Sphere,
     transform: Transform,
-    material: PhongMaterial,
+    material: u32,
 };
 
 struct Ray {
@@ -62,7 +55,7 @@ struct Intersection {
     t: f32, 
     ray: Ray,
     normal: vec3f,
-    material: PhongMaterial,
+    material: u32,
     uv: vec2f,
 };
 
@@ -97,7 +90,7 @@ struct MeshHeaders {
 };
 
 struct MeshModelHeader {
-    material: PhongMaterial,
+    material: u32,
     transform: Transform,
     bounding_box: Cube,
 
@@ -127,6 +120,17 @@ struct MeshNormals {
     normals: array<vec3f>
 };
 
+struct Materials {
+    length: u32,
+    materials: array<Material>
+}
+
+struct Material {
+    roughness: f32,
+    albedo: vec3f,
+    metallic: f32
+}
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
@@ -145,6 +149,9 @@ struct MeshNormals {
 
 @group(3) @binding(0) var skybox: texture_cube<f32>;
 @group(3) @binding(1) var skybox_sampler: sampler;
+
+@group(4) @binding(0) var<storage, read> materials: Materials; 
+
 
 @compute @workgroup_size(1, 1, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
@@ -405,7 +412,7 @@ fn compute_light_contribution_at_intersection(intersection: Intersection, light:
 fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: bool) -> vec3f {
     let material_colour = intersection_material_colour(intersection);
 
-    let ambient = config.ambient_light * light.colour * material_colour;
+    let ambient = config.ambient_light * material_colour;
     if (in_shadow) {
         return ambient;
     }
@@ -430,7 +437,6 @@ fn intersection_material_colour(intersection: Intersection) -> vec3f {
     if (intersection.material.texture_id != u32(0)) {
         let texture_coords = vec2f(intersection.uv.x, 1.0 - intersection.uv.y);
         colour = sample_texture(intersection.material.texture_id, texture_coords);
-        // colour = sample_texture(u32(0), texture_coords);
     }
 
     return colour;
