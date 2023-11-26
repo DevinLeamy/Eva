@@ -2,7 +2,7 @@ from eva_py import Box, Sphere, Material, Eva
 
 FALL_SPEED = 0.6
 JUMP = "Space"
-JUMP_SPEED = 7.0
+JUMP_SPEED = 8.0
 TERMINAL_FALL_SPEED = 4.0
 # One second.
 JUMP_COOLDOWN = 0.2 
@@ -18,7 +18,7 @@ class Bird:
         material = Material(
             roughness=1.0,
             metallic=0.0,
-            albedo=(0.0, 1.0, 0.0)
+            albedo=(0.0, 1.0, 1.0)
         )
         self.material_handle = Eva.add_material(material)
         self.geometry = Sphere().scale(10, 10, 10).set_material(self.material_handle)
