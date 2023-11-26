@@ -4,7 +4,7 @@ use crate::{
     prelude::extents,
     shader::{
         ShaderBuffer, ShaderCubeModel, ShaderMeshModel, ShaderMeshModels, ShaderPointLight,
-        ShaderSphereModel
+        ShaderSphereModel,
     },
 };
 
@@ -12,7 +12,6 @@ use super::{Cube, Geometry, Light, Node, Primitive, Scene, Transform};
 
 #[derive(Debug)]
 pub struct FlatScene {
-    pub lights: ShaderBuffer<ShaderPointLight>,
     pub spheres: ShaderBuffer<ShaderSphereModel>,
     pub cubes: ShaderBuffer<ShaderCubeModel>,
     pub meshes: ShaderMeshModels,
@@ -20,9 +19,6 @@ pub struct FlatScene {
 
 impl std::fmt::Display for FlatScene {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for light in self.lights.iter() {
-            writeln!(f, "Light: {:?}", light)?;
-        }
         for geometry in self.spheres.iter() {
             writeln!(f, "Object: {:?}", geometry)?;
         }
@@ -39,7 +35,6 @@ impl From<Scene> for FlatScene {
 
 struct SceneFlattener {
     transforms: Vec<Transform>,
-    lights: ShaderBuffer<ShaderPointLight>,
     spheres: ShaderBuffer<ShaderSphereModel>,
     cubes: ShaderBuffer<ShaderCubeModel>,
     meshes: ShaderMeshModels,
@@ -49,7 +44,6 @@ impl SceneFlattener {
     fn new() -> Self {
         Self {
             transforms: vec![Transform::default()],
-            lights: ShaderBuffer::new(),
             spheres: ShaderBuffer::new(),
             cubes: ShaderBuffer::new(),
             meshes: ShaderMeshModels::new(),
@@ -61,7 +55,6 @@ impl SceneFlattener {
         flattener.traverse_scene(&scene);
 
         FlatScene {
-            lights: flattener.lights,
             spheres: flattener.spheres,
             cubes: flattener.cubes,
             meshes: flattener.meshes,
@@ -77,9 +70,9 @@ impl SceneFlattener {
     fn traverse_node(&mut self, node: &Node) {
         self.push_transform(node.transform());
         match node {
-            Node::Light(light) => self.handle_light(light),
             Node::Geometry(geometry) => self.handle_geometry(geometry),
             Node::Transformation(_) => (),
+            _ => ()
         }
         for child in node.children() {
             self.traverse_node(child);
@@ -88,34 +81,26 @@ impl SceneFlattener {
         self.pop_transform();
     }
 
-    fn handle_light(&mut self, light: &Light) {
-        self.lights.push(ShaderPointLight {
-            position: self.top_transform().translation(),
-            colour: light.colour().clone(),
-        });
-    }
-
     fn handle_geometry(&mut self, geometry: &Geometry) {
         match geometry.primitive().clone() {
             Primitive::Cube(cube) => {
                 self.cubes.push(ShaderCubeModel {
                     cube,
                     transform: self.top_transform().into(),
-                    material: geometry.material().clone(),
+                    material_id: geometry.material_id,
                 });
             }
             Primitive::Sphere(sphere) => {
                 self.spheres.push(ShaderSphereModel {
                     sphere,
                     transform: self.top_transform().into(),
-                    material: geometry.material().clone(),
+                    material_id: geometry.material_id,
                 });
             }
             Primitive::Mesh(mesh) => {
                 let (min, max) = extents(&mesh.positions);
 
                 self.meshes.add(ShaderMeshModel {
-                    material: geometry.material().clone(),
                     bounding_box: Cube::from_points(min, max),
                     transform: self.top_transform().into(),
                     triangles: mesh.triangles,
@@ -123,6 +108,7 @@ impl SceneFlattener {
 
                     positions: mesh.positions,
                     normals: mesh.normals,
+                    material_id: geometry.material_id,
                 });
             }
         }

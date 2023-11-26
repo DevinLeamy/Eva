@@ -1,6 +1,6 @@
 use nalgebra::Vector3;
 
-use super::{PhongMaterial, Primitive, Sphere, Transform};
+use super::{Primitive, Sphere, Transform};
 
 #[derive(Clone, Debug)]
 pub enum Node {
@@ -61,7 +61,7 @@ impl Node {
 pub struct Geometry {
     transform: Transform,
     children: Vec<Node>,
-    material: PhongMaterial,
+    pub material_id: u32,
     primitive: Primitive,
 }
 
@@ -70,7 +70,7 @@ impl Default for Geometry {
         Self {
             transform: Transform::default(),
             children: Vec::new(),
-            material: PhongMaterial::default(),
+            material_id: 0,
             primitive: Primitive::Sphere(Sphere::new(1.0)),
         }
     }
@@ -79,14 +79,14 @@ impl Default for Geometry {
 impl Geometry {
     pub fn new(
         transform: Transform,
-        material: PhongMaterial,
+        material_id: u32,
         primitive: Primitive,
         children: Vec<Node>,
     ) -> Self {
         Self {
             transform,
             children,
-            material,
+            material_id,
             primitive,
         }
     }
@@ -95,7 +95,7 @@ impl Geometry {
         Self {
             transform: Transform::default(),
             children: Vec::new(),
-            material: PhongMaterial::default(),
+            material_id: 0,
             primitive,
         }
     }
@@ -116,20 +116,12 @@ impl Geometry {
         self.children.push(child);
     }
 
-    pub fn set_material(&mut self, material: PhongMaterial) {
-        self.material = material;
+    pub fn set_material(&mut self, material_id: u32) {
+        self.material_id = material_id;
     }
 
     pub fn primitive(&self) -> &Primitive {
         &self.primitive
-    }
-
-    pub fn material(&self) -> &PhongMaterial {
-        &self.material
-    }
-
-    pub fn material_mut(&mut self) -> &mut PhongMaterial {
-        &mut self.material
     }
 }
 

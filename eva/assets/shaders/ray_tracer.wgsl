@@ -14,13 +14,6 @@ struct Transform {
     m_normal_inverse: mat3x3f,
 };
 
-struct PhongMaterial {
-    diffuse: vec3f,
-    specular: vec3f,
-    shininess: f32,
-    texture_id: u32,
-};
-
 struct CubeModels {
     length: u32,
     cubes: array<CubeModel>,
@@ -29,7 +22,7 @@ struct CubeModels {
 struct CubeModel {
     cube: Cube,
     transform: Transform,
-    material: PhongMaterial
+    material_id: u32 
 };
 
 struct Cube {
@@ -45,7 +38,7 @@ struct SphereModels {
 struct SphereModel {
     sphere: Sphere,
     transform: Transform,
-    material: PhongMaterial,
+    material_id: u32,
 };
 
 struct Ray {
@@ -62,22 +55,12 @@ struct Intersection {
     t: f32, 
     ray: Ray,
     normal: vec3f,
-    material: PhongMaterial,
+    material_id: u32,
     uv: vec2f,
 };
 
-struct PointLights {
-    length: u32,
-    lights: array<PointLight>,
-};
-
-struct PointLight {
-    position: vec3f,
-    colour: vec3f,
-};
-
 struct GlobalConfig {
-    ambient_light: vec3f,
+    ambient: vec3f,
 };
 
 struct MeshPositions {
@@ -97,7 +80,7 @@ struct MeshHeaders {
 };
 
 struct MeshModelHeader {
-    material: PhongMaterial,
+    material_id: u32,
     transform: Transform,
     bounding_box: Cube,
 
@@ -127,12 +110,24 @@ struct MeshNormals {
     normals: array<vec3f>
 };
 
+struct Materials {
+    length: u32,
+    materials: array<Material>
+}
+
+struct Material {
+    roughness: f32,
+    metallic: f32,
+    albedo: vec3f,
+    light: vec3f
+}
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
-@group(0) @binding(3) var<storage, read> lights: PointLights;
-@group(0) @binding(4) var<uniform> config: GlobalConfig;
-@group(0) @binding(5) var<storage, read> cubes: CubeModels; 
+@group(0) @binding(3) var<uniform> config: GlobalConfig;
+@group(0) @binding(4) var<storage, read> cubes: CubeModels; 
+@group(0) @binding(5) var<storage, read> materials: Materials; 
 
 @group(1) @binding(0) var<storage, read> mesh_headers: MeshHeaders;
 @group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
@@ -145,6 +140,7 @@ struct MeshNormals {
 
 @group(3) @binding(0) var skybox: texture_cube<f32>;
 @group(3) @binding(1) var skybox_sampler: sampler;
+
 
 @compute @workgroup_size(1, 1, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
@@ -166,8 +162,10 @@ fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
             colour = colour + ray_colour;
         }
     }
+    colour = colour / f32(samples_per_row * samples_per_row);
+    colour = sqrt(colour);
 
-    textureStore(colour_buffer, screen_coord, vec4<f32>(colour / f32(samples_per_row * samples_per_row), 1.0));
+    textureStore(colour_buffer, screen_coord, vec4<f32>(colour, 1.0));
 }
 
 fn compute_pixel_position(x: f32, y: f32) -> vec3f {
@@ -251,41 +249,57 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 
 fn compute_ray_colour(_ray: Ray) -> vec3f {
     var ray: Ray = _ray;
+    let max_reflections = 10;
 
-    var total_light: vec3f = vec3f(0.0, 0.0, 0.0);
-    var total_reflectance: vec3f = vec3(0.5); 
-
-    for (var i: i32 = 0; i < 3; i = i + 1) {
+    var light: vec3f = vec3f(0.0);
+    var colour: vec3f = vec3f(1.0);
+    for (var i: i32 = 0; i < max_reflections; i = i + 1) {
         let intersection = compute_ray_intersection(ray);
         if (!intersection.some) {
-            total_light = total_light + total_reflectance * compute_skybox_colour(ray.direction);
+            let c = compute_skybox_colour(ray.direction);
+            light = light + colour * c;
+            colour = colour * c;
             break;
         }
 
-        total_light = total_light + total_reflectance * compute_light_at_intersection(intersection);
-        total_reflectance = total_reflectance * intersection.material.specular;
-
+        let material = intersection_material(intersection);
+        let albedo = intersection_material_colour(intersection);
+        light = light + colour * material.light;
+        colour = colour * albedo;
         ray = compute_reflected_ray(ray, intersection);
     }
 
-    return total_light;
+    return light;
 }
 
 fn compute_skybox_colour(coords: vec3f) -> vec3f {
     let colour = textureSampleLevel(skybox, skybox_sampler, coords, 0.0).rgb; 
     return colour;
+    // return vec3f(0.2, 0.3, 0.6);
 }
 
 fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     var reflected_ray: Ray;
-    reflected_ray.direction = normalize(ray.direction - intersection.normal * 2.0 * dot(ray.direction, intersection.normal));
+    let N = intersection.normal;
+    let R = ray.direction;
+    let perfect_reflection = normalize(R - N * 2.0 * dot(R, N));
+
+    let material = material_by_id(intersection.material_id);
+    let random_unit = random_unit_vector(vec2(intersection.t + R.x + N.x, intersection.t + R.y + N.y));
+
     // Offset to avoid floating point errors.
-    reflected_ray.origin = ray_point(ray, intersection.t) + reflected_ray.direction;
+    if (material.metallic == 1.0) {
+        reflected_ray.direction = perfect_reflection;
+    } else {
+        reflected_ray.direction = normalize(N + random_unit);
+    }
+    reflected_ray.origin = ray_point(ray, intersection.t); 
 
     return reflected_ray;
 }
 
 fn compute_ray_intersection(ray: Ray) -> Intersection {
+    let MIN_INTERSECTION_T = 0.001;
     var intersection: Intersection;
     intersection.some = false; 
 
@@ -299,9 +313,9 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
         var transformed_intersection: Intersection = intersection_transform(new_intersection, sphere_model.transform);
 
         // Set the material of the object that was intersected with.
-        transformed_intersection.material = sphere_model.material;
+        transformed_intersection.material_id = sphere_model.material_id;
     
-        if (transformed_intersection.some) {
+        if (transformed_intersection.some && transformed_intersection.t > MIN_INTERSECTION_T) {
             if (!intersection.some) {
                 intersection = transformed_intersection;
             } else if (intersection.t >= transformed_intersection.t) {
@@ -321,12 +335,12 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
         var transformed_intersection: Intersection = intersection_transform(new_intersection, cube_model.transform);
 
         // Set the material of the object that was intersected with.
-        transformed_intersection.material = cube_model.material;
+        transformed_intersection.material_id = cube_model.material_id;
     
         if (transformed_intersection.some) {
             if (!intersection.some) {
                 intersection = transformed_intersection;
-            } else if (intersection.t >= transformed_intersection.t) {
+            } else if (intersection.t >= transformed_intersection.t && transformed_intersection.t > MIN_INTERSECTION_T) {
                 // Take the nearer intersection.
                 intersection = transformed_intersection;
             }
@@ -354,9 +368,9 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
             var transformed_intersection: Intersection = intersection_transform(new_intersection, mesh.transform);
 
             // Set the material of the object that was intersected with.
-            transformed_intersection.material = mesh.material;
+            transformed_intersection.material_id = mesh.material_id;
         
-            if (transformed_intersection.some) {
+            if (transformed_intersection.some && transformed_intersection.t > MIN_INTERSECTION_T) {
                 if (!intersection.some) {
                     intersection = transformed_intersection;
                 } else if (intersection.t >= transformed_intersection.t) {
@@ -370,67 +384,14 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
     return intersection;
 }
 
-fn compute_light_at_intersection(intersection: Intersection) -> vec3f {
-    if (!intersection.some) {
-        return vec3f(0.0, 0.0, 0.0);
-    }
-
-    var total_light: vec3f = vec3f();
-
-    for (var i: i32 = 0; i < i32(lights.length); i = i + 1) {
-        let light = lights.lights[i];
-        total_light = total_light + compute_light_contribution_at_intersection(intersection, light);
-    }
-
-    return total_light;
-}
-
-fn compute_light_contribution_at_intersection(intersection: Intersection, light: PointLight) -> vec3f {
-    if (!intersection.some) {
-        return vec3f(0.0, 0.0, 0.0);
-    }
-
-    let intersection_point = ray_point(intersection.ray, intersection.t);
-    let to_light = normalize(light.position - intersection_point); 
-
-    // Move lightly away from the intersection point in the direction of the light to avoid
-    // intersecting with the inside of an object.
-    let offset_intersection_point = intersection_point + to_light * 0.1;
-    let ray_to_light = ray_from_points(offset_intersection_point, light.position);
-
-    let ray_to_light_intersection = compute_ray_intersection(ray_to_light);
-    return phong_illumination(intersection, light, ray_to_light_intersection.some);
-}
-
-fn phong_illumination(intersection: Intersection, light: PointLight, in_shadow: bool) -> vec3f {
-    let material_colour = intersection_material_colour(intersection);
-
-    let ambient = config.ambient_light * light.colour * material_colour;
-    if (in_shadow) {
-        return ambient;
-    }
-
-    let intersection_point = ray_point(intersection.ray, intersection.t);
-    let to_light = normalize(light.position - intersection_point);
-    let to_view = normalize(camera.position - intersection_point);
-
-
-    let diffuse_strength = max(0.0, dot(intersection.normal, to_light));
-    let diffuse = diffuse_strength * light.colour * material_colour;
-
-    let half_vector = normalize(to_view + to_light);
-    let specular_strength = pow(max(0.0, dot(intersection.normal, half_vector)), intersection.material.shininess);
-    let specular = light.colour * specular_strength * intersection.material.specular;
-
-    return diffuse + specular + ambient;
-}
-
 fn intersection_material_colour(intersection: Intersection) -> vec3f {
-    var colour: vec3f = intersection.material.diffuse;
-    if (intersection.material.texture_id != u32(0)) {
+    let material = material_by_id(intersection.material_id);
+    var colour: vec3f = material.albedo;
+
+    if (material.albedo.x == -1.0) {
+        let texture_id = u32(material.albedo.y);
         let texture_coords = vec2f(intersection.uv.x, 1.0 - intersection.uv.y);
-        colour = sample_texture(intersection.material.texture_id, texture_coords);
-        // colour = sample_texture(u32(0), texture_coords);
+        colour = sample_texture(texture_id, texture_coords);
     }
 
     return colour;
@@ -445,6 +406,9 @@ fn sphere_intersection(sphere: Sphere, ray: Ray) -> Intersection {
     var intersection: Intersection;
     intersection.some = false; 
 
+    if (sphere_point_inside(sphere, ray.origin)) {
+        return intersection;
+    }
 
     let a = 1.0;
     let b = 2.0 * dot(ray.origin, ray.direction);
@@ -501,6 +465,10 @@ fn sphere_uv(sphere: Sphere, point: vec3f) -> vec2f {
     let u = phi / (2.0 * PI);
     let v = theta / PI;
     return vec2f(u, v);
+}
+
+fn sphere_point_inside(sphere: Sphere, point: vec3f) -> bool {
+    return length(point) <= sphere.radius;
 }
 
 fn cube_intersection(cube: Cube, ray: Ray) -> Intersection {
@@ -683,4 +651,32 @@ fn random01(seed: vec2<f32>) -> f32 {
 
 fn shader_bool(boolean: u32) -> bool {
     return boolean == u32(1);
+}
+
+fn material_by_id(material_id: u32) -> Material {
+    return materials.materials[material_id];
+}
+
+fn lerp_vec3(a: vec3f, b: vec3f, l: f32) -> vec3f {
+    return vec3f(
+        lerp(a.x, b.x, l),
+        lerp(a.y, b.y, l),
+        lerp(a.z, b.z, l),
+    );
+}
+
+fn lerp(a: f32, b: f32, l: f32) -> f32 {
+    return a + (b - a) * l;
+}
+
+fn random_unit_vector(seed: vec2<f32>) -> vec3f {
+    return normalize(vec3f(
+        (random01(vec2f(seed.x - 1.0, seed.y - 1.0)) - 0.5) * 2.0,
+        (random01(vec2f(seed.x - 2.0, seed.y - 2.0)) - 0.5) * 2.0,
+        (random01(vec2f(seed.x - 3.0, seed.y - 3.0)) - 0.5) * 2.0,
+    ));
+}
+
+fn intersection_material(intersection: Intersection) -> Material {
+    return material_by_id(intersection.material_id);
 }

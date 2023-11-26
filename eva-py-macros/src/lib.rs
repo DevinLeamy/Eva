@@ -17,10 +17,8 @@ pub fn node_methods_derive(input: TokenStream) -> TokenStream {
                     self.inner.add_child(child.inner.clone().into());
                 } else if let Ok(child) = child.extract::<PyRef<PyTransform>>(py) {
                     self.inner.add_child(child.inner.clone().into());
-                } else if let Ok(child) = child.extract::<PyRef<EvaLight>>(py) {
-                    self.inner.add_child(child.inner.clone().into());
                 } else {
-                    panic!("add_child only accepts PyGeometry, PyTransform, or EvaLight");
+                    panic!("add_child only accepts PyGeometry, or PyTransform");
                 }
             }
 

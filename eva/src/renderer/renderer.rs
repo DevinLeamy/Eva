@@ -38,7 +38,7 @@ pub struct Renderer {
     pub config_buffer: Buffer,
     pub spheres_buffer: Buffer,
     pub cubes_buffer: Buffer,
-    pub lights_buffer: Buffer,
+    pub materials_buffer: Buffer,
 }
 
 impl Renderer {
@@ -158,7 +158,7 @@ impl Renderer {
         self.queue.write_buffer(&self.camera_buffer, 0, &shader_camera.as_bytes().unwrap());
         self.queue.write_buffer(&self.spheres_buffer, 0, &flat_scene.spheres.as_bytes().unwrap());
         self.queue.write_buffer(&self.cubes_buffer, 0, &flat_scene.cubes.as_bytes().unwrap());
-        self.queue.write_buffer(&self.lights_buffer, 0, &flat_scene.lights.as_bytes().unwrap());
+        self.queue.write_buffer(&self.materials_buffer, 0, &self.static_context.materials.as_bytes().unwrap());
 
         self.queue.write_buffer(&self.mesh_headers_buffer, 0, &flat_scene.meshes.headers.as_bytes().unwrap());
         self.queue.write_buffer(&self.mesh_triangles_buffer, 0, &flat_scene.meshes.triangles.as_bytes().unwrap());
@@ -211,16 +211,16 @@ impl Renderer {
                 },
                 BindGroupEntry {
                     binding: 3,
-                    resource: self.lights_buffer.as_entire_binding(),
-                },
-                BindGroupEntry {
-                    binding: 4,
                     resource: self.config_buffer.as_entire_binding(),
                 },
                 BindGroupEntry {
-                    binding: 5,
+                    binding: 4,
                     resource: self.cubes_buffer.as_entire_binding(),
                 },
+                BindGroupEntry {
+                    binding: 5,
+                    resource: self.materials_buffer.as_entire_binding()
+                }
             ],
         });
 

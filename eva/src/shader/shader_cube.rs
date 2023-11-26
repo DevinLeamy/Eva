@@ -1,7 +1,7 @@
 use encase::ShaderType;
 use eva_macros::ShaderStructMacro;
 
-use crate::prelude::{Cube, PhongMaterial};
+use crate::prelude::Cube;
 
 use super::{ShaderStruct, ShaderTransform};
 
@@ -9,5 +9,5 @@ use super::{ShaderStruct, ShaderTransform};
 pub struct ShaderCubeModel {
     pub cube: Cube,
     pub transform: ShaderTransform,
-    pub material: PhongMaterial,
+    pub material_id: u32,
 }
