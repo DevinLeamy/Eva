@@ -29,6 +29,14 @@ class Eva(Singleton):
         Eva().inner.set_ambient(strength, strength, strength)
 
     @staticmethod
+    def set_sample_count(count: int):
+        Eva().inner.set_sample_count(count)
+
+    @staticmethod
+    def set_max_reflections(reflections: int):
+        Eva().inner.set_max_reflections(reflections)
+
+    @staticmethod
     def add_material(material: Material) -> int:
         return Eva().inner.add_material(material.inner)
 

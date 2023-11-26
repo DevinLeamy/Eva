@@ -9,6 +9,8 @@ from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 #     "blue/z.png",
 #     "blue/-z.png",
 # ])
+Eva.set_max_reflections(15)
+Eva.set_sample_count(9)
 Eva.set_ambient(0.03)
 Eva.add_skybox([
     "sky/z.tga",

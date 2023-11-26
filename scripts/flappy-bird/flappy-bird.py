@@ -13,6 +13,8 @@ import datetime
 #     "sky/x.tga",
 #     "sky/-x.tga",
 # ])
+Eva.set_sample_count(4)
+Eva.set_max_reflections(10)
 Eva.add_skybox([
     "flap/flap.png",
     "flap/flap.png",

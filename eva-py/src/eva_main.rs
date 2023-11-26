@@ -39,6 +39,8 @@ pub fn main(run: EvaRunDescriptor) {
         ambient: run.global.ambient,
         textures: run.global.texture_loader.clone().textures(),
         materials: run.global.materials.clone(),
+        sample_count: run.global.sample_count,
+        max_reflections: run.global.max_reflections,
     };
     let mut renderer = RendererBuilder::new(window, static_context).build();
 
