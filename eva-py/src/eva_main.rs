@@ -15,17 +15,15 @@ use crate::prelude::{EvaCamera, EvaGlobal, EvaScene};
 
 pub struct EvaRunDescriptor<'a> {
     pub global: &'a EvaGlobal,
-    pub camera: PyObject,
+    pub render: PyObject,
     pub scene: PyObject,
-    pub update: PyObject,
-    pub input_handler: PyObject,
+    pub camera: PyObject,
 }
 
 pub struct ThreadSyncContext {
-    pub update: PyObject,
+    pub render: PyObject,
     pub camera: PyObject,
     pub scene: PyObject,
-    pub input_handler: PyObject,
 }
 
 pub fn main(run: EvaRunDescriptor) {
@@ -46,10 +44,9 @@ pub fn main(run: EvaRunDescriptor) {
     let mut renderer = RendererBuilder::new(window, static_context).build();
 
     let sync_arc = Arc::new(Mutex::new(ThreadSyncContext {
-        update: run.update,
+        render: run.render,
         camera: run.camera,
         scene: run.scene,
-        input_handler: run.input_handler,
     }));
     let sync_arc_clone = Arc::clone(&sync_arc);
 
@@ -71,9 +68,8 @@ pub fn main(run: EvaRunDescriptor) {
                             let state = format!("{:?}", state);
 
                             Python::with_gil(|py| -> PyResult<()> {
-                                let py_input_handler: &PyFunction =
-                                    sync.as_ref().unwrap().input_handler.downcast(py)?;
-                                py_input_handler.call1((key, state))?;
+                                let render_ref: &PyObject = &sync.as_ref().unwrap().render;
+                                render_ref.call_method1(py, "handle_input", (key, state))?;
 
                                 Ok(())
                             })
@@ -90,8 +86,8 @@ pub fn main(run: EvaRunDescriptor) {
 
         if now.duration_since(last_frame_time).as_millis() > 32 {
             let (camera, scene) = Python::with_gil(|py| -> PyResult<(Camera, Scene)> {
-                let py_func_ref: &PyFunction = sync.as_ref().unwrap().update.downcast(py)?;
-                py_func_ref.call1(())?;
+                let render_ref: &PyObject = &sync.as_ref().unwrap().render;
+                render_ref.call_method0(py, "update")?;
 
                 let py_camera_ref = &sync.as_ref().unwrap().camera;
                 let py_scene_ref = &sync.as_ref().unwrap().scene;

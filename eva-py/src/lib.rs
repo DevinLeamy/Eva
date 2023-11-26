@@ -32,15 +32,13 @@ fn eva_py_main(
     global: &EvaGlobal,
     scene: PyObject,
     camera: PyObject,
-    update: PyObject,
-    input_handler: PyObject,
+    render: PyObject,
 ) -> PyResult<()> {
     eva_main::main(EvaRunDescriptor {
         global,
         camera,
         scene,
-        update,
-        input_handler,
+        render,
     });
 
     Ok(())

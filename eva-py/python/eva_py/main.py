@@ -13,8 +13,8 @@ class Eva(Singleton):
         self.inner = EvaGlobal()
 
     @staticmethod
-    def run(update, handle_input):
-        eva_main(Eva().inner, Scene(), Camera(), update, handle_input)
+    def run(render):
+        eva_main(Eva().inner, Scene(), Camera(), render)
 
     @staticmethod
     def add_texture(name: str) -> int:
