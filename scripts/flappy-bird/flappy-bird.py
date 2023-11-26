@@ -56,6 +56,8 @@ class FlappyBird(Render):
 
     def reset_game(self):
         self.bird.reset()
+        for pipe in self.pipes:
+            pipe.reset()
 
     def handle_input(self, key: str, state: str):
         self.bird.handle_input(key, state)
@@ -79,6 +81,12 @@ class FlappyBird(Render):
             return True
         if (self.bird.geometry.intersects_with(self.bottom_wall.geometry)):
             return True
+
+        for pipe in self.pipes:
+            if self.bird.geometry.intersects_with(pipe.top_geometry):
+                return True
+            if self.bird.geometry.intersects_with(pipe.bottom_geometry):
+                return True
 
         return False
 

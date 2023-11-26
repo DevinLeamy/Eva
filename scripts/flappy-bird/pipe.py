@@ -8,6 +8,7 @@ PIPE_DEPTH = 30
 class PipePair:
     def __init__(self, width: float, height: float, x: float, window: (float, float), gap_size: float, max_x: float):
         self.max_x = max_x
+        self.starting_x = x
         self.gap_size = gap_size
         self.window = window
 
@@ -26,9 +27,7 @@ class PipePair:
             .scale(width, height, PIPE_DEPTH) \
             .set_material(self.material_handle)
 
-        shift = random.randint(-self.gap_size, self.gap_size)
-        self.top_geometry.translate(x, window[0] + shift, 0.0)
-        self.bottom_geometry.translate(x, window[1] + shift, 0.0)
+        self.position_pipes(self.starting_x)
 
     def update(self):
         self.top_geometry.translate(-SPEED, 0.0, 0.0)
@@ -40,9 +39,15 @@ class PipePair:
     def should_reposition(self) -> bool:
         x = self.top_geometry.translation()[0]
         return x > self.max_x
+    
+    def reset(self):
+        self.position_pipes(self.starting_x)
+
+    def position_pipes(self, x):
+        shift = random.randint(-self.gap_size, self.gap_size)
+        self.top_geometry.set_translation(-x, shift + self.window[0] + shift, 0.0)
+        self.bottom_geometry.set_translation(-x, shift + self.window[1] + shift, 0.0)
+
 
     def reposition(self):
-        shift = random.randint(-self.gap_size, self.gap_size)
-
-        self.top_geometry.set_translation(-self.max_x, self.window[0] + shift, 0.0)
-        self.bottom_geometry.set_translation(-self.max_x, self.window[1] + shift, 0.0)
+        self.position_pipes(self.max_x)
