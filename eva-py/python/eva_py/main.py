@@ -1,4 +1,4 @@
-from .eva_py import eva_main, EvaGlobal
+from .eva_py import eva_main_dynamic, eva_main_static, EvaGlobal
 from eva_py.camera import Camera
 from eva_py.scene import Scene
 from eva_py.utils import Singleton
@@ -13,8 +13,12 @@ class Eva(Singleton):
         self.inner = EvaGlobal()
 
     @staticmethod
-    def run(render):
-        eva_main(Eva().inner, Scene(), Camera(), render)
+    def run_dynamic(render):
+        eva_main_dynamic(Eva().inner, Scene(), Camera(), render)
+
+    @staticmethod
+    def run_static():
+        eva_main_dynamic(Eva().inner, Scene().inner, Camera().inner)
 
     @staticmethod
     def add_texture(name: str) -> int:

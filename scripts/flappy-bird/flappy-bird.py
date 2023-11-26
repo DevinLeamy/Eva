@@ -1,4 +1,4 @@
-from eva_py import Render, Camera, Eva
+from eva_py import RenderDynamic, Camera, Eva
 from bird import Bird
 from wall import Wall
 from background import Background
@@ -41,7 +41,7 @@ PIPE_WIDTH = 20
 PIPE_HEIGHT = 110
 
 
-class FlappyBird(Render):
+class FlappyBird(RenderDynamic):
     camera: Camera
     bird: Bird
     pipes: [PipePair]

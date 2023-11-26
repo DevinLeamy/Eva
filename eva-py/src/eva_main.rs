@@ -12,17 +12,34 @@ use winit::{
 
 use crate::prelude::{EvaCamera, EvaGlobal, EvaScene};
 
-pub struct EvaRunDescriptor<'a> {
-    pub global: &'a EvaGlobal,
-    pub render: PyObject,
-    pub scene: PyObject,
-    pub camera: PyObject,
+pub enum EvaRender {
+    Static {
+        camera: Camera,
+        scene: Scene,
+    },
+    Dynamic {
+        camera: PyObject,
+        scene: PyObject,
+        render: PyObject,
+    },
 }
 
-pub struct ThreadSyncContext {
+pub struct EvaRunDescriptor<'a> {
+    pub global: &'a EvaGlobal,
+    pub render: EvaRender,
+}
+
+pub struct DynamicThreadSyncContext {
     pub render: PyObject,
     pub camera: PyObject,
     pub scene: PyObject,
+}
+
+// Should be temp.
+pub struct StaticThreadSyncContext {
+    pub rendered: bool,
+    pub camera: Camera,
+    pub scene: Scene,
 }
 
 pub fn main(run: EvaRunDescriptor) {
@@ -44,72 +61,115 @@ pub fn main(run: EvaRunDescriptor) {
     };
     let mut renderer = RendererBuilder::new(window, static_context).build();
 
-    let sync_arc = Arc::new(Mutex::new(ThreadSyncContext {
-        render: run.render,
-        camera: run.camera,
-        scene: run.scene,
-    }));
-    let sync_arc_clone = Arc::clone(&sync_arc);
+    match run.render {
+        EvaRender::Static { camera, scene } => {
+            let sync_arc = Arc::new(Mutex::new(StaticThreadSyncContext {
+                camera,
+                scene,
+                rendered: false,
+            }));
+            let sync_arc_clone = Arc::clone(&sync_arc);
 
-    let mut last_frame_time: Instant = Instant::now();
-    event_loop.run(move |event, _, control_flow| {
-        let now = Instant::now();
-        let sync = sync_arc_clone.lock();
-
-        match event {
-            Event::WindowEvent {
-                window_id: _,
-                event: window_event,
-            } => match window_event {
-                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                WindowEvent::KeyboardInput { input, .. } => {
-                    match (input.virtual_keycode, input.state) {
-                        (Some(key), state) => {
-                            let key = format!("{:?}", key);
-                            let state = format!("{:?}", state);
-
-                            Python::with_gil(|py| -> PyResult<()> {
-                                let render_ref: &PyObject = &sync.as_ref().unwrap().render;
-                                render_ref.call_method1(py, "handle_input", (key, state))?;
-
-                                Ok(())
-                            })
-                            .unwrap();
-                        }
-
+            event_loop.run(move |event, _, control_flow| {
+                match event {
+                    Event::WindowEvent {
+                        window_id: _,
+                        event: window_event,
+                    } => match window_event {
+                        WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                         _ => {}
-                    }
+                    },
+                    _ => {}
                 }
-                _ => {}
-            },
-            _ => {}
+
+                let sync_ref = sync_arc_clone.as_ref().lock().unwrap();
+                if !sync_ref.rendered {
+                    let context = DynamicRenderContext {
+                        scene: sync_ref.scene.clone(),
+                        camera: sync_ref.camera.clone(),
+                    };
+                    renderer.render(&context).unwrap();
+                    sync_arc_clone.as_ref().lock().unwrap().rendered = true;
+                }
+            });
         }
+        EvaRender::Dynamic {
+            camera,
+            scene,
+            render,
+        } => {
+            let sync_arc = Arc::new(Mutex::new(DynamicThreadSyncContext {
+                render,
+                camera,
+                scene,
+            }));
+            let sync_arc_clone = Arc::clone(&sync_arc);
 
-        if now.duration_since(last_frame_time).as_millis() > 32 {
-            let (camera, scene) = Python::with_gil(|py| -> PyResult<(Camera, Scene)> {
-                let render_ref: &PyObject = &sync.as_ref().unwrap().render;
-                render_ref.call_method0(py, "update")?;
+            let mut last_frame_time: Instant = Instant::now();
+            event_loop.run(move |event, _, control_flow| {
+                let now = Instant::now();
+                let sync = sync_arc_clone.lock();
 
-                let py_camera_ref = &sync.as_ref().unwrap().camera;
-                let py_scene_ref = &sync.as_ref().unwrap().scene;
-                let eva_camera: EvaCamera = py_camera_ref
-                    .getattr(py, "inner")
-                    .unwrap()
-                    .extract(py)
+                match event {
+                    Event::WindowEvent {
+                        window_id: _,
+                        event: window_event,
+                    } => match window_event {
+                        WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                        WindowEvent::KeyboardInput { input, .. } => {
+                            match (input.virtual_keycode, input.state) {
+                                (Some(key), state) => {
+                                    let key = format!("{:?}", key);
+                                    let state = format!("{:?}", state);
+
+                                    Python::with_gil(|py| -> PyResult<()> {
+                                        let render_ref: &PyObject = &sync.as_ref().unwrap().render;
+                                        render_ref.call_method1(
+                                            py,
+                                            "handle_input",
+                                            (key, state),
+                                        )?;
+
+                                        Ok(())
+                                    })
+                                    .unwrap();
+                                }
+
+                                _ => {}
+                            }
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                }
+
+                if now.duration_since(last_frame_time).as_millis() > 32 {
+                    let (camera, scene) = Python::with_gil(|py| -> PyResult<(Camera, Scene)> {
+                        let render_ref: &PyObject = &sync.as_ref().unwrap().render;
+                        render_ref.call_method0(py, "update")?;
+
+                        let py_camera_ref = &sync.as_ref().unwrap().camera;
+                        let py_scene_ref = &sync.as_ref().unwrap().scene;
+                        let eva_camera: EvaCamera = py_camera_ref
+                            .getattr(py, "inner")
+                            .unwrap()
+                            .extract(py)
+                            .unwrap();
+                        let eva_scene: EvaScene = py_scene_ref
+                            .call_method1(py, "inner", ())
+                            .unwrap()
+                            .extract(py)
+                            .unwrap();
+
+                        Ok((eva_camera.inner, eva_scene.inner))
+                    })
                     .unwrap();
-                let eva_scene: EvaScene = py_scene_ref
-                    .call_method1(py, "inner", ())
-                    .unwrap()
-                    .extract(py)
-                    .unwrap();
 
-                Ok((eva_camera.inner, eva_scene.inner))
-            })
-            .unwrap();
-
-            let context = DynamicRenderContext { scene, camera };
-            renderer.render(&context).unwrap();
-            last_frame_time = Instant::now();
+                    let context = DynamicRenderContext { scene, camera };
+                    renderer.render(&context).unwrap();
+                    last_frame_time = Instant::now();
+                }
+            });
         }
-    });
+    }
 }
