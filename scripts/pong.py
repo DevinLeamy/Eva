@@ -1,4 +1,4 @@
-from eva_py import Camera, Material, Eva, Box, Sphere, RenderDynamic
+from eva_py import Camera, Material, Eva, Box, Sphere, RenderStatic
 from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 
 # Eva.add_skybox([
@@ -87,7 +87,7 @@ def position_in_orbit(t, r):
     return (x, y)
 
 
-class Pong(RenderDynamic):
+class Pong(RenderStatic):
     def __init__(self):
         super().__init__()
 
@@ -134,6 +134,9 @@ class Pong(RenderDynamic):
         self.orbit = Sphere(10) \
             .set_material(table_mat)
         self.add_geometry(self.orbit)
+
+        position = position_in_orbit(self.r, board_size * 0.65)
+        self.orbit.set_translation(position[0], position[1], game_z + 30)
 
     def handle_input(self, key, state):
         if state != "Pressed":

@@ -18,7 +18,7 @@ class Eva(Singleton):
 
     @staticmethod
     def run_static():
-        eva_main_dynamic(Eva().inner, Scene().inner, Camera().inner)
+        eva_main_static(Eva().inner, Scene().inner(), Camera().inner)
 
     @staticmethod
     def add_texture(name: str) -> int:

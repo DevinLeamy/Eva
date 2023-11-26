@@ -71,6 +71,7 @@ pub fn main(run: EvaRunDescriptor) {
             let sync_arc_clone = Arc::clone(&sync_arc);
 
             event_loop.run(move |event, _, control_flow| {
+                let mut sync = sync_arc_clone.lock().unwrap();
                 match event {
                     Event::WindowEvent {
                         window_id: _,
@@ -82,14 +83,13 @@ pub fn main(run: EvaRunDescriptor) {
                     _ => {}
                 }
 
-                let sync_ref = sync_arc_clone.as_ref().lock().unwrap();
-                if !sync_ref.rendered {
+                if !sync.rendered {
                     let context = DynamicRenderContext {
-                        scene: sync_ref.scene.clone(),
-                        camera: sync_ref.camera.clone(),
+                        scene: sync.scene.clone(),
+                        camera: sync.camera.clone(),
                     };
                     renderer.render(&context).unwrap();
-                    sync_arc_clone.as_ref().lock().unwrap().rendered = true;
+                    sync.rendered = true;
                 }
             });
         }
