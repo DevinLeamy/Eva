@@ -6,7 +6,7 @@ PIPE_DEPTH = 120
 
 
 class PipePair:
-    def __init__(self, width: float, height: float, x: float, window: (float, float), gap_size: float, max_x: float):
+    def __init__(self, width: float, height: float, x: float, window: (float, float), gap_size: float, max_x: float, light):
         self.max_x = max_x
         self.starting_x = x
         self.gap_size = gap_size
@@ -15,7 +15,8 @@ class PipePair:
         material = Material(
             roughness=1.0,
             metallic=0.0,
-            albedo=(1.0, 1.0, 1.0)
+            albedo=(1.0, 1.0, 1.0),
+            light=(light, light, light)
         )
         self.material_handle = Eva.add_material(material)
         # self.top_geometry = Mesh("cylinder.obj") \

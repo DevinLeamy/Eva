@@ -21,6 +21,14 @@ Eva.add_skybox([
     "flap/flap.png",
     "flap/flap.png",
 ])
+# Eva.add_skybox([
+#     "blue/x.png",
+#     "blue/-x.png",
+#     "blue/y.png",
+#     "blue/-y.png",
+#     "blue/z.png",
+#     "blue/-z.png",
+# ])
 
 
 GAME_WIDTH = 220
@@ -48,13 +56,18 @@ class FlappyBird(Render):
 
         self.pipes = []
         for i in range(3):
+            light = 0.0
+            if i % 2 == 1:
+                light = 0.0
+
             self.pipes.append(PipePair(
                 PIPE_WIDTH,
                 PIPE_HEIGHT,
                 (i + 1) * 80,
                 (2 * GAME_HEIGHT / 3, -GAME_HEIGHT / 2),
                 30,
-                GAME_WIDTH - 80
+                GAME_WIDTH - 80,
+                light
             ))
             self.add_geometry(self.pipes[-1].top_geometry)
             self.add_geometry(self.pipes[-1].bottom_geometry)
@@ -89,15 +102,15 @@ class FlappyBird(Render):
 
     def is_game_over(self):
         # Check if the bird intersected with either of the walls.
-        if (self.bird.geometry.intersects_with(self.top_wall.geometry)):
+        if (self.bird.hitbox.intersects_with(self.top_wall.geometry)):
             return True
-        if (self.bird.geometry.intersects_with(self.bottom_wall.geometry)):
+        if (self.bird.hitbox.intersects_with(self.bottom_wall.geometry)):
             return True
 
         for pipe in self.pipes:
-            if self.bird.geometry.intersects_with(pipe.top_geometry):
+            if self.bird.hitbox.intersects_with(pipe.top_geometry):
                 return True
-            if self.bird.geometry.intersects_with(pipe.bottom_geometry):
+            if self.bird.hitbox.intersects_with(pipe.bottom_geometry):
                 return True
 
         return False

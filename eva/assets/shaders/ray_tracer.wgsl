@@ -249,7 +249,7 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 
 fn compute_ray_colour(_ray: Ray) -> vec3f {
     var ray: Ray = _ray;
-    let max_reflections = 10;
+    let max_reflections = 20;
     // let max_reflections = 5;
 
     var light: vec3f = vec3f(0.0);
