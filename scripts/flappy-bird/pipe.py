@@ -2,7 +2,7 @@ from eva_py import Box, Material, Eva, Mesh
 import random
 
 SPEED = 0.75
-PIPE_DEPTH = 30
+PIPE_DEPTH = 120
 
 
 class PipePair:
@@ -14,7 +14,7 @@ class PipePair:
 
         material = Material(
             roughness=1.0,
-            metallic=1.0,
+            metallic=0.0,
             albedo=(1.0, 1.0, 1.0)
         )
         self.material_handle = Eva.add_material(material)

@@ -5,18 +5,27 @@ from background import Background
 from pipe import PipePair
 import datetime
 
+# Eva.add_skybox([
+#     "sky/z.tga",
+#     "sky/-z.tga",
+#     "sky/y.tga",
+#     "sky/-y.tga",
+#     "sky/x.tga",
+#     "sky/-x.tga",
+# ])
 Eva.add_skybox([
-    "sky/z.tga",
-    "sky/-z.tga",
-    "sky/y.tga",
-    "sky/-y.tga",
-    "sky/x.tga",
-    "sky/-x.tga",
+    "flap/flap.png",
+    "flap/flap.png",
+    "flap/flap.png",
+    "flap/flap.png",
+    "flap/flap.png",
+    "flap/flap.png",
 ])
 
-GAME_WIDTH = 200
+
+GAME_WIDTH = 220
 GAME_HEIGHT = 175
-WALL_HEIGHT = 10
+WALL_HEIGHT = 50
 
 PIPE_WIDTH = 20
 PIPE_HEIGHT = 110
@@ -30,9 +39,12 @@ class FlappyBird(Render):
     def __init__(self):
         super().__init__()
         self.bird = Bird()
-        self.background = Background(GAME_WIDTH)
-        self.top_wall = Wall(GAME_WIDTH, WALL_HEIGHT, GAME_HEIGHT / 2)
-        self.bottom_wall = Wall(GAME_WIDTH, WALL_HEIGHT, -GAME_HEIGHT / 2)
+        self.background = Background(GAME_WIDTH + 150, GAME_HEIGHT)
+        self.top_wall = Wall(GAME_WIDTH + 70, WALL_HEIGHT, GAME_HEIGHT * 0.75)
+        self.bottom_wall = Wall(
+            GAME_WIDTH + 70, WALL_HEIGHT, -GAME_HEIGHT * 0.5)
+        self.camera.translate(100, 0, -5)
+        self.camera.look_at(0, 0, 0)
 
         self.pipes = []
         for i in range(3):
@@ -40,7 +52,7 @@ class FlappyBird(Render):
                 PIPE_WIDTH,
                 PIPE_HEIGHT,
                 (i + 1) * 80,
-                (GAME_HEIGHT / 2, -GAME_HEIGHT / 2),
+                (2 * GAME_HEIGHT / 3, -GAME_HEIGHT / 2),
                 30,
                 GAME_WIDTH - 80
             ))

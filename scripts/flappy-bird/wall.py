@@ -1,6 +1,6 @@
 from eva_py import Box, Eva, Material
 
-WALL_DEPTH = 40
+WALL_DEPTH = 120
 
 
 class Wall:
