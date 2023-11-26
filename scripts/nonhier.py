@@ -1,23 +1,32 @@
-from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere, Mesh
-
-mat1 = Material((0.7, 1.0, 0.7), (0.5, 0.7, 0.5), 25)
-mat2 = Material((0.5, 0.5, 0.5), (0.5, 0.7, 0.5), 25)
-mat3 = Material((1.0, 0.6, 0.1), (0.5, 0.7, 0.5), 25)
-mat4 = Material((0.7, 0.6, 1.0), (0.5, 0.4, 0.8), 25)
-mat5 = Material((0.7, 0.7, 0.5), (0.0, 0.0, 0.0), 25)
-
-Eva.add_skybox([
-    "blue/x.png",
-    "blue/-x.png",
-    "blue/y.png",
-    "blue/-y.png",
-    "blue/z.png",
-    "blue/-z.png",
-])
-Eva.set_ambient(0.4)
+from eva_py import Scene, Camera, Material, Eva, Box, Sphere, Mesh
 
 earth_handle = Eva.add_texture("earth.jpg")
 wood_handle = Eva.add_texture("wood.jpeg")
+
+mat1 = Material(1.0, 0.0, (0.7, 1.0, 0.7))
+mat1.set_texture(earth_handle)
+mat1 = Eva.add_material(mat1)
+
+mat2 = Eva.add_material(Material(0.0, 1.0, (0.5, 0.5, 0.5)))
+mat3 = Eva.add_material(Material(1.0, 0.0, (1.0, 0.6, 0.1)))
+
+mat4 = Material(1.0, 0.0, (0.7, 0.6, 1.0))
+mat4.set_texture(wood_handle)
+mat4 = Eva.add_material(mat4)
+
+mat5 = Eva.add_material(Material(1.0, 0.0, (0.7, 0.7, 0.5)))
+light_mat = Eva.add_material(
+    Material(0.0, 0.0, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)))
+
+# Eva.add_skybox([
+#     "blue/x.png",
+#     "blue/-x.png",
+#     "blue/y.png",
+#     "blue/-y.png",
+#     "blue/z.png",
+#     "blue/-z.png",
+# ])
+Eva.set_ambient(0.4)
 
 scene = Scene()
 
@@ -30,7 +39,6 @@ scene.add(s1)
 s2 = Sphere(150)
 s2.set_material(mat5)
 s2.translate(200, 50, -100)
-s2.set_texture(earth_handle)
 scene.add(s2)
 
 s3 = Sphere(1000)
@@ -42,7 +50,6 @@ b1 = Box()
 b1.set_material(mat4)
 b1.scale(120, 120, 120)
 b1.translate(-200, -125, 40)
-b1.set_texture(wood_handle)
 scene.add(b1)
 
 s4 = Sphere(50)
@@ -61,14 +68,16 @@ steldodec.translate(-200, 200, -100)
 steldodec.set_material(mat5)
 scene.add(steldodec)
 
-white_light = Light(0.9)
-white_light.translate(-100.0, 150.0, 400.0)
+# l1 = Sphere(50)
+# l1.set_material(light_mat)
+# l1.translate(-100.0, 150.0, 400.0)
 
-magenta_light = Light(0.4, 0.4, 0.7)
-magenta_light.translate(400.0, 400.0, -200.0)
+# l2 = Sphere(50)
+# l2.set_material(light_mat)
+# l2.translate(400.0, 400.0, -400.0)
 
-scene.add(white_light)
-scene.add(magenta_light)
+# scene.add(l1)
+# scene.add(l2)
 
 camera = Camera((0, 0, 800))
 

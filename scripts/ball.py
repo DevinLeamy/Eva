@@ -1,7 +1,14 @@
-from eva_py import Scene, Light, Camera, Material, Eva, Box, Sphere
+from eva_py import Scene, Camera, Material, Eva, Box, Sphere
 from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 
 Eva.set_ambient(0.03)
+light_mat = Eva.add_material(Material(
+    0.0,
+    0.0,
+    (0.0, 0.0, 0.0),
+    (0.8, 0.8, 0.8)
+))
+
 # Eva.set_ambient(0.03)
 scene = Scene()
 for i in range(7):
@@ -21,10 +28,12 @@ for i in range(7):
 
         scene.add(ball)
 
-white_light = Light(1)
-white_light.translate(50.0, 97.0, 200.0)
+top_light = Box()
+top_light.scale(100, 10, 60)
+top_light.set_material(light_mat)
+top_light.translate(0.0, 50 / 2.0, 90)
 
-scene.add(white_light)
+scene.add(top_light)
 
 camera = Camera((0, 0, 200))
 camera.look_at(0, 0, 0)

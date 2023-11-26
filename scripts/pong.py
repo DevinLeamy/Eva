@@ -9,6 +9,14 @@ from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 #     "blue/z.png",
 #     "blue/-z.png",
 # ])
+Eva.add_skybox([
+    "sky/z.tga",
+    "sky/-z.tga",
+    "sky/y.tga",
+    "sky/-y.tga",
+    "sky/x.tga",
+    "sky/-x.tga",
+])
 
 # Bottom paddle.
 MOVE_LEFT: str = "A"
@@ -30,8 +38,8 @@ ball_mat = Eva.add_material(Material(
 ))
 paddle_mat = Eva.add_material(Material(
     1.0,
-    0.0,
-    (1.0, 1.0, 1.0),
+    1.0,
+    (1.0, 0.0, 0.0),
 ))
 table_mat = Eva.add_material(Material(
     0.0,
@@ -45,11 +53,17 @@ wall_mat = Eva.add_material(Material(
     0.0,
     (0.0, 1.0, 0.0),
 ))
+container_mat = Eva.add_material(Material(
+    1.0,
+    0.0,
+    (1.0, 1.0, 1.0),
+    # (0.2, 0.2, 0.2)
+))
 light_mat = Eva.add_material(Material(
     0.0,
     0.0,
     (0.0, 0.0, 0.0),
-    (0.6, 0.6, 0.6)
+    (0.8, 0.8, 0.8)
 ))
 
 scene = Scene()
@@ -110,15 +124,18 @@ top_light.scale(wall_height, paddle_height, paddle_depth)
 top_light.set_material(light_mat)
 top_light.translate(0.0, board_size / 2.0, 90)
 
-scene.add(top_light)
+# scene.add(top_light)
 
 bottom_light = Box()
 bottom_light.scale(wall_height, paddle_height, paddle_depth)
 bottom_light.set_material(light_mat)
 bottom_light.translate(0.0, -board_size / 2.0, 90)
 
-scene.add(bottom_light)
+# scene.add(bottom_light)
 
+orbit = Sphere(10)
+orbit.set_material(table_mat)
+scene.add(orbit)
 
 camera = Camera((0, 0, 220))
 camera.look_at(0, 0, 0)
@@ -144,9 +161,19 @@ def handle_input(key, state):
 
 ball_escaping = False
 
+r = 0
+
+
+def position_in_orbit(t, r):
+    import math
+    theta = (2 * math.pi / 20) * t
+    x = r * math.cos(theta)
+    y = r * math.sin(theta)
+    return (x, y)
+
 
 def update():
-    global ball_velocity, ball_escaping
+    global ball_velocity, ball_escaping, r
 
     # Update the position of the ball.
     ball.translate(ball_velocity[0], ball_velocity[1], 0.0)
@@ -180,6 +207,10 @@ def update():
     if vec3_length(ball.translation()) > board_size:
         ball.set_translation(0, 0, game_z)
         ball_velocity = [0, -BALL_SPEED, 0]
+
+    position = position_in_orbit(r, board_size * 0.65)
+    orbit.set_translation(position[0], position[1], game_z + 30)
+    r += 0.03
 
 
 Eva.run(update, handle_input)

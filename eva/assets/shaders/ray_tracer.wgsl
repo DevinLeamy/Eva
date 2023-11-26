@@ -275,6 +275,7 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
 fn compute_skybox_colour(coords: vec3f) -> vec3f {
     let colour = textureSampleLevel(skybox, skybox_sampler, coords, 0.0).rgb; 
     return colour;
+    // return vec3f(0.2, 0.3, 0.6);
 }
 
 fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
@@ -284,7 +285,7 @@ fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     let perfect_reflection = normalize(R - N * 2.0 * dot(R, N));
 
     let material = material_by_id(intersection.material_id);
-    let random_unit = random_unit_vector(vec2(intersection.t, intersection.t * intersection.t));
+    let random_unit = random_unit_vector(vec2(intersection.t + R.x + N.x, intersection.t + R.y + N.y));
 
     // Offset to avoid floating point errors.
     if (material.metallic == 1.0) {
@@ -292,12 +293,13 @@ fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     } else {
         reflected_ray.direction = normalize(N + random_unit);
     }
-    reflected_ray.origin = ray_point(ray, intersection.t) + reflected_ray.direction * 0.1;
+    reflected_ray.origin = ray_point(ray, intersection.t); 
 
     return reflected_ray;
 }
 
 fn compute_ray_intersection(ray: Ray) -> Intersection {
+    let MIN_INTERSECTION_T = 0.001;
     var intersection: Intersection;
     intersection.some = false; 
 
@@ -313,7 +315,7 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
         // Set the material of the object that was intersected with.
         transformed_intersection.material_id = sphere_model.material_id;
     
-        if (transformed_intersection.some) {
+        if (transformed_intersection.some && transformed_intersection.t > MIN_INTERSECTION_T) {
             if (!intersection.some) {
                 intersection = transformed_intersection;
             } else if (intersection.t >= transformed_intersection.t) {
@@ -338,7 +340,7 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
         if (transformed_intersection.some) {
             if (!intersection.some) {
                 intersection = transformed_intersection;
-            } else if (intersection.t >= transformed_intersection.t) {
+            } else if (intersection.t >= transformed_intersection.t && transformed_intersection.t > MIN_INTERSECTION_T) {
                 // Take the nearer intersection.
                 intersection = transformed_intersection;
             }
@@ -368,7 +370,7 @@ fn compute_ray_intersection(ray: Ray) -> Intersection {
             // Set the material of the object that was intersected with.
             transformed_intersection.material_id = mesh.material_id;
         
-            if (transformed_intersection.some) {
+            if (transformed_intersection.some && transformed_intersection.t > MIN_INTERSECTION_T) {
                 if (!intersection.some) {
                     intersection = transformed_intersection;
                 } else if (intersection.t >= transformed_intersection.t) {
