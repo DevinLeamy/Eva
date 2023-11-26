@@ -38,7 +38,7 @@ impl EvaCamera {
         self.inner.set_target(Vector3::new(x, y, z));
     }
 
-    fn set_position(&mut self, x: f32, y: f32, z: f32) {
+    fn set_translation(&mut self, x: f32, y: f32, z: f32) {
         self.inner.set_position(Vector3::new(x, y, z));
     }
 
