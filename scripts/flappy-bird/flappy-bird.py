@@ -5,30 +5,30 @@ from background import Background
 from pipe import PipePair
 import datetime
 
+# Eva.add_skybox([
+#     "sky/z.tga",
+#     "sky/-z.tga",
+#     "sky/y.tga",
+#     "sky/-y.tga",
+#     "sky/x.tga",
+#     "sky/-x.tga",
+# ])
+# Eva.add_skybox([
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+# ])
 Eva.add_skybox([
-    "sky/z.tga",
-    "sky/-z.tga",
-    "sky/y.tga",
-    "sky/-y.tga",
-    "sky/x.tga",
-    "sky/-x.tga",
+    "blue/x.png",
+    "blue/-x.png",
+    "blue/y.png",
+    "blue/-y.png",
+    "blue/z.png",
+    "blue/-z.png",
 ])
-# Eva.add_skybox([
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-# ])
-# Eva.add_skybox([
-#     "blue/x.png",
-#     "blue/-x.png",
-#     "blue/y.png",
-#     "blue/-y.png",
-#     "blue/z.png",
-#     "blue/-z.png",
-# ])
 
 
 GAME_WIDTH = 220
@@ -56,9 +56,9 @@ class FlappyBird(RenderDynamic):
 
         self.pipes = []
         for i in range(3):
-            light = 0.0
-            if i % 2 == 1:
-                light = 0.0
+            light = 0.2
+            # if i % 2 == 1:
+            #     light = 0.0
 
             self.pipes.append(PipePair(
                 PIPE_WIDTH,

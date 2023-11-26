@@ -14,7 +14,7 @@ class PipePair:
 
         material = Material(
             roughness=1.0,
-            metallic=0.0,
+            metallic=1.0,
             albedo=(1.0, 1.0, 1.0),
             light=(light, light, light)
         )
