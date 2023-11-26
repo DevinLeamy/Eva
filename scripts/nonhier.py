@@ -3,18 +3,27 @@ from eva_py import Scene, Camera, Material, Eva, Box, Sphere, Mesh
 earth_handle = Eva.add_texture("earth.jpg")
 wood_handle = Eva.add_texture("wood.jpeg")
 
-mat1 = Material(1.0, 0.0, (0.7, 1.0, 0.7))
+Eva.add_skybox([
+    "sky/z.tga",
+    "sky/-z.tga",
+    "sky/y.tga",
+    "sky/-y.tga",
+    "sky/x.tga",
+    "sky/-x.tga",
+])
+
+mat1 = Material(1.0, 0.0, (0.3, 1.0, 0.3))
 mat1.set_texture(earth_handle)
 mat1 = Eva.add_material(mat1)
 
-mat2 = Eva.add_material(Material(0.0, 1.0, (0.5, 0.5, 0.5)))
+mat2 = Eva.add_material(Material(0.0, 1.0, (1.0, 1.0, 1.0)))
 mat3 = Eva.add_material(Material(1.0, 0.0, (1.0, 0.6, 0.1)))
 
 mat4 = Material(1.0, 0.0, (0.7, 0.6, 1.0))
 mat4.set_texture(wood_handle)
 mat4 = Eva.add_material(mat4)
 
-mat5 = Eva.add_material(Material(1.0, 0.0, (0.7, 0.7, 0.5)))
+mat5 = Eva.add_material(Material(1.0, 1.0, (1.0, 1.0, 1.0)))
 light_mat = Eva.add_material(
     Material(0.0, 0.0, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)))
 

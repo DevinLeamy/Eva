@@ -406,6 +406,9 @@ fn sphere_intersection(sphere: Sphere, ray: Ray) -> Intersection {
     var intersection: Intersection;
     intersection.some = false; 
 
+    if (sphere_point_inside(sphere, ray.origin)) {
+        return intersection;
+    }
 
     let a = 1.0;
     let b = 2.0 * dot(ray.origin, ray.direction);
@@ -462,6 +465,10 @@ fn sphere_uv(sphere: Sphere, point: vec3f) -> vec2f {
     let u = phi / (2.0 * PI);
     let v = theta / PI;
     return vec2f(u, v);
+}
+
+fn sphere_point_inside(sphere: Sphere, point: vec3f) -> bool {
+    return length(point) <= sphere.radius;
 }
 
 fn cube_intersection(cube: Cube, ray: Ray) -> Intersection {
