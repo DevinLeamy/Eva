@@ -76,10 +76,6 @@ wall_height = board_size - 10
 wall_width = 2
 wall_depth = paddle_depth
 
-camera = Camera((0, 0, 220))
-camera.look_at(0, 0, 0)
-
-
 def position_in_orbit(t, r):
     import math
     theta = (2 * math.pi / 20) * t

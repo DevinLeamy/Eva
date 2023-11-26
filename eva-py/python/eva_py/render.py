@@ -1,8 +1,13 @@
-from eva_py import Eva, Scene
+from eva_py import Eva, Scene, Camera
 
 class Render:
+    scene: Scene
+    camera: Camera
+
     def __init__(self):
         self.scene = Scene()
+        self.camera = Camera((0, 0, 200))
+        self.camera.look_at(0, 0, 0)
 
     def update(self):
         print("Updating")

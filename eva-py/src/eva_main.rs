@@ -2,7 +2,6 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 use eva::prelude::*;
-use pyo3::types::PyFunction;
 use pyo3::{PyObject, PyResult, Python};
 use winit::dpi::LogicalSize;
 use winit::{
