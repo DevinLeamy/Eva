@@ -1,4 +1,4 @@
-from eva_py import Camera, Material, Eva, Box, Sphere, RenderStatic
+from eva_py import Camera, Material, Eva, Box, Sphere, RenderStatic, RenderDynamic
 from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
 
 # Eva.add_skybox([
@@ -87,7 +87,7 @@ def position_in_orbit(t, r):
     return (x, y)
 
 
-class Pong(RenderStatic):
+class Pong(RenderDynamic):
     def __init__(self):
         super().__init__()
 

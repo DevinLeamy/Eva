@@ -1,28 +1,26 @@
-from eva_py import RenderDynamic, Camera, Eva
+from eva_py import *
 from bird import Bird
 from wall import Wall
 from background import Background
 from pipe import PipePair
 import datetime
 
-# Eva.add_skybox([
-#     "sky/z.tga",
-#     "sky/-z.tga",
-#     "sky/y.tga",
-#     "sky/-y.tga",
-#     "sky/x.tga",
-#     "sky/-x.tga",
-# ])
-Eva.set_sample_count(4)
-Eva.set_max_reflections(10)
 Eva.add_skybox([
-    "flap/flap.png",
-    "flap/flap.png",
-    "flap/flap.png",
-    "flap/flap.png",
-    "flap/flap.png",
-    "flap/flap.png",
+    "sky/z.tga",
+    "sky/-z.tga",
+    "sky/y.tga",
+    "sky/-y.tga",
+    "sky/x.tga",
+    "sky/-x.tga",
 ])
+# Eva.add_skybox([
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+# ])
 # Eva.add_skybox([
 #     "blue/x.png",
 #     "blue/-x.png",

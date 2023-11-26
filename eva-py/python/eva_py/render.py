@@ -9,6 +9,8 @@ class RenderDynamic:
         self.scene = Scene()
         self.camera = Camera((0, 0, 200))
         self.camera.look_at(0, 0, 0)
+        Eva.set_max_reflections(10)
+        Eva.set_sample_count(9)
 
     def update(self):
         print("Updating")
@@ -40,6 +42,8 @@ class RenderStatic:
         self.scene = Scene()
         self.camera = Camera((0, 0, 200))
         self.camera.look_at(0, 0, 0)
+        Eva.set_max_reflections(45)
+        Eva.set_sample_count(81)
 
     # Add geometry to the scene.
     def add_geometry(self, geometry):
