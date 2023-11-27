@@ -1,5 +1,4 @@
-from eva_py import Camera, Material, Eva, Box, Sphere, RenderStatic, RenderDynamic
-from eva_py import vec3_sub, vec3_normalize, vec3_scalar_mult, vec3_length
+from eva_py import *
 
 # Eva.add_skybox([
 #     "blue/x.png",
