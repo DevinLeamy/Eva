@@ -13,8 +13,8 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn from_path(path: String) -> Self {
-        let obj_mesh = ObjLoader::load(path).unwrap();
+    pub async fn from_path(path: String) -> Self {
+        let obj_mesh = ObjLoader::load(path).await.unwrap();
 
         Self {
             triangles: obj_mesh.triangles,

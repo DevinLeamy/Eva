@@ -36,6 +36,8 @@ pub fn main() {
             })
             .expect("Couldn't append canvas to document body.");
     }
+    let runtime = tokio::runtime::Runtime::new().unwrap();
+    let demo = runtime.block_on(BallDemo::new().await.into());
     let runner = Runner::new(window, event_loop);
-    runner.run(BallDemo::new().into());
+    runner.run(demo);
 }

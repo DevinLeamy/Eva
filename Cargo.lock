@@ -594,6 +594,7 @@ dependencies = [
  "log",
  "nalgebra",
  "pollster",
+ "tokio",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",

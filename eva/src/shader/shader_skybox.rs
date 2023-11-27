@@ -68,12 +68,12 @@ pub struct ShaderSkybox {
 }
 
 impl ShaderSkybox {
-    pub fn create_skybox(images: Vec<String>) -> Option<Self> {
-        assert!(images.len() == 6);
-        let images: Vec<DynamicImage> = images
-            .iter()
-            .map(|name| AssetLoader::load_skybox_image(name.to_string()))
-            .collect();
+    pub async fn create_skybox(image_paths: Vec<String>) -> Option<Self> {
+        assert!(image_paths.len() == 6);
+        let mut images = Vec::new();
+        for image in image_paths {
+            images.push(AssetLoader::load_skybox_image(image.to_string()).await);
+        }
 
         Some(Self { images })
     }
@@ -99,7 +99,7 @@ impl<'a> Into<TextureDescriptor<'a>> for ShaderSkybox {
             dimension: TextureDimension::D2,
             format: TextureFormat::Rgba32Float,
             usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
-            view_formats: &[],
+        view_formats: &[],
         }
     }
 }

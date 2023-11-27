@@ -12,10 +12,10 @@ pub trait DynamicScene {
 }
 
 pub trait GlobalConfig {
-    fn static_context(&self) -> StaticRenderContext;
+    async fn static_context(&self) -> StaticRenderContext;
 }
 
-pub struct RunDescriptor {
-    pub global: Box<dyn GlobalConfig>,
+pub struct RunDescriptor<G: GlobalConfig> {
+    pub global: G,
     pub render: RenderMode,
 }

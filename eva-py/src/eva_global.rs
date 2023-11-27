@@ -40,8 +40,8 @@ impl EvaGlobal {
         }
     }
 
-    fn add_texture(&mut self, name: String) -> u32 {
-        self.texture_loader.load(name)
+    async fn add_texture(&mut self, name: String) -> u32 {
+        self.texture_loader.load(name).await
     }
 
     fn add_material(&mut self, material: PyRef<EvaMaterial>) -> u32 {

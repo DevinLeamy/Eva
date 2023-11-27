@@ -16,8 +16,9 @@ impl Runner {
         Self { window, event_loop }
     }
 
-    pub fn run(self, run: RunDescriptor) {
-        let mut renderer = RendererBuilder::new(self.window, run.global.static_context()).build();
+    pub async fn run<G: GlobalConfig>(self, run: RunDescriptor<G>) {
+        let mut renderer =
+            RendererBuilder::new(self.window, run.global.static_context().await).build();
 
         match run.render {
             RenderMode::Static { scene } => {

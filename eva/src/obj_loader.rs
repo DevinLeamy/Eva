@@ -12,21 +12,21 @@ lazy_static! {
 pub struct ObjLoader;
 
 impl ObjLoader {
-    pub fn load(path: String) -> Result<ObjMesh, String> {
+    pub async fn load(path: String) -> Result<ObjMesh, String> {
         let mut map = LOADED_MESHES.lock().unwrap();
         if map.contains_key(&path) {
             let value = map.get(&path).unwrap();
             return Ok(value.clone());
         }
 
-        let mesh = Self::load_mesh(path.clone())?;
+        let mesh = Self::load_mesh(path.clone()).await?;
         map.insert(path, mesh.clone());
 
         Ok(mesh)
     }
 
-    fn load_mesh(path: String) -> Result<ObjMesh, String> {
-        let obj_data = AssetLoader::load_obj(path);
+    async fn load_mesh(path: String) -> Result<ObjMesh, String> {
+        let obj_data = AssetLoader::load_obj(path).await;
         let mut vertices = Vec::<ShaderMeshVertex>::new();
 
         let mut positions = Vec::new();

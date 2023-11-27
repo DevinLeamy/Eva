@@ -11,15 +11,15 @@ pub struct AssetLoader;
 
 #[cfg(target_arch = "wasm32")]
 impl AssetLoader {
-    pub fn load_texture_image(path: String) -> DynamicImage {
+    pub async fn load_texture_image(path: String) -> DynamicImage {
         Self::load_image(format!("static/textures/{path}"))
     }
 
-    pub fn load_skybox_image(path: String) -> DynamicImage {
+    pub async fn load_skybox_image(path: String) -> DynamicImage {
         Self::load_image(format!("static/skybox/{path}"))
     }
 
-    pub fn load_obj(path: String) -> ObjData {
+    pub async fn load_obj(path: String) -> ObjData {
         ObjData::load_buf(Self::load_buffer(format!("/static/meshes/{path}"))).unwrap()
     }
 
@@ -41,19 +41,19 @@ impl AssetLoader {
 
 #[cfg(not(target_arch = "wasm32"))]
 impl AssetLoader {
-    pub fn load_texture_image(path: String) -> DynamicImage {
+    pub async fn load_texture_image(path: String) -> DynamicImage {
         Self::load_image(format!(
             "/Users/Devin/Desktop/Github/DevinLeamy/eva/eva/assets/textures/{path}"
-        ))
+        )).await
     }
 
-    pub fn load_skybox_image(path: String) -> DynamicImage {
+    pub async fn load_skybox_image(path: String) -> DynamicImage {
         Self::load_image(format!(
             "/Users/Devin/Desktop/Github/DevinLeamy/eva/eva/assets/skybox/{path}"
-        ))
+        )).await
     }
 
-    pub fn load_obj(path: String) -> ObjData {
+    pub async fn load_obj(path: String) -> ObjData {
         Obj::load(format!(
             "/Users/Devin/Desktop/Github/DevinLeamy/eva/eva-py/assets/meshes/{path}"
         ))
@@ -61,7 +61,7 @@ impl AssetLoader {
         .data
     }
 
-    fn load_image(path: String) -> DynamicImage {
+    async fn load_image(path: String) -> DynamicImage {
         Reader::open(path).unwrap().decode().unwrap()
     }
 }

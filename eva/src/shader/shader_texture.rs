@@ -7,8 +7,8 @@ pub struct ShaderTexture {
 }
 
 impl ShaderTexture {
-    pub fn from_path(path: String) -> Option<Self> {
-        let image = AssetLoader::load_texture_image(path);
+    pub async fn from_path(path: String) -> Option<Self> {
+        let image = AssetLoader::load_texture_image(path).await;
 
         Some(Self { image })
     }

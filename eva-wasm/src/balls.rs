@@ -9,9 +9,9 @@ pub struct BallDemo {
 impl BallDemo {}
 
 impl BallDemo {
-    pub fn new() -> Self {
+    pub async fn new() -> Self {
         Self {
-            config: BallDemoConfig::new(),
+            config: BallDemoConfig::new().await,
         }
     }
 }
@@ -43,12 +43,15 @@ impl DynamicScene for BallDemo {
 
 impl BallDemo {}
 
-impl Into<RunDescriptor> for BallDemo {
-    fn into(self) -> RunDescriptor {
+impl Into<RunDescriptor<BallDemoConfig>> for BallDemo {
+    fn into(self) -> RunDescriptor<BallDemoConfig> {
         RunDescriptor {
-            global: Box::new(self.config.clone()),
-            render: RenderMode::Dynamic {
-                scene: Box::new(self),
+            global: self.config.clone(),
+            // render: RenderMode::Dynamic {
+            //     scene: Box::new(self),
+            // },
+            render: RenderMode::Static {
+                scene: self.dynamic_context(),
             },
         }
     }
@@ -65,7 +68,7 @@ struct BallDemoConfig {
 }
 
 impl BallDemoConfig {
-    fn new() -> Self {
+    async fn new() -> Self {
         let mut texture_loader = TextureLoader::new();
         texture_loader.load("missing.png".to_string());
 
@@ -79,6 +82,7 @@ impl BallDemoConfig {
                 "filler.png".to_string(),
                 "filler.png".to_string(),
             ])
+            .await
             .unwrap(),
             ambient: Vector3::zeros(),
             materials: ShaderBuffer::new(),
@@ -89,11 +93,11 @@ impl BallDemoConfig {
 }
 
 impl GlobalConfig for BallDemoConfig {
-    fn static_context(&self) -> StaticRenderContext {
+    async fn static_context(&self) -> StaticRenderContext {
         StaticRenderContext {
             skybox: self.skybox.clone(),
             ambient: self.ambient,
-            textures: self.texture_loader.clone().textures(),
+            textures: self.texture_loader.clone().textures().await,
             materials: self.materials.clone(),
             sample_count: self.sample_count,
             max_reflections: self.max_reflections,
