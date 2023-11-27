@@ -3,5 +3,6 @@ members = [
     "eva", 
     "eva-macros",
     "eva-py",
-    "eva-py-macros"
+    "eva-py-macros", 
+    "eva-wasm"
 ]

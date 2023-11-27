@@ -2,33 +2,31 @@ use nalgebra::{Vector2, Vector3};
 use obj::{IndexTuple, Obj};
 use std::{collections::HashMap, path::PathBuf, sync::Mutex};
 
-use crate::{obj_mesh::ObjMesh, shader::ShaderMeshVertex};
+use crate::{asset_loader::AssetLoader, obj_mesh::ObjMesh, shader::ShaderMeshVertex};
 
 lazy_static! {
-    static ref LOADED_MESHES: Mutex<HashMap<PathBuf, ObjMesh>> = Mutex::new(HashMap::new());
+    static ref LOADED_MESHES: Mutex<HashMap<String, ObjMesh>> = Mutex::new(HashMap::new());
 }
 
 /// Loads wavefront .obj files.
 pub struct ObjLoader;
 
 impl ObjLoader {
-    pub fn load<P: Into<PathBuf>>(path: P) -> Result<ObjMesh, String> {
-        let path = path.into();
+    pub fn load(path: String) -> Result<ObjMesh, String> {
         let mut map = LOADED_MESHES.lock().unwrap();
         if map.contains_key(&path) {
             let value = map.get(&path).unwrap();
             return Ok(value.clone());
         }
 
-        let mesh = Self::load_mesh(&path)?;
+        let mesh = Self::load_mesh(path.clone())?;
         map.insert(path, mesh.clone());
 
         Ok(mesh)
     }
 
-    fn load_mesh(path: &PathBuf) -> Result<ObjMesh, String> {
-        let obj: Obj = Obj::load(path).map_err(|e| e.to_string())?;
-        let obj_data = obj.data;
+    fn load_mesh(path: String) -> Result<ObjMesh, String> {
+        let obj_data = AssetLoader::load_obj(path);
         let mut vertices = Vec::<ShaderMeshVertex>::new();
 
         let mut positions = Vec::new();

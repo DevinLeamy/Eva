@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fire RTRT</title>
+    <title>Eva</title>
     <style>
         canvas {
             background-color: black;
@@ -13,13 +13,12 @@
     </style>
 </head>
 
-<body>
-    <canvas id="fire-canvas" />
+<body id="eva-canvas">
     <script type="module">
-        import init from "./pkg/fire_rs.js";
+        import init from "./pkg/eva_wasm.js";
         init().then(() => {
             console.log("WASM Loaded");
-        }).catch((e) => console.log(e));
+        });
     </script>
 </body>
 

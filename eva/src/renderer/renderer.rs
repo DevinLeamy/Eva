@@ -132,10 +132,12 @@ impl Renderer {
                         b: 0.0,
                         a: 1.0,
                     }),
-                    store: true,
+                    store: StoreOp::Store,
                 },
             })],
             depth_stencil_attachment: None,
+            timestamp_writes: None,
+            occlusion_query_set: None
         });
 
         render_pass.set_pipeline(&self.display_pipeline);
@@ -229,6 +231,7 @@ impl Renderer {
         // Invoke the compute shader.
         let mut ray_tracer_pass = encoder.begin_compute_pass(&ComputePassDescriptor {
             label: Some("ray tracer pass"),
+            timestamp_writes: None
         });
 
         ray_tracer_pass.set_pipeline(&self.ray_tracer_pipeline);

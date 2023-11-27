@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{asset_loader::AssetLoader, prelude::*};
 use image::{io::Reader, DynamicImage};
 
 #[derive(Debug, Clone)]
@@ -7,10 +7,8 @@ pub struct ShaderTexture {
 }
 
 impl ShaderTexture {
-    pub fn from_path<P: Into<PathBuf>>(path: P) -> Option<Self> {
-        let path = path.into();
-        println!("PATH: {:?}", path);
-        let image = Reader::open(path).ok()?.decode().ok()?;
+    pub fn from_path(path: String) -> Option<Self> {
+        let image = AssetLoader::load_texture_image(path);
 
         Some(Self { image })
     }

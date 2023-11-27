@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{asset_loader::AssetLoader, prelude::*};
 use image::{io::Reader, DynamicImage};
 use wgpu::util::DeviceExt;
 
@@ -68,11 +68,11 @@ pub struct ShaderSkybox {
 }
 
 impl ShaderSkybox {
-    pub fn create_skybox(images: Vec<PathBuf>) -> Option<Self> {
+    pub fn create_skybox(images: Vec<String>) -> Option<Self> {
         assert!(images.len() == 6);
         let images: Vec<DynamicImage> = images
             .iter()
-            .map(|path| Reader::open(path).unwrap().decode().unwrap())
+            .map(|name| AssetLoader::load_skybox_image(name.to_string()))
             .collect();
 
         Some(Self { images })

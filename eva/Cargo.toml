@@ -7,9 +7,10 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+cfg-if = "1"
 log = "0.4.20"
 winit = { version = "0.28.0"}
-wgpu = { version = "0.17"}
+wgpu = { version = "0.18"}
 pollster = "0.3.0"
 bytemuck = { version = "1.14.0", features = ["derive"] }
 image = { version = "0.24.7", features = ["png", "jpeg"] }
@@ -19,3 +20,19 @@ encase = { version = "0.6.1", features = ["nalgebra"]}
 obj = "0.10.2"
 lazy_static = "1.4.0"
 eva-macros = { path = "../eva-macros" }
+env_logger = "0.10.1"
+bytes = "1.5.0"
+
+# WASM
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.6"
+console_log = "1.0"
+wgpu = { version = "0.18", features = ["webgl"]}
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4.30"
+web-sys = { version = "0.3", features = [
+    "Document",
+    "Window",
+    "Element",
+]}
+reqwest = { version = "0.11" }
