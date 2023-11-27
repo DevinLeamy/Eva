@@ -61,6 +61,8 @@ struct Intersection {
 
 struct GlobalConfig {
     ambient: vec3f,
+    sample_count: u32,
+    max_reflections: u32
 };
 
 struct MeshPositions {
@@ -145,7 +147,7 @@ struct Material {
 @compute @workgroup_size(1, 1, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     let screen_coord = vec2<i32>(i32(GlobalInvocationID.x), i32(GlobalInvocationID.y));
-    let samples_per_row = 3;
+    let samples_per_row = i32(max(1.0, sqrt(f32(config.sample_count))));
 
     let segment = (1.0 / f32(samples_per_row + 2));  
     var colour: vec3f = vec3f(0.0, 0.0, 0.0);
@@ -163,7 +165,7 @@ fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
         }
     }
     colour = colour / f32(samples_per_row * samples_per_row);
-    colour = sqrt(colour);
+    // colour = sqrt(colour);
 
     textureStore(colour_buffer, screen_coord, vec4<f32>(colour, 1.0));
 }
@@ -249,11 +251,10 @@ fn intersection_transform(intersection: Intersection, transform: Transform) -> I
 
 fn compute_ray_colour(_ray: Ray) -> vec3f {
     var ray: Ray = _ray;
-    let max_reflections = 10;
 
     var light: vec3f = vec3f(0.0);
     var colour: vec3f = vec3f(1.0);
-    for (var i: i32 = 0; i < max_reflections; i = i + 1) {
+    for (var i: i32 = 0; i < i32(config.max_reflections); i = i + 1) {
         let intersection = compute_ray_intersection(ray);
         if (!intersection.some) {
             let c = compute_skybox_colour(ray.direction);
@@ -275,7 +276,6 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
 fn compute_skybox_colour(coords: vec3f) -> vec3f {
     let colour = textureSampleLevel(skybox, skybox_sampler, coords, 0.0).rgb; 
     return colour;
-    // return vec3f(0.2, 0.3, 0.6);
 }
 
 fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {

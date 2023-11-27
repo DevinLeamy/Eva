@@ -151,7 +151,9 @@ impl Renderer {
         let flat_scene: FlatScene = context.scene.clone().into();
 
         let config = ShaderGlobalConfig {
-            ambient: self.static_context.ambient
+            ambient: self.static_context.ambient,
+            sample_count: self.static_context.sample_count,
+            max_reflections: self.static_context.max_reflections
         };
 
         self.queue.write_buffer(&self.config_buffer, 0, &config.as_bytes().unwrap());

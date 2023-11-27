@@ -1,4 +1,4 @@
-from .eva_py import eva_main, EvaGlobal
+from .eva_py import eva_main_dynamic, eva_main_static, EvaGlobal
 from eva_py.camera import Camera
 from eva_py.scene import Scene
 from eva_py.utils import Singleton
@@ -13,8 +13,12 @@ class Eva(Singleton):
         self.inner = EvaGlobal()
 
     @staticmethod
-    def run(update, handle_input):
-        eva_main(Eva().inner, Scene(), Camera(), update, handle_input)
+    def run_dynamic(render):
+        eva_main_dynamic(Eva().inner, Scene(), Camera(), render)
+
+    @staticmethod
+    def run_static():
+        eva_main_static(Eva().inner, Scene().inner(), Camera().inner)
 
     @staticmethod
     def add_texture(name: str) -> int:
@@ -27,6 +31,14 @@ class Eva(Singleton):
     @staticmethod
     def set_ambient(strength: float):
         Eva().inner.set_ambient(strength, strength, strength)
+
+    @staticmethod
+    def set_sample_count(count: int):
+        Eva().inner.set_sample_count(count)
+
+    @staticmethod
+    def set_max_reflections(reflections: int):
+        Eva().inner.set_max_reflections(reflections)
 
     @staticmethod
     def add_material(material: Material) -> int:

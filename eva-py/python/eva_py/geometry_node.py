@@ -10,9 +10,13 @@ class GeometryNode(Node):
             self.inner().scale(x, y, z)
         else:
             self.inner().scale(x, x, x)
+        
+        return self
 
     def set_material(self, material):
         self.inner().set_material(material)
+        return self
 
     def set_texture(self, texture: int):
         self.inner().set_texture(texture)
+        return self

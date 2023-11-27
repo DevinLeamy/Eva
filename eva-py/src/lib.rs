@@ -22,30 +22,49 @@ mod prelude {
     pub use eva_py_macros::PyNode;
 }
 
+use eva_main::EvaRender;
+
 use crate::eva_main::EvaRunDescriptor;
 
 use crate::prelude::*;
 
 #[pyfunction]
-#[pyo3(name = "eva_main")]
-fn eva_py_main(
+#[pyo3(name = "eva_main_dynamic")]
+fn eva_py_main_dynamic(
     global: &EvaGlobal,
     scene: PyObject,
     camera: PyObject,
-    update: PyObject,
-    input_handler: PyObject,
+    render: PyObject,
 ) -> PyResult<()> {
     eva_main::main(EvaRunDescriptor {
         global,
-        camera,
-        scene,
-        update,
-        input_handler,
+        render: EvaRender::Dynamic {
+            camera,
+            scene,
+            render,
+        },
     });
 
     Ok(())
 }
 
+#[pyfunction]
+#[pyo3(name = "eva_main_static")]
+fn eva_py_main_static(
+    global: &EvaGlobal,
+    scene: PyRef<EvaScene>,
+    camera: PyRef<EvaCamera>,
+) -> PyResult<()> {
+    eva_main::main(EvaRunDescriptor {
+        global,
+        render: EvaRender::Static {
+            camera: camera.inner.clone(),
+            scene: scene.inner.clone(),
+        },
+    });
+
+    Ok(())
+}
 #[pymodule]
 fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyGeometry>()?;
@@ -54,7 +73,8 @@ fn eva_py(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<EvaCamera>()?;
     m.add_class::<EvaMaterial>()?;
     m.add_class::<EvaGlobal>()?;
-    m.add_function(wrap_pyfunction!(eva_py_main, m)?)?;
+    m.add_function(wrap_pyfunction!(eva_py_main_dynamic, m)?)?;
+    m.add_function(wrap_pyfunction!(eva_py_main_static, m)?)?;
 
     Ok(())
 }

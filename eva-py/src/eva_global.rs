@@ -19,6 +19,8 @@ pub struct EvaGlobal {
     pub skybox: ShaderSkybox,
     pub ambient: Vector3<f32>,
     pub materials: ShaderBuffer<PbrMaterial>,
+    pub sample_count: u32,
+    pub max_reflections: u32,
 }
 
 #[pymethods]
@@ -42,6 +44,8 @@ impl EvaGlobal {
             .unwrap(),
             ambient: DEFAULT_AMBIENT,
             materials: ShaderBuffer::new(),
+            sample_count: 9,
+            max_reflections: 10,
         }
     }
 
@@ -62,5 +66,13 @@ impl EvaGlobal {
 
     fn set_ambient(&mut self, r: f32, g: f32, b: f32) {
         self.ambient = Vector3::new(r, g, b);
+    }
+
+    fn set_sample_count(&mut self, count: u32) {
+        self.sample_count = count;
+    }
+
+    fn set_max_reflections(&mut self, max_reflections: u32) {
+        self.max_reflections = max_reflections;
     }
 }

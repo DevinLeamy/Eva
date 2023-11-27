@@ -13,3 +13,6 @@ class Camera(Singleton):
 
     def translate(self, x, y, z):
         self.inner.translate(x, y, z)
+    
+    def set_translation(self, x, y, z):
+        self.inner.set_translation(x, y, z)
