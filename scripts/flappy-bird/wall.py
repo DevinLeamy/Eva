@@ -6,7 +6,7 @@ WALL_DEPTH = 120
 class Wall:
     def __init__(self, width, height, y):
         material = Material(
-            roughness=1.0,
+            roughness=0.3,
             metallic=1.0,
             albedo=(0.5, 0.7, 1.0)
         )

@@ -4,7 +4,7 @@ class Background:
     def __init__(self, width: float, height: float):
         texture_handle = Eva.add_texture("flap.png")
         material = Material(
-            roughness=1.0,
+            roughness=0.01,
             metallic=1.0,
             albedo=(0.0, 0.0, 0.0)
         )

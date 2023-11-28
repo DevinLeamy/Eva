@@ -41,7 +41,7 @@ mat5.set_texture(earth_handle)
 mat5 = Eva.add_material(mat5)
 light_mat = Eva.add_material(
     Material(0.0, 0.0, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)))
-mat6 = Material(1.0, 1.0, (1.0, 1.0, 1.0))
+mat6 = Material(0.3, 1.0, (1.0, 1.0, 1.0))
 # mat6.set_light([1.0, 1.0, 1.0])
 mat6 = Eva.add_material(mat6)
 

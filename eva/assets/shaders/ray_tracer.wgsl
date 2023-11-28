@@ -287,12 +287,12 @@ fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     let material = material_by_id(intersection.material_id);
     let random_unit = random_unit_vector(vec2(intersection.t + R.x + N.x, intersection.t + R.y + N.y));
 
-    // Offset to avoid floating point errors.
-    if (material.metallic == 1.0) {
-        reflected_ray.direction = perfect_reflection;
-    } else {
-        reflected_ray.direction = normalize(N + random_unit);
-    }
+    reflected_ray.direction = normalize(
+        perfect_reflection * material.metallic + 
+        N * (1.0 - material.metallic) + 
+        random_unit * material.roughness
+    );
+
     reflected_ray.origin = ray_point(ray, intersection.t); 
 
     return reflected_ray;

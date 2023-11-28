@@ -18,7 +18,7 @@ class Bird:
 
     def __init__(self):
         material = Material(
-            roughness=1.0,
+            roughness=0.3,
             metallic=1.0,
             albedo=(0.0, 1.0, 1.0),
         )

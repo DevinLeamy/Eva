@@ -5,30 +5,30 @@ from background import Background
 from pipe import PipePair
 import datetime
 
-# Eva.add_skybox([
-#     "sky/z.tga",
-#     "sky/-z.tga",
-#     "sky/y.tga",
-#     "sky/-y.tga",
-#     "sky/x.tga",
-#     "sky/-x.tga",
-# ])
-# Eva.add_skybox([
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-#     "flap/flap.png",
-# ])
 Eva.add_skybox([
-    "blue/x.png",
-    "blue/-x.png",
-    "blue/y.png",
-    "blue/-y.png",
-    "blue/z.png",
-    "blue/-z.png",
+    "sky/z.tga",
+    "sky/-z.tga",
+    "sky/y.tga",
+    "sky/-y.tga",
+    "sky/x.tga",
+    "sky/-x.tga",
 ])
+# Eva.add_skybox([
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+#     "flap/flap.png",
+# ])
+# Eva.add_skybox([
+#     "blue/x.png",
+#     "blue/-x.png",
+#     "blue/y.png",
+#     "blue/-y.png",
+#     "blue/z.png",
+#     "blue/-z.png",
+# ])
 
 
 GAME_WIDTH = 220
@@ -46,6 +46,9 @@ class FlappyBird(RenderDynamic):
 
     def __init__(self):
         super().__init__()
+        Eva.set_sample_count(4)
+        # Eva.set_max_reflections(3)
+
         self.bird = Bird()
         self.background = Background(GAME_WIDTH + 150, GAME_HEIGHT)
         self.top_wall = Wall(GAME_WIDTH + 70, WALL_HEIGHT, GAME_HEIGHT * 0.75)
@@ -56,7 +59,7 @@ class FlappyBird(RenderDynamic):
 
         self.pipes = []
         for i in range(3):
-            light = 0.2
+            light = 0.0
             # if i % 2 == 1:
             #     light = 0.0
 
