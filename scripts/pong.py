@@ -123,7 +123,8 @@ class Pong(RenderDynamic):
             .set_material(wall_mat)
         self.add_geometry(self.right_wall)
 
-        self.ball_escaping = False
+        self.ball_escaping_x = False
+        self.ball_escaping_y = False
         self.ball_velocity = [0, -BALL_SPEED, 0]
         self.ball = Sphere(radius=ball_size) \
             .set_material(ball_mat) \
@@ -162,29 +163,32 @@ class Pong(RenderDynamic):
 
         # Check for ball-paddle intersections.
         if self.ball.intersects_with(self.bottom_paddle):
-            if not self.ball_escaping:
+            if not self.ball_escaping_y:
                 x_offset = vec3_sub(self.ball.translation(),
                                     self.bottom_paddle.translation())[0]
                 self.ball_velocity[0] = (-x_offset) / 30.0
                 self.ball_velocity[1] = self.ball_velocity[1] * -1
                 self.ball_velocity = vec3_scalar_mult(
                     vec3_normalize(self.ball_velocity), BALL_SPEED)
-            self.ball_escaping = True
+            self.ball_escaping_y = True
         elif self.ball.intersects_with(self.top_paddle):
-            if not self.ball_escaping:
+            if not self.ball_escaping_y:
                 x_offset = vec3_sub(self.ball.translation(),
                                     self.top_paddle.translation())[0]
                 self.ball_velocity[0] = (-x_offset) / 30.0
                 self.ball_velocity[1] = self.ball_velocity[1] * -1
                 self.ball_velocity = vec3_scalar_mult(
                     vec3_normalize(self.ball_velocity), BALL_SPEED)
-            self.ball_escaping = True
-        elif self.ball.intersects_with(self.left_wall) or self.ball.intersects_with(self.right_wall):
-            if not self.ball_escaping:
-                self.ball_velocity[0] = self.ball_velocity[0] * -1
-            self.ball_escaping = True
+            self.ball_escaping_y = True
         else:
-            self.ball_escaping = False
+            self.ball_escaping_y = False
+
+        if self.ball.intersects_with(self.left_wall) or self.ball.intersects_with(self.right_wall):
+            if not self.ball_escaping_x:
+                self.ball_velocity[0] = self.ball_velocity[0] * -1
+            self.ball_escaping_x = True
+        else:
+            self.ball_escaping_x = False
 
         if vec3_length(self.ball.translation()) > board_size:
             self.ball.set_translation(0, 0, game_z)
