@@ -9,6 +9,7 @@ mod scene;
 mod shader;
 mod texture_loader;
 mod utils;
+mod asset_loader;
 
 pub mod prelude {
     pub use std::path::PathBuf;

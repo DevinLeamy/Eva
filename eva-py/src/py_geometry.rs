@@ -1,7 +1,5 @@
 pub use crate::prelude::*;
 
-const MESH_PATH: &str = "./eva-py/assets/meshes/";
-
 enum GeometryType {
     Sphere,
     Cube,
@@ -34,9 +32,7 @@ impl PyGeometry {
             GeometryType::Sphere => Primitive::Sphere(Sphere::new(1.0)),
             GeometryType::Cube => Primitive::Cube(Cube::new(1.0)),
             GeometryType::Mesh(name) => {
-                let mut path = PathBuf::from(MESH_PATH);
-                path.push(name);
-                Primitive::Mesh(Mesh::from_path(path))
+                Primitive::Mesh(Mesh::from_path(name))
             }
         };
 
