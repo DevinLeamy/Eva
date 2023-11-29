@@ -35,13 +35,6 @@ pub struct DynamicThreadSyncContext {
     pub scene: PyObject,
 }
 
-pub struct StaticThreadSyncContext {
-    pub rendered: bool,
-    pub camera: Camera,
-    pub scene: Scene,
-    pub screenshot: Option<PathBuf>,
-}
-
 pub fn main(run: EvaRunDescriptor) {
     env_logger::init();
 

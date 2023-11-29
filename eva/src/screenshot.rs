@@ -18,6 +18,7 @@ pub fn screenshot_rgba16f_buffer(
     device.poll(wgpu::Maintain::Wait);
     let data = buffer_slice.get_mapped_range();
     let screenshot = rgbaf16_to_image(&data.to_vec(), width, height, align(width, 256));
+    println!("Screenshot: {:?}", path);
     screenshot.save(path).unwrap();
 }
 

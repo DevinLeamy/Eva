@@ -1,5 +1,3 @@
-use nalgebra::Vector3;
-
 use crate::{
     prelude::extents,
     shader::{
