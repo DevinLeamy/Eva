@@ -9,7 +9,7 @@ use crate::prelude::*;
 use super::StaticRenderContext;
 
 const SPHERE_COUNT: u64 = 100;
-const CUBE_COUNT: u64 = 25;
+const CUBE_COUNT: u64 = 100;
 const MATERIAL_COUNT: u64 = 60;
 const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
 const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;

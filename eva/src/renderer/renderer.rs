@@ -71,7 +71,6 @@ impl Renderer {
 
         self.encode_pass(&mut encoder, &texture, &surface_texture, context);
         self.queue.submit([encoder.finish()]);
-        self.device.poll(MaintainBase::Wait);
         
         if let Some(path) = &context.screenshot {
             self.device.poll(MaintainBase::Wait);
