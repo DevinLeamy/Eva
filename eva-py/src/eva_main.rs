@@ -63,36 +63,22 @@ pub fn main(run: EvaRunDescriptor) {
 
     match run.render {
         EvaRender::Static { camera, scene } => {
-            let sync_arc = Arc::new(Mutex::new(StaticThreadSyncContext {
-                camera,
-                scene,
-                rendered: false,
+            let context = DynamicRenderContext {
+                scene: scene.clone(),
+                camera: camera.clone(),
                 screenshot: run.global.screenshot_path.clone(),
-            }));
-            let sync_arc_clone = Arc::clone(&sync_arc);
+            };
+            renderer.render(&context).unwrap();
 
-            event_loop.run(move |event, _, control_flow| {
-                let mut sync = sync_arc_clone.lock().unwrap();
-                match event {
-                    Event::WindowEvent {
-                        window_id: _,
-                        event: window_event,
-                    } => match window_event {
-                        WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-                        _ => {}
-                    },
+            event_loop.run(move |event, _, control_flow| match event {
+                Event::WindowEvent {
+                    window_id: _,
+                    event: window_event,
+                } => match window_event {
+                    WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                     _ => {}
-                }
-
-                if !sync.rendered {
-                    sync.rendered = true;
-                    let context = DynamicRenderContext {
-                        scene: sync.scene.clone(),
-                        camera: sync.camera.clone(),
-                        screenshot: sync.screenshot.clone(),
-                    };
-                    renderer.render(&context).unwrap();
-                }
+                },
+                _ => {}
             });
         }
         EvaRender::Dynamic {
