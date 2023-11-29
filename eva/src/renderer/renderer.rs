@@ -83,10 +83,11 @@ impl Renderer {
 
         self.encode_pass(&mut encoder, &texture_view, &surface_texture, context);
         self.queue.submit([encoder.finish()]);
+        self.device.poll(MaintainBase::Wait);
+        surface_texture.present();
+        self.device.poll(MaintainBase::Wait);
         let screenshot = self.create_screenshot(&texture);
         screenshot.save(PathBuf::from("/Users/Devin/Desktop/Github/DevinLeamy/eva/archive/image.png")).unwrap();
-
-        surface_texture.present();
 
         Ok(())
     }
@@ -295,7 +296,6 @@ impl Renderer {
         self.device.poll(wgpu::Maintain::Wait);
         let data = buffer_slice.get_mapped_range();
 
-        // let dynamic_image = rgba_f16_float_to_dynamic_image(&data.to_vec(), self.width(), self.height());
         let dynamic_image = rgba_f16_float_to_dynamic_image(&data.to_vec(), aligned_width, self.height());
 
         dynamic_image
@@ -313,12 +313,12 @@ fn rgba_f16_float_to_dynamic_image(buffer: &[u8], width: u32, height: u32) -> Dy
         let b = f16::from_ne_bytes([buffer[idx + 4], buffer[idx + 5]]).to_f32();
         let a = f16::from_ne_bytes([buffer[idx + 6], buffer[idx + 7]]).to_f32();
 
-        // println!("{r} {g} {b} {a}");
+        println!("{r} {g} {b} {a}");
 
         *pixel = Rgba([
-            (r * 255.0) as u8,
-            (g * 255.0) as u8,
-            (b * 255.0) as u8,
+            f32::min(255.0, r * 255.0) as u8,
+            f32::min(255.0, g * 255.0) as u8,
+            f32::min(255.0, b * 255.0) as u8,
             (a * 255.0) as u8,
         ]);
     }

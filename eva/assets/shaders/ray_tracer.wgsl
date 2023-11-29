@@ -165,7 +165,6 @@ fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
         }
     }
     colour = colour / f32(samples_per_row * samples_per_row);
-    // colour = sqrt(colour);
 
     textureStore(colour_buffer, screen_coord, vec4<f32>(colour, 1.0));
 }
