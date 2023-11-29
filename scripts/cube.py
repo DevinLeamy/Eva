@@ -137,9 +137,9 @@ class Cube(RenderStatic):
                     ))
                     c1.set_material(center_mat)
                     c1.translate(
-                        middle[0] + 2 * i * (sz + 1.5) - 10,
-                        30 + 2 * k * (sz + 1.5) - 10,
-                        middle[1] + 2 * j * (sz + 1.5) - 10,
+                        middle[0] + 2 * i * (sz + 1) - 10,
+                        30 + 2 * k * (sz + 1) - 10,
+                        middle[1] + 2 * j * (sz + 1) - 25,
                     )
                     self.add_geometry(c1)
 
