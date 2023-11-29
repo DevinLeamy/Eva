@@ -48,8 +48,8 @@ mat6 = Eva.add_material(mat6)
 class NonHier(RenderStatic):
     def __init__(self):
         super().__init__()
-        Eva.set_sample_count(1000)
-        Eva.set_max_reflections(200)
+        # Eva.set_sample_count(1000)
+        # Eva.set_max_reflections(200)
 
         self.camera.set_translation(0, 0, 800)
 

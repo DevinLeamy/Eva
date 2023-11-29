@@ -87,7 +87,7 @@ impl Renderer {
         surface_texture.present();
         self.device.poll(MaintainBase::Wait);
         let screenshot = self.create_screenshot(&texture);
-        screenshot.save(PathBuf::from("/Users/Devin/Desktop/Github/DevinLeamy/eva/archive/image.png")).unwrap();
+        screenshot.save(PathBuf::from("/Users/Devin/Desktop/Github/DevinLeamy/eva/archive/image2.png")).unwrap();
 
         Ok(())
     }
@@ -302,6 +302,10 @@ impl Renderer {
     }
 }
 
+fn gamma_correction(colour: f32) -> f32 {
+    colour.powf(1.0 / 2.2)
+}
+
 fn rgba_f16_float_to_dynamic_image(buffer: &[u8], width: u32, height: u32) -> DynamicImage {
     let mut image_buffer = RgbaImage::new(width, height);
 
@@ -316,9 +320,9 @@ fn rgba_f16_float_to_dynamic_image(buffer: &[u8], width: u32, height: u32) -> Dy
         println!("{r} {g} {b} {a}");
 
         *pixel = Rgba([
-            f32::min(255.0, r * 255.0) as u8,
-            f32::min(255.0, g * 255.0) as u8,
-            f32::min(255.0, b * 255.0) as u8,
+            (gamma_correction(r) * 255.0) as u8,
+            (gamma_correction(g) * 255.0) as u8,
+            (gamma_correction(b) * 255.0) as u8,
             (a * 255.0) as u8,
         ]);
     }
