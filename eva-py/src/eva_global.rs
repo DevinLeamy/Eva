@@ -13,6 +13,7 @@ pub struct EvaGlobal {
     pub materials: ShaderBuffer<PbrMaterial>,
     pub sample_count: u32,
     pub max_reflections: u32,
+    pub screenshot_path: Option<PathBuf>,
 }
 
 #[pymethods]
@@ -37,6 +38,7 @@ impl EvaGlobal {
             materials: ShaderBuffer::new(),
             sample_count: 9,
             max_reflections: 10,
+            screenshot_path: None,
         }
     }
 
@@ -63,5 +65,9 @@ impl EvaGlobal {
 
     fn set_max_reflections(&mut self, max_reflections: u32) {
         self.max_reflections = max_reflections;
+    }
+
+    fn set_screenshot(&mut self, path: String) {
+        self.screenshot_path = Some(PathBuf::from(path));
     }
 }

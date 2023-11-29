@@ -35,11 +35,11 @@ pub struct DynamicThreadSyncContext {
     pub scene: PyObject,
 }
 
-// Should be temp.
 pub struct StaticThreadSyncContext {
     pub rendered: bool,
     pub camera: Camera,
     pub scene: Scene,
+    pub screenshot: Option<PathBuf>,
 }
 
 pub fn main(run: EvaRunDescriptor) {
@@ -67,6 +67,7 @@ pub fn main(run: EvaRunDescriptor) {
                 camera,
                 scene,
                 rendered: false,
+                screenshot: run.global.screenshot_path.clone(),
             }));
             let sync_arc_clone = Arc::clone(&sync_arc);
 
@@ -88,7 +89,7 @@ pub fn main(run: EvaRunDescriptor) {
                     let context = DynamicRenderContext {
                         scene: sync.scene.clone(),
                         camera: sync.camera.clone(),
-                        screenshot: Some(PathBuf::from("./archive/image.png")),
+                        screenshot: sync.screenshot.clone(),
                     };
                     renderer.render(&context).unwrap();
                 }

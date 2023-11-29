@@ -39,6 +39,10 @@ class Eva(Singleton):
     @staticmethod
     def set_max_reflections(reflections: int):
         Eva().inner.set_max_reflections(reflections)
+    
+    @staticmethod
+    def set_screenshot(path: str):
+        Eva().inner.set_screenshot(path)
 
     @staticmethod
     def add_material(material: Material) -> int:

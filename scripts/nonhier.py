@@ -1,4 +1,5 @@
 from eva_py import *
+import random
 
 earth_handle = Eva.add_texture("earth.jpg")
 wood_handle = Eva.add_texture("wood.jpeg")
@@ -50,6 +51,7 @@ class NonHier(RenderStatic):
         super().__init__()
         Eva.set_sample_count(100)
         Eva.set_max_reflections(200)
+        Eva.set_screenshot(f"./archive/nonhier-{random.randint(0, 999)}.png")
 
         self.camera.set_translation(0, 0, 800)
 

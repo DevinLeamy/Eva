@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use crate::{
     prelude::{FlatScene, align, screenshot_rgba16f_buffer},
     shader::{ShaderCamera, ShaderGlobalConfig, ShaderStruct},
@@ -74,12 +73,12 @@ impl Renderer {
         self.queue.submit([encoder.finish()]);
         self.device.poll(MaintainBase::Wait);
         
-        if let Some(_path) = &context.screenshot {
+        if let Some(path) = &context.screenshot {
             self.device.poll(MaintainBase::Wait);
             screenshot_rgba16f_buffer(
                 &self.device, 
                 &self.screenshot_buffer, 
-                PathBuf::from("/Users/Devin/Desktop/Github/DevinLeamy/eva/archive/image4.png"),
+                path.to_owned(),
                 self.width(), 
                 self.height()
             );
