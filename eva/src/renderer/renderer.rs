@@ -323,6 +323,6 @@ fn rgba_f16_float_to_dynamic_image(buffer: &[u8], width: u32, height: u32) -> Dy
         ]);
     }
 
-    DynamicImage::ImageRgba32F(image_buffer)
+    DynamicImage::ImageRgba8(image_buffer)
 }
 
