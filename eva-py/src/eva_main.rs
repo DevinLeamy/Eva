@@ -84,13 +84,13 @@ pub fn main(run: EvaRunDescriptor) {
                 }
 
                 if !sync.rendered {
+                    sync.rendered = true;
                     let context = DynamicRenderContext {
                         scene: sync.scene.clone(),
                         camera: sync.camera.clone(),
                         screenshot: Some(PathBuf::from("./archive/image.png")),
                     };
                     renderer.render(&context).unwrap();
-                    sync.rendered = true;
                 }
             });
         }

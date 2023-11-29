@@ -49,6 +49,7 @@ pub struct RendererBuilder {
     cubes_buffer: Option<Buffer>,
     config_buffer: Option<Buffer>,
     materials_buffer: Option<Buffer>,    
+    screenshot_buffer: Option<Buffer>,
 }
 
 impl RendererBuilder {
@@ -129,7 +130,8 @@ impl RendererBuilder {
             config_buffer: None,
             spheres_buffer: None,
             cubes_buffer: None,
-            materials_buffer: None
+            materials_buffer: None,
+            screenshot_buffer: None
         }
     }
 
@@ -168,7 +170,8 @@ impl RendererBuilder {
             config_buffer: self.config_buffer.unwrap(),
             cubes_buffer: self.cubes_buffer.unwrap(),
             spheres_buffer: self.spheres_buffer.unwrap(),
-            materials_buffer: self.materials_buffer.unwrap()
+            materials_buffer: self.materials_buffer.unwrap(),
+            screenshot_buffer: self.screenshot_buffer.unwrap()
         }
     }
 }
@@ -250,6 +253,14 @@ impl RendererBuilder {
             size: PbrMaterial::size() * MATERIAL_COUNT, 
             usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
             mapped_at_creation: false 
+        }));
+
+        let size = self.window.inner_size();
+        self.screenshot_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None, 
+            size: (align(size.width, 256) * size.height * 8) as u64, 
+            usage: BufferUsages::COPY_DST | BufferUsages::MAP_READ, 
+            mapped_at_creation: false,
         }));
     }
 

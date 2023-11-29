@@ -1,12 +1,9 @@
-use std::{path::PathBuf, iter::once};
-
+use std::path::PathBuf;
 use crate::{
-    prelude::{FlatScene, align},
+    prelude::{FlatScene, align, screenshot_rgba16f_buffer},
     shader::{ShaderCamera, ShaderGlobalConfig, ShaderStruct},
 };
 
-use half::f16;
-use image::{DynamicImage, ImageBuffer, Rgba, RgbaImage};
 use wgpu::*;
 use winit::window::Window;
 
@@ -43,6 +40,7 @@ pub struct Renderer {
     pub spheres_buffer: Buffer,
     pub cubes_buffer: Buffer,
     pub materials_buffer: Buffer,
+    pub screenshot_buffer: Buffer
 }
 
 impl Renderer {
@@ -70,25 +68,24 @@ impl Renderer {
                 | TextureUsages::COPY_SRC,
             view_formats: &[],
         });
-        let texture_view = texture.create_view(&TextureViewDescriptor {
-            label: Some("texture view"),
-            format: Some(TextureFormat::Rgba16Float),
-            dimension: Some(TextureViewDimension::D2),
-            aspect: TextureAspect::All,
-            base_mip_level: 0,
-            mip_level_count: Some(1),
-            base_array_layer: 0,
-            array_layer_count: None,
-        });
+       
 
-        self.encode_pass(&mut encoder, &texture_view, &surface_texture, context);
+        self.encode_pass(&mut encoder, &texture, &surface_texture, context);
         self.queue.submit([encoder.finish()]);
         self.device.poll(MaintainBase::Wait);
-        surface_texture.present();
-        self.device.poll(MaintainBase::Wait);
-        let screenshot = self.create_screenshot(&texture);
-        screenshot.save(PathBuf::from("/Users/Devin/Desktop/Github/DevinLeamy/eva/archive/image2.png")).unwrap();
+        
+        if let Some(_path) = &context.screenshot {
+            self.device.poll(MaintainBase::Wait);
+            screenshot_rgba16f_buffer(
+                &self.device, 
+                &self.screenshot_buffer, 
+                PathBuf::from("/Users/Devin/Desktop/Github/DevinLeamy/eva/archive/image4.png"),
+                self.width(), 
+                self.height()
+            );
+        }
 
+        surface_texture.present();
         Ok(())
     }
 }
@@ -102,9 +99,20 @@ impl Renderer {
         self.window.inner_size().height
     }
 
-    fn encode_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView, surface_texture: &SurfaceTexture, context: &DynamicRenderContext) {
+    fn encode_pass(&self, encoder: &mut CommandEncoder, texture: &Texture, surface_texture: &SurfaceTexture, context: &DynamicRenderContext) {
+        let texture_view = texture.create_view(&TextureViewDescriptor {
+            label: None,
+            format: Some(TextureFormat::Rgba16Float),
+            dimension: Some(TextureViewDimension::D2),
+            aspect: TextureAspect::All,
+            base_mip_level: 0,
+            mip_level_count: Some(1),
+            base_array_layer: 0,
+            array_layer_count: None,
+        });
         self.ray_tracer_pass(encoder, &texture_view, context);
         self.display_pass(encoder, &surface_texture, &texture_view);
+        self.screenshot_pass(encoder, &texture);
     }
 
     fn display_pass(
@@ -258,16 +266,7 @@ impl Renderer {
         drop(ray_tracer_pass);
     }
 
-    fn create_screenshot(&self, texture: &Texture) -> DynamicImage {
-        let aligned_width = align(self.width(), 256);
-        let buffer = self.device.create_buffer(&BufferDescriptor { 
-            label: None, 
-            size: (aligned_width * self.height() * 8) as u64, 
-            usage: BufferUsages::COPY_DST | BufferUsages::MAP_READ, 
-            mapped_at_creation: false,
-        });
-
-        let mut encoder = self.device.create_command_encoder(&CommandEncoderDescriptor { label: None });
+    fn screenshot_pass(&self, encoder: &mut CommandEncoder, texture: &Texture) {
         encoder.copy_texture_to_buffer(
             ImageCopyTexture {
                 texture: &texture,
@@ -276,10 +275,10 @@ impl Renderer {
                 aspect: TextureAspect::All,
             },
             ImageCopyBuffer {
-                buffer: &buffer,
+                buffer: &self.screenshot_buffer,
                 layout: wgpu::ImageDataLayout {
                     offset: 0,
-                    bytes_per_row: Some(aligned_width * 8),
+                    bytes_per_row: Some(align(self.width(), 256) * 8),
                     rows_per_image: Some(self.height()),
                 },
             },
@@ -289,44 +288,5 @@ impl Renderer {
                 depth_or_array_layers: 1,
             },
         );
-
-        self.queue.submit(once(encoder.finish()));
-        let buffer_slice = buffer.slice(..);
-        buffer_slice.map_async(wgpu::MapMode::Read, |_| {});
-        self.device.poll(wgpu::Maintain::Wait);
-        let data = buffer_slice.get_mapped_range();
-
-        let dynamic_image = rgba_f16_float_to_dynamic_image(&data.to_vec(), aligned_width, self.height());
-
-        dynamic_image
     }
 }
-
-fn gamma_correction(colour: f32) -> f32 {
-    colour.powf(1.0 / 2.2)
-}
-
-fn rgba_f16_float_to_dynamic_image(buffer: &[u8], width: u32, height: u32) -> DynamicImage {
-    let mut image_buffer = RgbaImage::new(width, height);
-
-    for (x, y, pixel) in image_buffer.enumerate_pixels_mut() {
-        let idx = ((y * width + x) * 8) as usize;
-
-        let r = f16::from_ne_bytes([buffer[idx + 0], buffer[idx + 1]]).to_f32();
-        let g = f16::from_ne_bytes([buffer[idx + 2], buffer[idx + 3]]).to_f32();
-        let b = f16::from_ne_bytes([buffer[idx + 4], buffer[idx + 5]]).to_f32();
-        let a = f16::from_ne_bytes([buffer[idx + 6], buffer[idx + 7]]).to_f32();
-
-        println!("{r} {g} {b} {a}");
-
-        *pixel = Rgba([
-            (gamma_correction(r) * 255.0) as u8,
-            (gamma_correction(g) * 255.0) as u8,
-            (gamma_correction(b) * 255.0) as u8,
-            (a * 255.0) as u8,
-        ]);
-    }
-
-    DynamicImage::ImageRgba8(image_buffer)
-}
-

@@ -4,22 +4,22 @@ earth_handle = Eva.add_texture("earth.jpg")
 wood_handle = Eva.add_texture("wood.jpeg")
 
 
-Eva.add_skybox([
-    "sky/z.tga",
-    "sky/-z.tga",
-    "sky/y.tga",
-    "sky/-y.tga",
-    "sky/x.tga",
-    "sky/-x.tga",
-])
 # Eva.add_skybox([
-#     "blue/x.png",
-#     "blue/-x.png",
-#     "blue/y.png",
-#     "blue/-y.png",
-#     "blue/z.png",
-#     "blue/-z.png",
+#     "sky/z.tga",
+#     "sky/-z.tga",
+#     "sky/y.tga",
+#     "sky/-y.tga",
+#     "sky/x.tga",
+#     "sky/-x.tga",
 # ])
+Eva.add_skybox([
+    "blue/x.png",
+    "blue/-x.png",
+    "blue/y.png",
+    "blue/-y.png",
+    "blue/z.png",
+    "blue/-z.png",
+])
 
 mat1 = Material(1.0, 0.0, (0.3, 1.0, 0.3))
 mat1.set_texture(earth_handle)
@@ -48,8 +48,8 @@ mat6 = Eva.add_material(mat6)
 class NonHier(RenderStatic):
     def __init__(self):
         super().__init__()
-        # Eva.set_sample_count(1000)
-        # Eva.set_max_reflections(200)
+        Eva.set_sample_count(100)
+        Eva.set_max_reflections(200)
 
         self.camera.set_translation(0, 0, 800)
 
