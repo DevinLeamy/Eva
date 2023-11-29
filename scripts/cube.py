@@ -56,8 +56,8 @@ class Cube(RenderStatic):
             texture=wall_handle
         ))
         l3 = Eva.add_material(Material(
-            1.0,
             0.0,
+            1.0,
             (1.0, 1.0, 1.0),
             [0.2, 0.2, 0.2]
         ))
@@ -123,26 +123,87 @@ class Cube(RenderStatic):
 
                 self.add_geometry(ball)
         
-        center_mat = Eva.add_material(Material(
-            1.0,
-            0.0,
-            (1.0, 1.0, 1.0),
-        ))
-
         middle = box_center(3, 3)
-        sz = 3
+        sz = 2.5
         for i in range(3):
             for j in range(3):
                 for k in range(3):
                     c1 = Sphere()
                     c1.scale(sz, sz, sz)
+                    center_mat = Eva.add_material(Material(
+                        1.0 / 2.0 * i,
+                        1.0 / 2.0 * j,
+                        (1.0, 1.0, 1.0),
+                    ))
                     c1.set_material(center_mat)
                     c1.translate(
-                        middle[0] + 2 * i * (sz + 2) - 10,
-                        30 + 2 * k * (sz + 2) - 10,
-                        middle[1] + 2 * j * (sz + 2) - 10,
+                        middle[0] + 2 * i * (sz + 1.5) - 10,
+                        30 + 2 * k * (sz + 1.5) - 10,
+                        middle[1] + 2 * j * (sz + 1.5) - 10,
                     )
                     self.add_geometry(c1)
+
+        middle = box_center(3, 3)
+        sz = 2.5
+        for i in range(3):
+            for j in range(3):
+                c1 = Mesh("pyramid.obj")
+                c1.scale(sz, sz, sz * 2)
+                c1.rotate_x(-90)
+                center_mat = Eva.add_material(Material(
+                    1.0,
+                    0.0,
+                    (1.0 / 2 * i, 1.0 / 2 * j, 1.0),
+                ))
+                c1.set_material(center_mat)
+                c1.translate(
+                    middle[0] + i * (sz + 1) - 1,
+                    8,
+                    middle[1] + j * (sz + 1) + BOX_SIZE + BOX_SIZE / 2 + 2,
+                )
+                self.add_geometry(c1)
+
+        middle = box_center(1, 5)
+        sz = 2.5
+        for i in range(3):
+            for j in range(3):
+                c1 = Mesh("pyramid.obj")
+                c1.scale(sz, sz, sz * 2)
+                c1.rotate_x(-90)
+                center_mat = Eva.add_material(Material(
+                    1.0,
+                    0.0,
+                    (1.0 / 2 * i, 1.0, 1.0 / 2 * j),
+                ))
+                c1.set_material(center_mat)
+                c1.translate(
+                    middle[0] + i * (sz + 1) - 2,
+                    10,
+                    middle[1] + j * (sz + 1) + BOX_SIZE + BOX_SIZE / 2 + 2,
+                )
+                self.add_geometry(c1)
+
+
+
+        middle = box_center(5, 5)
+        sz = 2.5
+        for i in range(3):
+            for j in range(3):
+                c1 = Mesh("pyramid.obj")
+                c1.scale(sz, sz, sz * 2)
+                c1.rotate_x(-90)
+                center_mat = Eva.add_material(Material(
+                    1.0,
+                    0.0,
+                    (1.0 / 2 * i, 1.0, 1.0 / 2 * j),
+                ))
+                c1.set_material(center_mat)
+                c1.translate(
+                    middle[0] + i * (sz + 1) - 2,
+                    10,
+                    middle[1] + j * (sz + 1) + BOX_SIZE + BOX_SIZE / 2 + 2,
+                )
+                self.add_geometry(c1)
 
 
     def handle_input(self, key, state):

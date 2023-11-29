@@ -15,6 +15,14 @@ class Node:
         self.inner().rotate("y", degrees)
         return self
 
+    def rotate_x(self, degrees: float):
+        self.inner().rotate("x", degrees)
+        return self
+
+    def rotate_z(self, degrees: float):
+        self.inner().rotate("z", degrees)
+        return self
+
     def translation(self) -> [float]:
         return self.inner().translation()
 
