@@ -87,6 +87,7 @@ pub fn main(run: EvaRunDescriptor) {
                     let context = DynamicRenderContext {
                         scene: sync.scene.clone(),
                         camera: sync.camera.clone(),
+                        screenshot: Some(PathBuf::from("./archive/image.png")),
                     };
                     renderer.render(&context).unwrap();
                     sync.rendered = true;
@@ -165,7 +166,11 @@ pub fn main(run: EvaRunDescriptor) {
                     })
                     .unwrap();
 
-                    let context = DynamicRenderContext { scene, camera };
+                    let context = DynamicRenderContext {
+                        scene,
+                        camera,
+                        screenshot: None,
+                    };
                     renderer.render(&context).unwrap();
                     last_frame_time = Instant::now();
                 }
