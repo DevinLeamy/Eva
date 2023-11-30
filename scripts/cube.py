@@ -33,32 +33,33 @@ class Cube(RenderStatic):
 
         # Eva.set_sample_count(4)
         Eva.set_screenshot(f"./archive/cube-{random.randint(100, 999)}.png")
-        Eva.set_sample_count(500)
-        Eva.set_max_reflections(4)
+        Eva.set_sample_count(200)
+        Eva.set_max_reflections(10)
 
         # self.camera.set_translation(-3 * BOX_SIZE, 40, 35)
-        self.camera.set_translation(0, 40, 35)
+        self.camera.set_translation(-7 * BOX_SIZE, 40, 35)
+        # self.camera.set_translation(0, 40, 35)
         self.camera.look_at(-3 * BOX_SIZE, 20, -3.5 * BOX_SIZE)
 
         l1 = Eva.add_material(Material(
             1.0,
             0.0,
-            (1.0, 1.0, 1.0),
+            (0.0, 1.0, 0.0),
             [0.5, 0.5, 0.5],
-            texture=wall_handle
+            # texture=wall_handle
         ))
         l2 = Eva.add_material(Material(
             1.0,
             0.0,
-            (1.0, 1.0, 1.0),
+            (1.0, 0.0, 0.0),
             # (1.0, 1.0, 1.0),
             [0.5, 0.5, 0.5],
-            texture=wall_handle
+            # texture=wall_handle
         ))
         l3 = Eva.add_material(Material(
             0.0,
             1.0,
-            (1.0, 1.0, 1.0),
+            (0.0, 0.0, 0.0),
             [0.2, 0.2, 0.2]
         ))
         l4 = Eva.add_material(Material(
@@ -85,13 +86,13 @@ class Cube(RenderStatic):
         w3.scale(1, 70, 70)
         w3.translate(6.5 * BOX_SIZE, 3 * BOX_SIZE, -3 * BOX_SIZE)
         w3.set_material(l3)
-        self.add_geometry(w3)
+        # self.add_geometry(w3)
 
         w4 = Box()
         w4.scale(70, 70, 1)
         w4.translate(3 * BOX_SIZE, 3 * BOX_SIZE, 40)
         w4.set_material(l4)
-        self.add_geometry(w4)
+        # self.add_geometry(w4)
 
 
 
@@ -124,10 +125,10 @@ class Cube(RenderStatic):
                 self.add_geometry(ball)
         
         middle = box_center(3, 3)
-        sz = 2.5
-        for i in range(3):
-            for j in range(3):
-                for k in range(3):
+        sz = 1.5
+        for i in range(4):
+            for j in range(4):
+                for k in range(4):
                     c1 = Sphere()
                     c1.scale(sz, sz, sz)
                     center_mat = Eva.add_material(Material(
@@ -138,7 +139,7 @@ class Cube(RenderStatic):
                     c1.set_material(center_mat)
                     c1.translate(
                         middle[0] + 2 * i * (sz + 1) - 10,
-                        30 + 2 * k * (sz + 1) - 10,
+                        15 + 2 * k * (sz + 1),
                         middle[1] + 2 * j * (sz + 1) - 25,
                     )
                     self.add_geometry(c1)
@@ -157,7 +158,7 @@ class Cube(RenderStatic):
                 ))
                 c1.set_material(center_mat)
                 c1.translate(
-                    middle[0] + i * (sz + 1) - 1,
+                    middle[0] + i * (sz + 1) - 2,
                     8,
                     middle[1] + j * (sz + 1) + BOX_SIZE + BOX_SIZE / 2 + 2,
                 )
@@ -195,7 +196,7 @@ class Cube(RenderStatic):
                 center_mat = Eva.add_material(Material(
                     1.0,
                     0.0,
-                    (1.0 / 2 * i, 1.0, 1.0 / 2 * j),
+                    (1.0 / 2 * i, 1.0 / 2 * i, 1.0 / 2 * i),
                 ))
                 c1.set_material(center_mat)
                 c1.translate(
