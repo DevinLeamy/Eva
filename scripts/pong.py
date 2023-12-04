@@ -8,8 +8,6 @@ from eva_py import *
 #     "blue/z.png",
 #     "blue/-z.png",
 # ])
-Eva.set_max_reflections(15)
-Eva.set_sample_count(9)
 Eva.set_ambient(0.03)
 Eva.add_skybox([
     "sky/z.tga",
@@ -89,6 +87,9 @@ def position_in_orbit(t, r):
 class Pong(RenderDynamic):
     def __init__(self):
         super().__init__()
+
+        Eva.set_max_reflections(15)
+        Eva.set_sample_count(16)
 
         self.ball_velocity = [0, -BALL_SPEED, 0]
 
