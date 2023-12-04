@@ -180,8 +180,8 @@ impl RendererBuilder {
     #[rustfmt::skip]
     fn create_assets(&mut self) {
         // Shaders.
-        self.ray_tracer_shader = Some(self.device.create_shader_module(include_wgsl!("../../assets/shaders/ray_tracer.wgsl")));
-        self.display_shader = Some(self.device.create_shader_module(include_wgsl!("../../assets/shaders/display.wgsl")));
+        self.ray_tracer_shader = Some(self.device.create_shader_module(include_wgsl!("../../shaders/ray_tracer.wgsl")));
+        self.display_shader = Some(self.device.create_shader_module(include_wgsl!("../../shaders/display.wgsl")));
 
         self.camera_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
             label: Some("camera buffer"), 
