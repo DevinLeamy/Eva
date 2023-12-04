@@ -33,7 +33,7 @@ Eva is a real-time ray tracer built in Rust using WebGPU, with an integrated scr
 
 == Texture Mapping
 
-Any material can be assigned a texture. Textures are sourced from: `./eva/assets/textures`.
+Any material can be assigned a texture. Textures are sourced from: `/assets/textures`.
 
 ```py
 # Load a texture.
@@ -55,7 +55,7 @@ box.set_material(textured_material)
 
 == Skyboxes
 
-Scenes can optionally set a skybox. Skyboxes are sourced from: `./eva/assets/skybox`.
+Scenes can optionally set a skybox. Skyboxes are sourced from: `/eva/skybox`.
 Skyboxes are defined by six images, listed in the order: ["x", "-x", "y", "-y", "z", "-z"], defining
 the six faces of a cube.
 
@@ -157,7 +157,7 @@ The ray tracer lives in `/eva`. It's written in 100% safe Rust and WGSL (WebGPU 
   - `/shader`: Types that can be loaded into the WGSL shaders.
   - `/scene`: Scene definition.
   - `/renderer`: The machinery that creates the WebGPU primitives, loads GPU data, and runs the shaders.
-- `/eva/assets/shaders`
+- `/eva/shaders`
   - `display.wgsl`: Fragment and vertex shader.
   - `ray_tracer.wgsl`: Ray tracer compute shader.
 
@@ -213,10 +213,10 @@ Not comprehensive overview of the scripting API.
 # import the module
 from eva_py import *
 
-# create a skybox (from /eva/assets/skybox)
+# create a skybox (from /assets/skybox)
 Eva.add_skybox(["x", "-x", "y", "-y", "z", "-z"])
 
-# load a texture (from /eva/assets/textures)
+# load a texture (from /assets/textures)
 wood_handle = Eva.add_texture("wood.png")
 
 rock_material = Material(
@@ -228,7 +228,7 @@ rock_material = Material(
 )
 rock_handle = Eva.add_material(rock_material)
 
-# create a mesh (from /eva-py/assets/meshes)
+# create a mesh (from /assets/meshes)
 suzanne = Mesh("suzanne.obj").translate(1, 0, 0) \
                              .set_material(rock_handle)
 ```
