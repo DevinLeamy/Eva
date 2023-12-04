@@ -87,7 +87,7 @@ impl RendererBuilder {
         println!("Present modes: {:?}", surface_capabilities);
         let surface_config = SurfaceConfiguration {
             usage: TextureUsages::RENDER_ATTACHMENT,
-            format: TextureFormat::Rgba16Float,
+            format: TextureFormat::Bgra8Unorm,
             width: size.width,
             height: size.height,
             present_mode: surface_capabilities.present_modes[0],
