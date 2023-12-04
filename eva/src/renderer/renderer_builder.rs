@@ -11,8 +11,8 @@ use super::StaticRenderContext;
 const SPHERE_COUNT: u64 = 100;
 const CUBE_COUNT: u64 = 100;
 const MATERIAL_COUNT: u64 = 200;
-const MESH_POINT_BUFFER_SIZE: u64 = 400_000;
-const MESH_TRIANGLE_BUFFER_SIZE: u64 = 400_000;
+const MESH_POINT_BUFFER_SIZE: u64 = 1_500_000;
+const MESH_TRIANGLE_BUFFER_SIZE: u64 = 1_500_000;
 const MESH_HEADERS_BUFFER_SIZE: u64 = 10_000;
 
 pub struct RendererBuilder {

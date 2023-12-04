@@ -46,7 +46,6 @@ impl ObjLoader {
         }
 
         for shape in obj_data.objects.iter().flat_map(|o| &o.groups[0].polys) {
-            assert!(shape.0.len() == 3);
             let base_vertex_index = vertices.len() as u32;
 
             for IndexTuple(v_position, _v_uv, v_normal) in &shape.0 {
@@ -62,11 +61,28 @@ impl ObjLoader {
                 })
             }
 
-            triangles.push(Vector3::new(
-                base_vertex_index,
-                base_vertex_index + 1,
-                base_vertex_index + 2,
-            ))
+            let vertices = shape.0.len();
+
+            if vertices == 3 {
+                triangles.push(Vector3::new(
+                    base_vertex_index,
+                    base_vertex_index + 1,
+                    base_vertex_index + 2,
+                ))
+            } else if vertices == 4 {
+                triangles.push(Vector3::new(
+                    base_vertex_index,
+                    base_vertex_index + 1,
+                    base_vertex_index + 2,
+                ));
+                triangles.push(Vector3::new(
+                    base_vertex_index + 1,
+                    base_vertex_index + 2,
+                    base_vertex_index + 3,
+                ));
+            } else {
+                panic!("Invalid number of vertices {:?}", vertices);
+            }
         }
 
         Ok(ObjMesh {

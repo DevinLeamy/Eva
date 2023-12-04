@@ -49,8 +49,10 @@ mat6 = Eva.add_material(mat6)
 class NonHier(RenderStatic):
     def __init__(self):
         super().__init__()
-        Eva.set_sample_count(100)
-        Eva.set_max_reflections(200)
+        # Eva.set_sample_count(100)
+        # Eva.set_max_reflections(200)
+        Eva.set_sample_count(20)
+        Eva.set_max_reflections(100)
         Eva.set_screenshot(f"./archive/nonhier-{random.randint(0, 999)}.png")
 
         self.camera.set_translation(0, 0, 800)
@@ -81,6 +83,12 @@ class NonHier(RenderStatic):
         s4.set_material(mat3)
         s4.translate(-100, 25, -270)
         self.add_geometry(s4)
+
+        # p = Mesh("airplane.obj")
+        # p.set_material(mat3)
+        # p.scale(20, 20, 20)
+        # p.translate(-100, 50, -100)
+        # self.add_geometry(p)
 
         # s5 = Sphere(80)
         # s5.set_material(mat1)

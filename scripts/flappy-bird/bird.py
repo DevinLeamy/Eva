@@ -26,7 +26,7 @@ class Bird:
         self.hitbox = Sphere().scale(10, 10, 10).translate(
             0.0, 0.0, BIRD_Z).set_material(self.material_handle)
 
-        # self.geometry = Mesh("buckyball.obj").scale(5, 5, 5).translate( 0.0, 0.0, BIRD_Z).set_material(self.material_handle)
+        # self.geometry = Mesh("airplane.obj").scale(5, 5, 5).translate( 0.0, 0.0, BIRD_Z).set_material(self.material_handle)
         self.geometry = self.hitbox
         self.velocity = 0
         self.jump_cooldown = 0
