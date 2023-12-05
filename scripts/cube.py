@@ -3,22 +3,22 @@ import random
 
 random.seed(420)
 
-# Eva.add_skybox([
-#     "sky/z.tga",
-#     "sky/-z.tga",
-#     "sky/y.tga",
-#     "sky/-y.tga",
-#     "sky/x.tga",
-#     "sky/-x.tga",
-# ])
 Eva.add_skybox([
-    "blue/x.png",
-    "blue/-x.png",
-    "blue/y.png",
-    "blue/-y.png",
-    "blue/z.png",
-    "blue/-z.png",
+    "sky/z.tga",
+    "sky/-z.tga",
+    "sky/y.tga",
+    "sky/-y.tga",
+    "sky/x.tga",
+    "sky/-x.tga",
 ])
+# Eva.add_skybox([
+#     "blue/x.png",
+#     "blue/-x.png",
+#     "blue/y.png",
+#     "blue/-y.png",
+#     "blue/z.png",
+#     "blue/-z.png",
+# ])
 
 BOX_SIZE = 10
 
@@ -33,8 +33,8 @@ class Cube(RenderStatic):
 
         # Eva.set_sample_count(4)
         Eva.set_screenshot(f"./archive/cube-{random.randint(100, 999)}.png")
-        Eva.set_sample_count(200)
-        Eva.set_max_reflections(10)
+        Eva.set_sample_count(800)
+        Eva.set_max_reflections(100)
 
         # self.camera.set_translation(-3 * BOX_SIZE, 40, 35)
         self.camera.set_translation(-7 * BOX_SIZE, 40, 35)
@@ -45,7 +45,7 @@ class Cube(RenderStatic):
             1.0,
             0.0,
             (0.0, 1.0, 0.0),
-            [0.5, 0.5, 0.5],
+            [0.0, 0.0, 0.0],
             # texture=wall_handle
         ))
         l2 = Eva.add_material(Material(
@@ -53,7 +53,7 @@ class Cube(RenderStatic):
             0.0,
             (1.0, 0.0, 0.0),
             # (1.0, 1.0, 1.0),
-            [0.5, 0.5, 0.5],
+            [0.0, 0.0, 0.0],
             # texture=wall_handle
         ))
         l3 = Eva.add_material(Material(
@@ -66,7 +66,7 @@ class Cube(RenderStatic):
             1.0,
             0.0,
             (1.0, 1.0, 1.0),
-            [0.5, 0.5, 0.5],
+            [0.0, 0.0, 0.0],
         ))
 
 
@@ -125,10 +125,10 @@ class Cube(RenderStatic):
                 self.add_geometry(ball)
         
         middle = box_center(3, 3)
-        sz = 1.5
-        for i in range(4):
-            for j in range(4):
-                for k in range(4):
+        sz = 2.5
+        for i in range(3):
+            for j in range(3):
+                for k in range(3):
                     c1 = Sphere()
                     c1.scale(sz, sz, sz)
                     center_mat = Eva.add_material(Material(
@@ -154,7 +154,7 @@ class Cube(RenderStatic):
                 center_mat = Eva.add_material(Material(
                     1.0,
                     0.0,
-                    (1.0 / 2 * i, 1.0 / 2 * j, 1.0),
+                    (1.0 / 2 * i, 1.0, 1.0),
                 ))
                 c1.set_material(center_mat)
                 c1.translate(
@@ -174,7 +174,7 @@ class Cube(RenderStatic):
                 center_mat = Eva.add_material(Material(
                     1.0,
                     0.0,
-                    (1.0 / 2 * i, 1.0, 1.0 / 2 * j),
+                    (1.0, 1.0, 1.0 / 2 * j),
                 ))
                 c1.set_material(center_mat)
                 c1.translate(

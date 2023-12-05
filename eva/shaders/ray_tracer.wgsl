@@ -124,6 +124,8 @@ struct Material {
     light: vec3f
 }
 
+var<private> rand_seed : vec2<f32>;
+
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var<uniform> camera: Camera;
 @group(0) @binding(2) var<storage, read> spheres: SphereModels; 
@@ -143,9 +145,22 @@ struct Material {
 @group(3) @binding(0) var skybox: texture_cube<f32>;
 @group(3) @binding(1) var skybox_sampler: sampler;
 
+fn init_rand(invocation_id : u32, seed : vec4<f32>) {
+  rand_seed = seed.xz;
+  rand_seed = fract(rand_seed * cos(35.456+f32(invocation_id) * seed.yw));
+  rand_seed = fract(rand_seed * cos(41.235+f32(invocation_id) * seed.xw));
+}
+
+fn rand() -> f32 {
+  rand_seed.x = fract(cos(dot(rand_seed, vec2<f32>(23.14077926, 232.61690225))) * 136.8168);
+  rand_seed.y = fract(cos(dot(rand_seed, vec2<f32>(54.47856553, 345.84153136))) * 534.7645);
+  return rand_seed.y;
+}
 
 @compute @workgroup_size(1, 1, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
+    let global_id = 900.0 * f32(GlobalInvocationID.x) + f32(GlobalInvocationID.y);
+    init_rand(u32(global_id), vec4f(0.1));
     let screen_coord = vec2<i32>(i32(GlobalInvocationID.x), i32(GlobalInvocationID.y));
     let samples_per_row = i32(max(1.0, sqrt(f32(config.sample_count))));
 
@@ -267,6 +282,10 @@ fn compute_ray_colour(_ray: Ray) -> vec3f {
         light = light + colour * material.light;
         colour = colour * albedo;
         ray = compute_reflected_ray(ray, intersection);
+
+        if (length(colour) < 0.001) {
+            break;
+        }
     }
 
     return light;
@@ -284,7 +303,7 @@ fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
     let perfect_reflection = normalize(R - N * 2.0 * dot(R, N));
 
     let material = material_by_id(intersection.material_id);
-    let random_unit = random_unit_vector(vec2(intersection.t + R.x + N.x, intersection.t + R.y + N.y));
+    let random_unit = random_unit_vector();
 
     reflected_ray.direction = normalize(
         perfect_reflection * material.metallic + 
@@ -643,11 +662,6 @@ fn mesh_triangle_intersection(mesh: MeshModelHeader, v1: MeshVertex, v2: MeshVer
     return intersection;
 }
 
-fn random01(seed: vec2<f32>) -> f32 {
-    let x = dot(seed, vec2<f32>(12.9898, 78.233)) * 0.01267123 + 54.54321;
-    return fract(sin(x) * 43758.5453);
-}
-
 fn shader_bool(boolean: u32) -> bool {
     return boolean == u32(1);
 }
@@ -668,11 +682,11 @@ fn lerp(a: f32, b: f32, l: f32) -> f32 {
     return a + (b - a) * l;
 }
 
-fn random_unit_vector(seed: vec2<f32>) -> vec3f {
+fn random_unit_vector() -> vec3f {
     return normalize(vec3f(
-        (random01(vec2f(seed.x - 1.0, seed.y - 1.0)) - 0.5) * 2.0,
-        (random01(vec2f(seed.x - 2.0, seed.y - 2.0)) - 0.5) * 2.0,
-        (random01(vec2f(seed.x - 3.0, seed.y - 3.0)) - 0.5) * 2.0,
+        (rand() - 0.5) * 2.0, 
+        (rand() - 0.5) * 2.0, 
+        (rand() - 0.5) * 2.0
     ));
 }
 

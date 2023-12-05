@@ -18,8 +18,17 @@ pub fn screenshot_rgba16f_buffer(
     device.poll(wgpu::Maintain::Wait);
     let data = buffer_slice.get_mapped_range();
     let screenshot = rgbaf16_to_image(&data.to_vec(), width, height, align(width, 256));
-    println!("Screenshot: {:?}", path);
-    screenshot.save(path).unwrap();
+
+    let mut extension = 0;
+    let mut final_path = path.clone();
+    while final_path.is_file() {
+        let file_name = path.file_stem().unwrap().to_str().unwrap();
+        let file_extension = path.extension().unwrap().to_str().unwrap();
+        let new_file_name = format!("{}-{}.{}", file_name, extension, file_extension);
+        final_path = path.with_file_name(new_file_name);
+        extension += 1;
+    }
+    screenshot.save(final_path).unwrap();
 }
 
 fn gamma_correction(colour: f32) -> f32 {

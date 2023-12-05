@@ -73,7 +73,10 @@ impl Renderer {
         self.queue.submit([encoder.finish()]);
         
         if let Some(path) = &context.screenshot {
-            self.device.poll(MaintainBase::Wait);
+            // Wait for the render to complete.
+            while !self.device.poll(MaintainBase::Poll) {
+                continue;
+            }
             screenshot_rgba16f_buffer(
                 &self.device, 
                 &self.screenshot_buffer, 

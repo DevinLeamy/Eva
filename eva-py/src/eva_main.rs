@@ -62,7 +62,7 @@ pub fn main(run: EvaRunDescriptor) {
                 screenshot: run.global.screenshot_path.clone(),
             };
             renderer.render(&context).unwrap();
-
+            println!("COMPLETED");
             event_loop.run(move |event, _, control_flow| match event {
                 Event::WindowEvent {
                     window_id: _,
