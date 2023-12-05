@@ -8,7 +8,6 @@ from eva_py import *
 #     "blue/z.png",
 #     "blue/-z.png",
 # ])
-Eva.set_ambient(0.03)
 Eva.add_skybox([
     "sky/z.tga",
     "sky/-z.tga",

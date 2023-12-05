@@ -53,7 +53,7 @@ class NonHier(RenderStatic):
         # Eva.set_max_reflections(200)
         Eva.set_sample_count(20)
         Eva.set_max_reflections(100)
-        Eva.set_screenshot(f"./archive/nonhier-{random.randint(0, 999)}.png")
+        Eva.set_screenshot(f"./archive/nonhier.png")
 
         self.camera.set_translation(0, 0, 800)
 

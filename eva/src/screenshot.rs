@@ -47,9 +47,9 @@ fn rgbaf16_to_image(buffer: &[u8], width: u32, height: u32, aligned_width: u32) 
         let a = f16::from_ne_bytes([buffer[idx + 6], buffer[idx + 7]]).to_f32();
 
         *pixel = Rgba([
-            (gamma_correction(r) * 255.0) as u8,
-            (gamma_correction(g) * 255.0) as u8,
-            (gamma_correction(b) * 255.0) as u8,
+            (r * 255.0) as u8,
+            (g * 255.0) as u8,
+            (b * 255.0) as u8,
             (a * 255.0) as u8,
         ]);
     }

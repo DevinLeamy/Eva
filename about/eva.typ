@@ -70,14 +70,21 @@ Eva.add_skybox([
 ])
 ```
 
+#figure(
+  stack(dir: ltr)[#image("./assets/sky-light.png", width: 50%)][#image("./assets/sky-dark.png", width: 50%)],
+  caption: "Day and Night Skyboxes"
+)
+
+
+
 #pagebreak()
 == Phong Shading
 
 Eva can render `.obj` meshes with triangular faces. If the mesh has vertex normals, Phong Shading is applied.
 
 #figure(
-  image("./assets/phong.png", width: 50%),
-  caption: "Suzanne Phong Shading"
+  stack(dir: ltr)[#image("./assets/cat.png", width: 50%)][#image("./assets/catN.png", width: 50%)],
+  caption: "Cat Phong Shading"
 )
 
 == Real-time Ray Tracing
