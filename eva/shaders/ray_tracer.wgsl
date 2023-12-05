@@ -299,7 +299,7 @@ fn compute_reflected_ray(ray: Ray, intersection: Intersection) -> Ray {
         random_unit * material.roughness
     );
 
-    reflected_ray.origin = ray_point(ray, intersection.t); 
+    reflected_ray.origin = ray_point(ray, intersection.t) + N * 1.1; 
 
     return reflected_ray;
 }
