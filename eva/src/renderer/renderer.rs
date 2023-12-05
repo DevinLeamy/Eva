@@ -18,9 +18,11 @@ pub struct Renderer {
 
     pub ray_tracer_pipeline: ComputePipeline,
     pub display_pipeline: RenderPipeline,
+    pub copy_texture_pipeline: RenderPipeline,
 
     pub ray_tracer_bind_group_layout: BindGroupLayout,
     pub display_bind_group_layout: BindGroupLayout,
+    pub copy_texture_bind_group_layout: BindGroupLayout,
     pub mesh_bind_group_layout: BindGroupLayout,
     pub texture_bind_group_layout: BindGroupLayout,
     pub skybox_bind_group_layout: BindGroupLayout,
@@ -50,26 +52,7 @@ impl Renderer {
             .device
             .create_command_encoder(&CommandEncoderDescriptor::default());
 
-        let texture = self.device.create_texture(&TextureDescriptor {
-            label: Some("display texture"),
-            size: Extent3d {
-                width: self.width(),
-                height: self.height(),
-                depth_or_array_layers: 1,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: TextureDimension::D2,
-            format: TextureFormat::Rgba16Float,
-            usage: TextureUsages::COPY_DST
-                | TextureUsages::STORAGE_BINDING
-                | TextureUsages::TEXTURE_BINDING 
-                | TextureUsages::COPY_SRC,
-            view_formats: &[],
-        });
-       
-
-        self.encode_pass(&mut encoder, &texture, &surface_texture, context);
+        self.encode_pass(&mut encoder, &surface_texture, context);
         self.queue.submit([encoder.finish()]);
         
         if let Some(path) = &context.screenshot {
@@ -100,8 +83,26 @@ impl Renderer {
         self.window.inner_size().height
     }
 
-    fn encode_pass(&self, encoder: &mut CommandEncoder, texture: &Texture, surface_texture: &SurfaceTexture, context: &DynamicRenderContext) {
-        let texture_view = texture.create_view(&TextureViewDescriptor {
+    #[rustfmt::skip]
+    fn encode_pass(&self, encoder: &mut CommandEncoder, surface_texture: &SurfaceTexture, context: &DynamicRenderContext) {
+        let raw_texture = self.device.create_texture(&TextureDescriptor {
+            label: Some("display texture"),
+            size: Extent3d {
+                width: self.width(),
+                height: self.height(),
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Rgba16Float,
+            usage: TextureUsages::COPY_DST
+                | TextureUsages::STORAGE_BINDING
+                | TextureUsages::TEXTURE_BINDING 
+                | TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+        let raw_texture_view = raw_texture.create_view(&TextureViewDescriptor {
             label: None,
             format: Some(TextureFormat::Rgba16Float),
             dimension: Some(TextureViewDimension::D2),
@@ -111,25 +112,126 @@ impl Renderer {
             base_array_layer: 0,
             array_layer_count: None,
         });
-        self.ray_tracer_pass(encoder, &texture_view, context);
-        self.display_pass(encoder, &surface_texture, &texture_view);
+
+        let msaa_texture = self.device.create_texture(&TextureDescriptor {
+            label: Some("display texture"),
+            size: Extent3d {
+                width: self.width(),
+                height: self.height(),
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Bgra8Unorm,
+            usage: TextureUsages::COPY_DST
+                | TextureUsages::TEXTURE_BINDING 
+                | TextureUsages::RENDER_ATTACHMENT
+                | TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+        let msaa_texture_view = msaa_texture.create_view(&TextureViewDescriptor {
+            label: None,
+            format: Some(TextureFormat::Bgra8Unorm),
+            dimension: Some(TextureViewDimension::D2),
+            aspect: TextureAspect::All,
+            base_mip_level: 0,
+            mip_level_count: Some(1),
+            base_array_layer: 0,
+            array_layer_count: None,
+        });
+
+        self.ray_tracer_pass(encoder, &raw_texture_view, context);
+        self.copy_texture_pass(encoder, &raw_texture_view, &msaa_texture_view);
+        let output_view = surface_texture.texture.create_view(&TextureViewDescriptor::default());
+        self.display_pass(encoder, &output_view, &msaa_texture_view);
 
         if context.screenshot.is_some() {
-            self.screenshot_pass(encoder, &texture);
+            self.screenshot_pass(encoder, &msaa_texture);
         }
+    }
+
+    fn copy_texture_pass(
+        &self,
+        encoder: &mut CommandEncoder,
+        single_sample_texture_view: &TextureView,
+        output_texture_view: &TextureView,
+    ) {
+        let msaa_texture = self.device.create_texture(&TextureDescriptor {
+            label: Some("display texture"),
+            size: Extent3d {
+                width: self.width(),
+                height: self.height(),
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 4,
+            dimension: TextureDimension::D2,
+            format: TextureFormat::Bgra8Unorm,
+            usage: TextureUsages::COPY_DST
+                | TextureUsages::TEXTURE_BINDING 
+                | TextureUsages::RENDER_ATTACHMENT 
+                | TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+        let msaa_texture_view = msaa_texture.create_view(&TextureViewDescriptor {
+            label: None,
+            format: Some(TextureFormat::Bgra8Unorm),
+            dimension: Some(TextureViewDimension::D2),
+            aspect: TextureAspect::All,
+            base_mip_level: 0,
+            mip_level_count: Some(1),
+            base_array_layer: 0,
+            array_layer_count: None,
+        });
+
+        let sampler = self.device.create_sampler(&SamplerDescriptor::default());
+        let copy_texture_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
+            label: None,
+            layout: &self.copy_texture_bind_group_layout,
+            entries: &[
+                BindGroupEntry {
+                    binding: 0,
+                    resource: BindingResource::Sampler(&sampler),
+                },
+                BindGroupEntry {
+                    binding: 1,
+                    resource: BindingResource::TextureView(&single_sample_texture_view),
+                },
+            ],
+        });
+
+        let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
+            label: None,
+            color_attachments: &[Some(RenderPassColorAttachment {
+                view: &msaa_texture_view,
+                resolve_target: Some(output_texture_view),
+                ops: Operations {
+                    load: LoadOp::Clear(Color {
+                        r: 0.0,
+                        g: 0.0,
+                        b: 0.0,
+                        a: 1.0,
+                    }),
+                    store: true,
+                },
+            })],
+            depth_stencil_attachment: None,
+        });
+
+        render_pass.set_pipeline(&self.copy_texture_pipeline);
+        render_pass.set_bind_group(0, &copy_texture_bind_group, &[]);
+        render_pass.draw(0..6 as u32, 0..1);
+
+        drop(render_pass);
     }
 
     fn display_pass(
         &self,
         encoder: &mut CommandEncoder,
-        surface_texture: &SurfaceTexture,
+        output_view: &TextureView,
         texture_view: &TextureView,
     ) {
-        // Create a view into the current texture that we can write to.
-        let view = surface_texture
-            .texture
-            .create_view(&TextureViewDescriptor::default());
-
         let sampler = self.device.create_sampler(&SamplerDescriptor::default());
         let display_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("display bind group"),
@@ -149,7 +251,7 @@ impl Renderer {
         let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("render pass"),
             color_attachments: &[Some(RenderPassColorAttachment {
-                view: &view,
+                view: &output_view,
                 resolve_target: None,
                 ops: Operations {
                     load: LoadOp::Clear(Color {
@@ -171,8 +273,9 @@ impl Renderer {
         drop(render_pass);
     }
 
+
     #[rustfmt::skip]
-    fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, texture_view: &TextureView, context: &DynamicRenderContext) {
+    fn ray_tracer_pass(&self, encoder: &mut CommandEncoder, raw_texture_view: &TextureView, context: &DynamicRenderContext) {
         let shader_camera: ShaderCamera = context.camera.clone().into();
         let flat_scene: FlatScene = context.scene.clone().into();
 
@@ -227,7 +330,7 @@ impl Renderer {
             entries: &[
                 BindGroupEntry {
                     binding: 0,
-                    resource: BindingResource::TextureView(&texture_view),
+                    resource: BindingResource::TextureView(&raw_texture_view),
                 },
                 BindGroupEntry {
                     binding: 1,

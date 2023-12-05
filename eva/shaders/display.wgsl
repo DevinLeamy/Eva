@@ -1,5 +1,3 @@
-// Adapted from: https://github.com/amengede/webgpu-for-beginners/blob/main/23%20Raytracing%20Multiple%20Objects/finished/src/shaders/screen_shader.wgsl
-
 @group(0) @binding(0) var screen_sampler : sampler;
 @group(0) @binding(1) var colour_buffer : texture_2d<f32>;
 

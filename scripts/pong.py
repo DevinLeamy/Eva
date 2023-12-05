@@ -88,8 +88,8 @@ class Pong(RenderDynamic):
     def __init__(self):
         super().__init__()
 
-        Eva.set_max_reflections(15)
-        Eva.set_sample_count(16)
+        Eva.set_max_reflections(10)
+        Eva.set_sample_count(9)
 
         self.ball_velocity = [0, -BALL_SPEED, 0]
 

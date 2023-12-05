@@ -45,7 +45,7 @@ To run a script `./scripts/custom-script.py`, from the root folder, call
 Or, alternatively:
 
 ```bash
-cd wall-e-py
+cd eva-py
 source .env/bin/activate
 maturin develop
 cd ..

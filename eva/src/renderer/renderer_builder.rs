@@ -20,20 +20,22 @@ pub struct RendererBuilder {
     device: Device,
     queue: Queue,
     window: Window,
-    adapter: Adapter,
     context: StaticRenderContext,
 
     ray_tracer_shader: Option<ShaderModule>,
     display_shader: Option<ShaderModule>,
+    copy_texture_shader: Option<ShaderModule>,
 
     ray_tracer_pipeline: Option<ComputePipeline>,
     display_pipeline: Option<RenderPipeline>,
+    copy_texture_pipeline: Option<RenderPipeline>,
 
     ray_tracer_bind_group_layout: Option<BindGroupLayout>,
     mesh_bind_group_layout: Option<BindGroupLayout>,
     texture_bind_group_layout: Option<BindGroupLayout>,
     skybox_bind_group_layout: Option<BindGroupLayout>,
     display_bind_group_layout: Option<BindGroupLayout>,
+    copy_texture_bind_group_layout: Option<BindGroupLayout>,
 
     texture_bind_group: Option<BindGroup>,
     skybox_bind_group: Option<BindGroup>,
@@ -92,7 +94,7 @@ impl RendererBuilder {
             height: size.height,
             present_mode: surface_capabilities.present_modes[0],
             alpha_mode: surface_capabilities.alpha_modes[0],
-            view_formats: vec![TextureFormat::Bgra8Unorm],
+            view_formats: vec![],
         };
 
         surface.configure(&device, &surface_config);
@@ -102,20 +104,22 @@ impl RendererBuilder {
             queue,
             window,
             surface,
-            adapter,
             context,
 
             ray_tracer_shader: None,
             display_shader: None,
+            copy_texture_shader: None,
 
             ray_tracer_pipeline: None,
             display_pipeline: None,
+            copy_texture_pipeline: None,
 
             ray_tracer_bind_group_layout: None,
             mesh_bind_group_layout: None,
             texture_bind_group_layout: None,
             skybox_bind_group_layout: None,
             display_bind_group_layout: None,
+            copy_texture_bind_group_layout: None,
 
             texture_bind_group: None,
             skybox_bind_group: None,
@@ -150,12 +154,14 @@ impl RendererBuilder {
 
             ray_tracer_pipeline: self.ray_tracer_pipeline.unwrap(),
             display_pipeline: self.display_pipeline.unwrap(),
+            copy_texture_pipeline: self.copy_texture_pipeline.unwrap(),
 
             ray_tracer_bind_group_layout: self.ray_tracer_bind_group_layout.unwrap(),
             mesh_bind_group_layout: self.mesh_bind_group_layout.unwrap(),
             texture_bind_group_layout: self.texture_bind_group_layout.unwrap(),
             skybox_bind_group_layout: self.skybox_bind_group_layout.unwrap(),
             display_bind_group_layout: self.display_bind_group_layout.unwrap(),
+            copy_texture_bind_group_layout: self.copy_texture_bind_group_layout.unwrap(),
 
             texture_bind_group: self.texture_bind_group.unwrap(),
             skybox_bind_group: self.skybox_bind_group.unwrap(),
@@ -182,6 +188,7 @@ impl RendererBuilder {
         // Shaders.
         self.ray_tracer_shader = Some(self.device.create_shader_module(include_wgsl!("../../shaders/ray_tracer.wgsl")));
         self.display_shader = Some(self.device.create_shader_module(include_wgsl!("../../shaders/display.wgsl")));
+        self.copy_texture_shader = Some(self.device.create_shader_module(include_wgsl!("../../shaders/display.wgsl")));
 
         self.camera_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
             label: Some("camera buffer"), 
@@ -459,6 +466,30 @@ impl RendererBuilder {
                 ],
             },
         ));
+
+        self.copy_texture_bind_group_layout = Some(self.device.create_bind_group_layout(
+            &BindGroupLayoutDescriptor {
+                label: Some("copy texture bind group layout"),
+                entries: &[
+                    BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Sampler(SamplerBindingType::NonFiltering),
+                        count: None,
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Texture {
+                            sample_type: TextureSampleType::Float { filterable: false },
+                            view_dimension: TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: None,
+                    },
+                ],
+            },
+        ));
     }
 
     fn create_bind_groups(&mut self) {
@@ -542,6 +573,7 @@ impl RendererBuilder {
     fn create_pipelines(&mut self) {
         self.create_render_pipeline();
         self.create_display_pipeline();
+        self.create_copy_texture_pipeline();
     }
 
     fn create_render_pipeline(&mut self) {
@@ -606,6 +638,52 @@ impl RendererBuilder {
                 },
                 depth_stencil: None,
                 multisample: MultisampleState::default(),
+                multiview: None,
+            },
+        ));
+    }
+
+    fn create_copy_texture_pipeline(&mut self) {
+        let layout = self
+            .device
+            .create_pipeline_layout(&PipelineLayoutDescriptor {
+                label: Some("copy texture pipeline layout"),
+                bind_group_layouts: &[self.copy_texture_bind_group_layout.as_ref().unwrap()],
+                push_constant_ranges: &[],
+            });
+
+        self.copy_texture_pipeline = Some(self.device.create_render_pipeline(
+            &RenderPipelineDescriptor {
+                label: Some("copy texture pipeline"),
+                layout: Some(&layout),
+                vertex: VertexState {
+                    module: self.copy_texture_shader.as_ref().unwrap(),
+                    entry_point: "vs_main",
+                    buffers: &[],
+                },
+                fragment: Some(FragmentState {
+                    module: self.copy_texture_shader.as_ref().unwrap(),
+                    entry_point: "fs_main",
+                    targets: &[Some(ColorTargetState {
+                        format: TextureFormat::Bgra8Unorm,
+                        blend: Some(BlendState::REPLACE),
+                        write_mask: ColorWrites::ALL,
+                    })],
+                }),
+                primitive: PrimitiveState {
+                    topology: PrimitiveTopology::TriangleList,
+                    strip_index_format: None,
+                    front_face: FrontFace::Ccw,
+                    cull_mode: None, 
+                    polygon_mode: PolygonMode::Fill,
+                    unclipped_depth: false,
+                    conservative: false,
+                },
+                depth_stencil: None,
+                multisample: MultisampleState {
+                    count: 4,
+                    ..Default::default()
+                },
                 multiview: None,
             },
         ));
