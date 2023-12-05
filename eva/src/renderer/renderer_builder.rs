@@ -1,8 +1,10 @@
 use std::num::NonZeroU32;
 
+use nalgebra::Vector4;
 use pollster::FutureExt;
 use wgpu::*;
 use winit::window::Window;
+use rand::Rng;
 
 use crate::prelude::*;
 
@@ -52,6 +54,7 @@ pub struct RendererBuilder {
     config_buffer: Option<Buffer>,
     materials_buffer: Option<Buffer>,    
     screenshot_buffer: Option<Buffer>,
+    rng_seeds_buffer: Option<Buffer>
 }
 
 impl RendererBuilder {
@@ -135,7 +138,8 @@ impl RendererBuilder {
             spheres_buffer: None,
             cubes_buffer: None,
             materials_buffer: None,
-            screenshot_buffer: None
+            screenshot_buffer: None,
+            rng_seeds_buffer: None
         }
     }
 
@@ -177,7 +181,8 @@ impl RendererBuilder {
             cubes_buffer: self.cubes_buffer.unwrap(),
             spheres_buffer: self.spheres_buffer.unwrap(),
             materials_buffer: self.materials_buffer.unwrap(),
-            screenshot_buffer: self.screenshot_buffer.unwrap()
+            screenshot_buffer: self.screenshot_buffer.unwrap(),
+            rng_seeds_buffer: self.rng_seeds_buffer.unwrap()
         }
     }
 }
@@ -269,6 +274,23 @@ impl RendererBuilder {
             usage: BufferUsages::COPY_DST | BufferUsages::MAP_READ, 
             mapped_at_creation: false,
         }));
+
+        self.rng_seeds_buffer = Some(self.device.create_buffer(&BufferDescriptor { 
+            label: None, 
+            size: (16 * size.width * size.height + 32) as u64, 
+            usage: BufferUsages::STORAGE | BufferUsages::COPY_DST, 
+            mapped_at_creation: false 
+        }));
+        let mut rng_seeds: ShaderBuffer<Vector4<f32>> = ShaderBuffer::new();
+        let mut rng = rand::thread_rng();
+        for _ in 0..(size.width * size.height) {
+            let x = rng.gen::<f32>();
+            let y = rng.gen::<f32>();
+            let z = rng.gen::<f32>();
+            let w = rng.gen::<f32>();
+            rng_seeds.push(Vector4::new(x, y, z, w));
+        }
+        self.queue.write_buffer(&self.rng_seeds_buffer.as_ref().unwrap(), 0, &rng_seeds.as_bytes().unwrap());
     }
 
     fn create_bind_group_layouts(&mut self) {
@@ -431,6 +453,16 @@ impl RendererBuilder {
                     },
                     BindGroupLayoutEntry {
                         binding: 5,
+                        visibility: ShaderStages::COMPUTE,
+                        ty: BindingType::Buffer {
+                            ty: BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 6,
                         visibility: ShaderStages::COMPUTE,
                         ty: BindingType::Buffer {
                             ty: BufferBindingType::Storage { read_only: true },

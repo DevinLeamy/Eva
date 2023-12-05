@@ -41,7 +41,8 @@ pub struct Renderer {
     pub spheres_buffer: Buffer,
     pub cubes_buffer: Buffer,
     pub materials_buffer: Buffer,
-    pub screenshot_buffer: Buffer
+    pub screenshot_buffer: Buffer,
+    pub rng_seeds_buffer: Buffer
 }
 
 impl Renderer {
@@ -147,7 +148,7 @@ impl Renderer {
         self.display_pass(encoder, &output_view, &msaa_texture_view);
 
         if context.screenshot.is_some() {
-            self.screenshot_pass(encoder, &msaa_texture);
+            self.screenshot_pass(encoder, &raw_texture);
         }
     }
 
@@ -351,6 +352,10 @@ impl Renderer {
                 BindGroupEntry {
                     binding: 5,
                     resource: self.materials_buffer.as_entire_binding()
+                },
+                BindGroupEntry {
+                    binding: 6,
+                    resource: self.rng_seeds_buffer.as_entire_binding()
                 }
             ],
         });

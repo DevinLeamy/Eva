@@ -95,10 +95,11 @@ class NonHier(RenderStatic):
         # s5.translate(0, 200, -250)
         # self.add_geometry(s5)
 
-        steldodec = Mesh('suzanne.obj')
-        steldodec.scale(100)
+        steldodec = Mesh('catN.obj')
+        steldodec.scale(10)
         steldodec.translate(-200, 200, -100)
-        steldodec.rotate_y(-15)
+        steldodec.rotate_x(-90)
+        steldodec.rotate_y(90)
         steldodec.set_material(mat6)
         self.add_geometry(steldodec)
 

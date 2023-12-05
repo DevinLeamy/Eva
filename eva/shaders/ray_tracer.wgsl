@@ -124,6 +124,11 @@ struct Material {
     light: vec3f
 }
 
+struct RngSeeds {
+    length: u32,
+    seeds: array<vec4f>
+};
+
 var<private> rand_seed : vec2<f32>;
 
 @group(0) @binding(0) var colour_buffer: texture_storage_2d<rgba16float, write>;
@@ -132,6 +137,7 @@ var<private> rand_seed : vec2<f32>;
 @group(0) @binding(3) var<uniform> config: GlobalConfig;
 @group(0) @binding(4) var<storage, read> cubes: CubeModels; 
 @group(0) @binding(5) var<storage, read> materials: Materials; 
+@group(0) @binding(6) var<storage, read> rng_seeds: RngSeeds; 
 
 @group(1) @binding(0) var<storage, read> mesh_headers: MeshHeaders;
 @group(1) @binding(1) var<storage, read> mesh_triangles: MeshTriangles;
@@ -147,8 +153,8 @@ var<private> rand_seed : vec2<f32>;
 
 @compute @workgroup_size(1, 1, 1)
 fn compute_main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
-    let global_id = 900.0 * f32(GlobalInvocationID.x) + f32(GlobalInvocationID.y);
-    init_rand(u32(global_id), vec4f(0.1));
+    let global_id = i32(u32(850) * GlobalInvocationID.x + GlobalInvocationID.y);
+    init_rand(u32(global_id), rng_seeds.seeds[global_id]);
     let screen_coord = vec2<i32>(i32(GlobalInvocationID.x), i32(GlobalInvocationID.y));
     let samples_per_row = i32(max(1.0, sqrt(f32(config.sample_count))));
 

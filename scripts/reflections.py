@@ -21,7 +21,8 @@ class Cube(RenderStatic):
         self.camera.set_translation(-278, 273, -575)
         self.camera.look_at(-278, 273, -200)
 
-        Eva.set_sample_count(1000)
+        Eva.set_sample_count(500)
+        # Eva.set_sample_count(10)
         Eva.set_max_reflections(100)
 
         red = Eva.add_material(Material(1.0, 0.0, (0.65, 0.05, 0.05)))
@@ -42,10 +43,11 @@ class Cube(RenderStatic):
             .translate(130 + 165 / 2, 165 / 2, 65 + 165 / 2) \
             .set_material(white)
 
-            # .scale(70, 70, 70) \
-        c = Mesh("smstdodeca.obj") \
-            .rotate_y(180) \
-            .translate(555/2, 555/2, 555/2 - 150) \
+        c = Mesh("catN.obj") \
+            .scale(10, 10, 10) \
+            .rotate_x(-90) \
+            .rotate_y(-90) \
+            .translate(555/2 - 80, 555/2 - 13, 555/2 - 180) \
             .set_material(c_mat)
 
         l = 130
