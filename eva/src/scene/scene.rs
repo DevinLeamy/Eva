@@ -14,5 +14,3 @@ impl Scene {
         &mut self.root
     }
 }
-
-impl Scene {}

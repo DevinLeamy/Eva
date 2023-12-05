@@ -110,7 +110,10 @@ impl Renderer {
         });
         self.ray_tracer_pass(encoder, &texture_view, context);
         self.display_pass(encoder, &surface_texture, &texture_view);
-        self.screenshot_pass(encoder, &texture);
+
+        if context.screenshot.is_some() {
+            self.screenshot_pass(encoder, &texture);
+        }
     }
 
     fn display_pass(
@@ -125,7 +128,6 @@ impl Renderer {
             .create_view(&TextureViewDescriptor::default());
 
         let sampler = self.device.create_sampler(&SamplerDescriptor::default());
-
         let display_bind_group = self.device.create_bind_group(&BindGroupDescriptor {
             label: Some("display bind group"),
             layout: &self.display_bind_group_layout,
@@ -144,7 +146,6 @@ impl Renderer {
         let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("render pass"),
             color_attachments: &[Some(RenderPassColorAttachment {
-                // The texture view to write the data to.
                 view: &view,
                 resolve_target: None,
                 ops: Operations {
