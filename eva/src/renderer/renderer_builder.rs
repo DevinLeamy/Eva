@@ -92,7 +92,7 @@ impl RendererBuilder {
             height: size.height,
             present_mode: surface_capabilities.present_modes[0],
             alpha_mode: surface_capabilities.alpha_modes[0],
-            view_formats: vec![],
+            view_formats: vec![TextureFormat::Bgra8Unorm],
         };
 
         surface.configure(&device, &surface_config);

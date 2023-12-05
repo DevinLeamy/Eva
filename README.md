@@ -1,21 +1,19 @@
-# WALL-E
+# Eva
 
-> A ray-tracer named after one of the most noble robots out there :)
+> Realtime raytracing that will make your computer sweat :)
 
 <p align="center">
-  <img src="./images/sample.png" width="300" height="300">
-    <p><i><u>sample.py</u>: Two cars surrounded by trees and piles of leaves, in front of a set of large boulders. There's a small and sparkling pond. </i></p>
+  <img src="./about/assets/reflect.png" width="300" height="300">
 </p>
 
 ### Structure
 
--   `/wall-e`: The Rust ray-tracing library.
--   `/wall-e-py`: Rust Python3 bindings, for scripting.
--   `/wall-e-py/assets/meshes`: Contains `.obj` mesh files.
--   `/wall-e-py-macros`: Rust macros used in `/wall-e-py`.
--   `/scripts`: Scripts (scenes) you want to render.
--   `/images`: Images from the scenes requested in the assignment guidelines.
--   `SCRIPTING.md`: Documentation for the scripting API.
+-   `/eva`: Core renderer.
+-   `/eva-macros`: Marcos for the core renderer.
+-   `/eva-py`: Python3 scripting API.
+-   `/eva-py/python/eva_py`: Pure Python3 wrapper on the Rust bindings.
+-   `/eva-py-macros`: Macros for the Python3 scripting API.
+-   `/scripts`: Python3 scripts.
 
 ### Setup
 
@@ -24,7 +22,7 @@
 Create a virtual environment and install `maturin`.
 
 ```bash
-cd wall-e-py
+cd eva-py
 python3 -m venv .env
 source .env/bin/activate
 pip install maturin
@@ -54,17 +52,19 @@ cd ..
 python3 ./scripts/custom-script.py
 ```
 
-Rendered images, by default, are placed in the root folder.
-
 ### Dependencies
 
--   [pyo3](https://github.com/PyO3/pyo3): Interacting with Rust code using Python.
--   `nalgebra`: Linear algebra cratea.
--   `image`: Image processing crate.
--   `lazy_static`: Utility crate for creating global mutable variables with non-const initialization.
--   `obj`: Utility crate for loading `obj` files.
--   [maturin](https://github.com/PyO3/maturin): Building python3 module generated using `pyo3`.
--   `rand`: Utility crate for random number generation.
+-   [`wgpu`](https://github.com/gfx-rs/wgpu): Rust implementation of the WebGPU specification.
+-   [`pyo3`](https://github.com/PyO3/pyo3): Rust to Python3 bindings.
+-   [`maturin`](https://github.com/PyO3/maturin): Python3 package builder for pyo3 generated bindings.
+-   [`nalgebra`](https://github.com/dimforge/nalgebra): Rust linear algebra.
+-   [`winit`](https://github.com/rust-windowing/winit): Rust cross-platform windowing.
+-   [`pollster`](https://github.com/zesterer/pollster): Rust crate for statically resolving `Future`s.
+-   [`bytemuck`](https://github.com/Lokathor/bytemuck): Rust crate for converting data types into bytes.
+-   [`image`](https://github.com/image-rs/image): Rust crate for encoding and decoding images.
+-   [`encase`](https://github.com/teoxoy/encase): Rust crate for byte-aligning structures for use in WebGPU shaders.
+-   [`obj`](https://github.com/simnalamburt/obj-rs): Rust crate for loading `.obj` meshes.
+-   [`half`](https://github.com/starkat99/half-rs): Rust crate for handling 16-bit floating float numbers.
 
 ### Resources
 

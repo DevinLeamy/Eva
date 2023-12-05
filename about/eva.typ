@@ -103,6 +103,12 @@ class Realtime(RenderDynamic):
 ```
 
 == Reflections
+Rays can reflect off of metallic surfaces. The maximum ray reflections can be configured:
+```python
+Eva.set_max_reflections(100)
+```
+
+#figure(image("./assets/reflect.png", width: 50%), caption: "Rays reflecting off of a spiky shape.")
 
 == Python Scripting
 Eva is divided into two core components: `/eva` and `/eva-py`. `/eva-py` defines a scripting 
@@ -190,7 +196,7 @@ The `Renderer` _does not_ have any notion of a render loop. Updates can be handl
 
 == Scripting Bindings
 
-The scripting bindings live in `/eva-py`. Eva uses #link("https://github.com/PyO3/pyo3")[#underline[`pyo3`]] to generate bindings and #link("https://github.com/PyO3/maturin")[#underline[`maturin`]] to create the Python3 package `eva_py`. The raw `pyo3` bindings are not very easy to work with directly due to Rust's ownership rules (e.g. once I "give" an object to Rust it can no longer be updated from Python), and type restrictions (e.g. cannot build a robust class hierarchy). For those reasons, a pure Python layer - `/eva-py/python/eva_py` - was added to make the scripting API easier to work with. (HINDSIGHT).
+The scripting bindings live in `/eva-py`. Eva uses #link("https://github.com/PyO3/pyo3")[#underline[`pyo3`]] to generate bindings and #link("https://github.com/PyO3/maturin")[#underline[`maturin`]] to create the Python3 package `eva_py`. The raw `pyo3` bindings are not very easy to work with directly due to Rust's ownership rules (e.g. once I "give" an object to Rust it can no longer be updated from Python), and type restrictions (e.g. cannot build a robust class hierarchy). For those reasons, a pure Python layer - `/eva-py/python/eva_py` - was added to make the scripting API easier to work with.
 
 The `eva_py` package can be built as follows:
 ```bash
