@@ -569,21 +569,6 @@ impl RendererBuilder {
     }
 
     fn create_display_pipeline(&mut self) {
-        let size = self.window.inner_size();
-        let surface_capabilities = self.surface.get_capabilities(&self.adapter);
-
-        let surface_config = SurfaceConfiguration {
-            usage: TextureUsages::RENDER_ATTACHMENT,
-            format: TextureFormat::Rgba16Float,
-            width: size.width,
-            height: size.height,
-            present_mode: surface_capabilities.present_modes[0],
-            alpha_mode: surface_capabilities.alpha_modes[0],
-            view_formats: vec![],
-        };
-
-        self.surface.configure(&self.device, &surface_config);
-
         let layout = self
             .device
             .create_pipeline_layout(&PipelineLayoutDescriptor {
@@ -605,7 +590,7 @@ impl RendererBuilder {
                     module: self.display_shader.as_ref().unwrap(),
                     entry_point: "fs_main",
                     targets: &[Some(ColorTargetState {
-                        format: surface_config.format,
+                        format: TextureFormat::Bgra8Unorm,
                         blend: Some(BlendState::REPLACE),
                         write_mask: ColorWrites::ALL,
                     })],
