@@ -21,34 +21,37 @@ class Cube(RenderStatic):
         self.camera.set_translation(-278, 273, -575)
         self.camera.look_at(-278, 273, -200)
 
-        Eva.set_sample_count(500)
+        Eva.set_sample_count(700)
         # Eva.set_sample_count(10)
-        Eva.set_max_reflections(100)
+        Eva.set_max_reflections(200)
 
         red = Eva.add_material(Material(1.0, 0.0, (0.65, 0.05, 0.05)))
         green = Eva.add_material(Material(1.0, 0.0, (0.12, 0.45, 0.15)))
         white = Eva.add_material(Material(1.0, 0.0, (0.73, 0.73, 0.73)))
         light = Eva.add_material(
             Material(1.0, 0.0, (1.0, 1.0, 1.0), [10.0, 10.0, 10.0]))
-        c_mat = Eva.add_material(Material(0.0, 1.0, (1.0, 1.0, 1.0)))
+        box = Eva.add_material(Material(0.0, 1.0, (0.73, 0.73, 0.73)))
 
         box1 = Box() \
             .scale(165, 330, 165) \
             .translate(265 + 165 / 2, 330 / 2, 295 + 165 / 2) \
             .rotate_y(-15) \
-            .set_material(white)
+            .set_material(box)
         box2 = Box() \
             .scale(165, 165, 165) \
             .rotate_y(18) \
             .translate(130 + 165 / 2, 165 / 2, 65 + 165 / 2) \
-            .set_material(white)
+            .set_material(box)
 
-        c = Mesh("catN.obj") \
-            .scale(10, 10, 10) \
-            .rotate_x(-90) \
-            .rotate_y(-90) \
-            .translate(555/2 - 80, 555/2 - 13, 555/2 - 180) \
-            .set_material(c_mat)
+        # offset = 100
+        # for i in [-1, 1]:
+        #     for j in [-1, 1]:
+        #         c = Sphere() \
+        #             .scale(40, 40, 40) \
+        #             .translate(555/2 + offset * i, 555/2 + offset * j + 30, 555/2 - 100) \
+        #             .set_material(c_mat)
+        #         self.add_geometry(c)
+
 
         l = 130
         self.add_geometry(Box().scale(0.01, 555, 555).translate(
@@ -66,7 +69,6 @@ class Cube(RenderStatic):
 
         self.add_geometry(box1)
         self.add_geometry(box2)
-        self.add_geometry(c)
 
     def handle_input(self, key, state):
         speed = 10

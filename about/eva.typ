@@ -52,6 +52,12 @@ box = Box()
 box.set_material(textured_material)
 ```
 
+#figure(
+  stack(dir: ltr)[#image("./assets/texture1.png", width: 50%)][#image("./assets/texture2.png", width: 50%)],
+  caption: "Textured Materials"
+)
+
+
 
 == Skyboxes
 
@@ -115,7 +121,10 @@ Rays can reflect off of metallic surfaces. The maximum ray reflections can be co
 Eva.set_max_reflections(100)
 ```
 
-#figure(image("./assets/reflect.png", width: 50%), caption: "Rays reflecting off of a spiky shape.")
+#figure(
+  stack(dir: ltr)[#image("./assets/reflection1.png", width: 50%)][#image("./assets/reflection2.png", width: 50%)],
+  caption: "Reflective Surfaces"
+)
 
 == Python Scripting
 Eva is divided into two core components: `/eva` and `/eva-py`. `/eva-py` defines a scripting 
