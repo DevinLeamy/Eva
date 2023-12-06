@@ -29,10 +29,6 @@ class Eva(Singleton):
         Eva().inner.add_skybox(images)
 
     @staticmethod
-    def set_ambient(strength: float):
-        Eva().inner.set_ambient(strength, strength, strength)
-
-    @staticmethod
     def set_sample_count(count: int):
         Eva().inner.set_sample_count(count)
 

@@ -42,7 +42,7 @@ table_mat = Eva.add_material(Material(
     0.0,
     1.0,
     (1.0, 1.0, 1.0),
-    (0.1, 0.1, 0.1)
+    (0.1, 0.1, 0.1),
 ))
 
 wall_mat = Eva.add_material(Material(

@@ -60,7 +60,6 @@ struct Intersection {
 };
 
 struct GlobalConfig {
-    ambient: vec3f,
     sample_count: u32,
     max_reflections: u32
 };

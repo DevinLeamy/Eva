@@ -289,10 +289,6 @@ For those reasons, I decided to not port the application to the web.
 
 Not all GPUs have the same features. The WebGPU `Adapter` is used to ask for a `Device` and `Queue` supporting a certain set of features, if they're available. The WebGPU `Instance`, a wrapper on your native GPU, allows you to create a `Surface` (a fancy texture) given a `winit::Window` and can tell you what the capabilities of that `Surface` are. Because I work at home on my local machine, I found out rather late into this assignment that the features and capabilities of the `Device` and `Surface` of my local machine (an M1 Max Macbook Pro) are different than what are available on the school Linux machines. My project would not run. Fixing this required changing texture formats, storage types for texture, and some other shader-specific logic. This was a non-trivial diff I was not expecting. 
 
-== Random Number Generation
-
-The quality (i.e. randomness) of random numbers greatly impacted the quality of my images, because they are used extensively when computing how rays should reflect when hitting diffuse surfaces. Typically, you can resolve this by providing a uniform to your shader and then using that as a seed for random number generation. Compute shaders, however, are numbers hundreds of times with the same uniforms making this not a feasible solution. Each invocation, however, does provide a `GlobalInvocationID` which is a number from zero to the number of invocations. This single integer was the seed for my random number generation. It works, but it's not perfect and results in some visual artifacts.
-
 = Resources
 #line(length: 100%)
 
@@ -308,5 +304,3 @@ The quality (i.e. randomness) of random numbers greatly impacted the quality of 
 - #link("https://github.com/teoxoy/encase")[`encase`]: Rust crate for byte-aligning structures for use in WebGPU shaders.
 - #link("https://github.com/simnalamburt/obj-rs")[`obj`]: Rust crate for loading `.obj` meshes.
 - #link("https://github.com/starkat99/half-rs")[`half`]: Rust crate for handling 16-bit floating float numbers.
-
-== Learning Resources

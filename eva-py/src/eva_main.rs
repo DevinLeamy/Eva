@@ -46,7 +46,6 @@ pub fn main(run: EvaRunDescriptor) {
         .unwrap();
     let static_context = StaticRenderContext {
         skybox: run.global.skybox.clone(),
-        ambient: run.global.ambient,
         textures: run.global.texture_loader.clone().textures(),
         materials: run.global.materials.clone(),
         sample_count: run.global.sample_count,
