@@ -3,7 +3,7 @@
 > Realtime raytracing that will make your computer sweat :)
 
 <p align="center">
-  <img src="./about/assets/reflect.png" width="300" height="300">
+  <img src="./about/assets/reflection2.png" width="350" height="350">
 </p>
 
 ### Structure
