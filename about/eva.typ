@@ -203,7 +203,14 @@ On render, all of the data is loaded into the shaders and the render commands ar
 
 The `Renderer` _does not_ have any notion of a render loop. Updates can be handled in whatever way you want so long as you can provide the `Renderer` with a `DynamicRenderContext`. This made it significantly easier to enable runtime `update()`s from Python.
 
-\*_There's a third render pass to take screenshots._
+\*_There's a third render pass for Multisample Anti Aliasing and a fourth render pass to take a screenshot. _
+
+== Lighting
+
+Objects are lit in a physically based way. Rays are shot into the scene, objects are hit, and the rays are reflected based on the material properties on the impacted surface. Diffuse surfaces will randomly scatter the rays, while metallic surfaces will perfectly reflect the rays. Materials can also be partially diffuse and partially metallic, in practice meaning the reflected ray is a weighted average of a perfect reflection and a random reflection. There is no ambient lighting.
+
+Initially, Eva used Blinn-Phong lighting. Then PBR as described in #link("https://learnopengl.com/PBR/Theory")[Learn OpenGL PBR]. The lighting was then changed to how it is now. The motivation for this was that I didn't want the real-time renders to look like something you could easily achieve with a raster engine (i.e. clever approximations of real lighting). I wanted
+it to be apparent that the images were ray traced. 
 
 == Scripting Bindings
 
@@ -253,15 +260,6 @@ suzanne = Mesh("suzanne.obj").translate(1, 0, 0) \
 For a more comprehensive look at how it can be used, check out the `/scripts/flappy-bird` for a dynamic example and 
 `/scripts/nonhier` for a static example.
 
-= Development Process
-#line(length: 100%)
-
-== Lighting
-
-== Web
-
-= Games and Images
-
 = Post Mortem
 #line(length: 100%)
 
@@ -273,7 +271,7 @@ The second biggest trump card was that virtually every feature was harder to add
 
 #pagebreak()
 
-Three things were harder than I thought they would have been:
+Two things were harder than I thought they would have been:
 
 == Porting Eva to the Web
 
@@ -288,6 +286,31 @@ For those reasons, I decided to not port the application to the web.
 == GPU Compatibility
 
 Not all GPUs have the same features. The WebGPU `Adapter` is used to ask for a `Device` and `Queue` supporting a certain set of features, if they're available. The WebGPU `Instance`, a wrapper on your native GPU, allows you to create a `Surface` (a fancy texture) given a `winit::Window` and can tell you what the capabilities of that `Surface` are. Because I work at home on my local machine, I found out rather late into this assignment that the features and capabilities of the `Device` and `Surface` of my local machine (an M1 Max Macbook Pro) are different than what are available on the school Linux machines. My project would not run. Fixing this required changing texture formats, storage types for texture, and some other shader-specific logic. This was a non-trivial diff I was not expecting. 
+
+= Notes
+
+== Objectives
+Being explicit about the objectives I did not complete:
+3. Photon mapping (emit and trace photons).
+4. Photon mapping (estimate irradiance using stored light information).
+7. Port the application to the web.
+8. Modelling of the game objects.
+
+== Screenshots
+From my experience, WebGPU will occasionally stop rendering before a frame is finished if it's been taking a long time, resulting in images where part of the image is "empty".
+It's not supposed to happen (`Device::poll(MaintainBase::Wait)` is supposed to _wait_ for the GPU to finish running), but it does. This is particularly relevant when you're rendering
+a complicated scene in the static rendering mode. I've found that if you do things on your machine while Eva is rendering, this is significantly more likely to happen. 
+
+== Realtime Rendering
+The dynamic scenes, `pong` and `flappy-bird`, run at 60FPS (real-time) on my M1 Max Macbook Pro. They do not run smoothly on the school Linux machines. Rendering speeds can be improved by 
+reducing the number of samples per pixel and the maximum number of reflections per ray. Another solution is to reduce the resolution (in `eva-py/src/eva_main.rs`) down from `850x850`.
+
+== Static Rendering
+All the images showcased in this document took less than 3 minutes to render, most taking less than 30 seconds. The number of samples per pixel varied from 300 to 1500. They take significantly longer to render on the school Linux machines.
+
+== Compile Times
+Compiling Eva on the school Linux machines takes _several minutes_.  
+
 
 = Resources
 #line(length: 100%)
