@@ -13,21 +13,12 @@ Eva.add_skybox([
     "sky/x.tga",
     "sky/-x.tga",
 ])
-# Eva.add_skybox([
-#     "blue/x.png",
-#     "blue/-x.png",
-#     "blue/y.png",
-#     "blue/-y.png",
-#     "blue/z.png",
-#     "blue/-z.png",
-# ])
 
 mat1 = Material(1.0, 0.0, (0.3, 1.0, 0.3))
 mat1.set_texture(earth_handle)
 mat1 = Eva.add_material(mat1)
 
 mat2 = Material(0.0, 1.0, (1.0, 1.0, 1.0))
-# mat2.set_light([1.0, 1.0, 1.0])
 mat2 = Eva.add_material(mat2)
 mat3 = Eva.add_material(Material(1.0, 0.0, (1.0, 0.6, 0.1)))
 
@@ -36,13 +27,11 @@ mat4.set_texture(wood_handle)
 mat4 = Eva.add_material(mat4)
 
 mat5 = Material(1.0, 0.0, (1.0, 1.0, 1.0))
-# mat5.set_light([1.0, 1.0, 1.0])
 mat5.set_texture(earth_handle)
 mat5 = Eva.add_material(mat5)
 light_mat = Eva.add_material(
     Material(0.0, 0.0, (0.0, 0.0, 0.0), (1.0, 1.0, 1.0)))
 mat6 = Material(0.3, 1.0, (1.0, 1.0, 1.0))
-# mat6.set_light([1.0, 1.0, 1.0])
 mat6 = Eva.add_material(mat6)
 
 
@@ -83,17 +72,6 @@ class NonHier(RenderStatic):
         s4.set_material(mat3)
         s4.translate(-100, 25, -270)
         self.add_geometry(s4)
-
-        # p = Mesh("airplane.obj")
-        # p.set_material(mat3)
-        # p.scale(20, 20, 20)
-        # p.translate(-100, 50, -100)
-        # self.add_geometry(p)
-
-        # s5 = Sphere(80)
-        # s5.set_material(mat1)
-        # s5.translate(0, 200, -250)
-        # self.add_geometry(s5)
 
         steldodec = Mesh('catN.obj')
         steldodec.scale(10)

@@ -31,7 +31,6 @@ ball_mat = Eva.add_material(Material(
     1.0,
     0.0,
     (0.0, 0.0, 1.0),
-    # (1.0, 1.0, 1.0)
 ))
 paddle_mat = Eva.add_material(Material(
     1.0,

@@ -9,7 +9,6 @@ Eva.add_skybox([
     "sky/-x.tga",
 ])
 
-# class Cube(RenderDynamic):
 class Cube(RenderStatic):
     def __init__(self):
         super().__init__()
