@@ -81,9 +81,6 @@ Eva.add_skybox([
   caption: "Day and Night Skyboxes"
 )
 
-
-
-#pagebreak()
 == Phong Shading
 
 Eva can render `.obj` meshes with triangular faces. If the mesh has vertex normals, Phong Shading is applied.
@@ -139,9 +136,7 @@ To run a script, `my-scene.py` execute:
 ```
 
 
-== TODO: Photon mapping
-
-== PBR Materials
+== Materials
 
 A material is defined by a `roughness`, `metallicness`, `color`, an optional `texture`, and an optional `emissiveness`. 
 
@@ -154,8 +149,8 @@ earth = Material(0, 0, (1, 1, 1), texture=earth_handle)
 ```
 
 #figure(
-  image("./assets/materials.png", width: 50%),
-  caption: "A grid of spheres with metallic (left to right) and roughness (top to bottom) values ranging from [0,1]."
+  stack(dir: ltr)[#image("./assets/mat1.png", width: 50%)][#image("./assets/mat2.png", width: 50%)],
+  caption: "Different Kinds of Materials"
 )
 
 = Technical Overview

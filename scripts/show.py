@@ -41,14 +41,15 @@ class Cube(RenderStatic):
         self.camera.set_translation(-278, 273, -575)
         self.camera.look_at(-278, 273, -200)
 
-        Eva.set_sample_count(700)
+        Eva.set_sample_count(1500)
         # Eva.set_sample_count(10)
         Eva.set_max_reflections(200)
 
-        red = Eva.add_material(Material(1.0, 0.0, (0.65, 0.05, 0.05)))
-        green = Eva.add_material(Material(1.0, 0.0, (0.12, 0.45, 0.15)))
-        white = Eva.add_material(Material(1.0, 0.0, (0.73, 0.73, 0.73)))
-        box = Eva.add_material(Material(1.0, 0.0, (0.73, 0.73, 0.73), texture=smile_handle))
+        red = Eva.add_material(Material(1.0, 1.0, (0.65, 0.05, 0.05)))
+        green = Eva.add_material(Material(1.0, 1.0, (0.12, 0.45, 0.15)))
+        white = Eva.add_material(Material(0.7, 1.0, (0.73, 0.73, 0.73)))
+        box1_mat = Eva.add_material(Material(0.5, 1.0, (0.33, 0.73, 0.73)))
+        box2_mat = Eva.add_material(Material(0.1, 1.0, (0.33, 0.73, 0.73)))
         light = Eva.add_material(
             Material(1.0, 0.0, (1.0, 1.0, 1.0), [10.0, 10.0, 10.0]))
         c_mat = Eva.add_material(Material(1.0, 0.0, (1.00, 1.00, 1.00), texture=Eva.add_texture("planet.jpg")))
@@ -57,19 +58,28 @@ class Cube(RenderStatic):
             .scale(165, 330, 165) \
             .translate(265 + 165 / 2, 330 / 2, 295 + 165 / 2) \
             .rotate_y(-15) \
-            .set_material(box)
+            .set_material(box1_mat)
         box2 = Box() \
             .scale(165, 165, 165) \
             .rotate_y(18) \
             .translate(130 + 165 / 2, 165 / 2, 65 + 165 / 2) \
-            .set_material(box)
+            .set_material(box2_mat)
 
-        c = Sphere() \
-            .scale(100, 100, 100) \
-            .translate(555/2, 555/2, 555/2 - 100) \
-            .set_material(c_mat)
+        # for i in range(7):
+        #     for j in range(7):
+        #         ball_size = 15 
 
-        self.add_geometry(c)
+        #         ball_mat = Eva.add_material(Material(
+        #             1.0 / 6.0 * i,
+        #             1.0 / 6.0 * j,
+        #             (1.0, 1.0, 1.0),
+        #         ))
+
+        #         self.add_geometry(Sphere(radius=ball_size).set_material(ball_mat).translate(555/2 + i * (ball_size + ball_size + 5), 555/2 + j * (ball_size + ball_size + 5), 555/2 - 250))
+        #         self.add_geometry(Sphere(radius=ball_size).set_material(ball_mat).translate(555/2 + i * (ball_size + ball_size + 5), 555/2 - j * (ball_size + ball_size + 5), 555/2 - 250))
+        #         self.add_geometry(Sphere(radius=ball_size).set_material(ball_mat).translate(555/2 - i * (ball_size + ball_size + 5), 555/2 + j * (ball_size + ball_size + 5), 555/2 - 250))
+        #         self.add_geometry(Sphere(radius=ball_size).set_material(ball_mat).translate(555/2 - i * (ball_size + ball_size + 5), 555/2 - j * (ball_size + ball_size + 5), 555/2 - 250))
+
 
 
         l = 130
@@ -78,7 +88,7 @@ class Cube(RenderStatic):
         self.add_geometry(Box().scale(0.01, 555, 555).translate(
             0, 277.5, 277.5).set_material(red))
         self.add_geometry(Box().scale(l, 0.01, l).translate(
-            555/2, 554, 555/2 - l/2).set_material(light))
+            555/2, 553, 555/2 - l/2).set_material(light))
         self.add_geometry(Box().scale(555, 0.01, 555).translate(
             277.5, 0, 277.5).set_material(white))
         self.add_geometry(Box().scale(555, 0.01, 555).translate(
