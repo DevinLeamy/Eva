@@ -18,8 +18,8 @@ class Cube(RenderStatic):
         self.camera.set_translation(-278, 273, -575)
         self.camera.look_at(-278, 273, -200)
 
-        # Eva.set_sample_count(1000)
-        # Eva.set_max_reflections(1000)
+        Eva.set_sample_count(1000)
+        Eva.set_max_reflections(200)
 
         red = Eva.add_material(Material(1.0, 0.0, (0.65, 0.05, 0.05)))
         green = Eva.add_material(Material(1.0, 0.0, (0.12, 0.45, 0.15)))
