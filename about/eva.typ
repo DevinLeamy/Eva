@@ -25,7 +25,9 @@ UW User ID: dleamy
 = Overview
 #line(length: 100%)
 
-Eva is a real-time ray tracer built in Rust using WebGPU, with an integrated scripting API. 
+Eva is a real-time ray tracer built in Rust using WebGPU, with an integrated Python3 scripting API. Unlike WALL-E (A4) which took hours to render a 
+nice image, Eva is hip and modern. Eva can render at 850x850 resolution with 16 samples per pixel at 60FPS on an M1 Max Macbook Pro. Eva can also go big, rendering images with
+over 1000 samples and hundreds of reflections per pixel in only a couple of minutes!
 
 #pagebreak()
 = Features
@@ -232,7 +234,7 @@ python3 "script-that-uses-eva.py"
 
 == Scripting API
 
-Not comprehensive overview of the scripting API.
+Non-comprehensive overview of the scripting API.
 ```python
 # import the module
 from eva_py import *
@@ -260,10 +262,61 @@ suzanne = Mesh("suzanne.obj").translate(1, 0, 0) \
 For a more comprehensive look at how it can be used, check out the `/scripts/flappy-bird` for a dynamic example and 
 `/scripts/nonhier` for a static example.
 
+= Games and Images
+
+Screenshots can be found in `/assets`. Eva comes with two games, "Flappy Bird" and "Pong". 
+
+#figure(
+  stack(dir: ltr)[#image("./assets/flap.png", width: 50%)][#image("./assets/pong.png", width: 50%)],
+  caption: "Real-time Flappy Bird and Pong"
+)
+
+#strong[Flappy Bird]
+- `[Space]` Jump
+
+```bash
+./debug.sh flappy-bird/flappy-bird
+```
+
+#strong[Pong]
+- `[A]` Move bottom paddle left
+- `[D]` Move bottom paddle right
+- `[J]` Move top paddle left
+- `[L]` Move top paddle right
+
+```bash
+./debug.sh pong
+```
+
+= Notes
+
+== Objectives
+Objectives I did not complete:
+3. Photon mapping (emit and trace photons).
+4. Photon mapping (estimate irradiance using stored light information).
+7. Port the application to the web.
+8. Modelling of the game objects.
+
+_(If you think my project warrants bonus marks for MSAA, Materials, the Python API, Games, or anything else it would make my heart sing 🙂)_
+== Screenshots
+From my experience, WebGPU will occasionally stop rendering before a frame is finished if it's been taking a long time, resulting in images where part of the image is "empty".
+It's not supposed to happen - `Device::poll(MaintainBase::Wait)` is supposed to _wait_ for the GPU to finish running - but it doesn't always. This is particularly relevant when you're rendering
+a complicated scene in the static rendering mode. I've found that if you do things on your machine while Eva is rendering, this is significantly more likely to happen. 
+
+== Realtime Rendering
+The dynamic scenes, `pong` and `flappy-bird`, run at 60FPS (real-time) on my M1 Max Macbook Pro. They do not run smoothly on the school Linux machines. Rendering speeds can be improved by 
+reducing the number of samples per pixel and the maximum number of reflections per ray. Another solution is to reduce the resolution (in `eva-py/src/eva_main.rs`) down from `850x850`.
+
+== Static Rendering
+All the images showcased in this document took less than 3 minutes to render, most taking less than 30 seconds. The number of samples per pixel varied from 300 to 1500. They take significantly longer to render on the school Linux machines.
+
+== Compile Times
+Compiling Eva on the school Linux machines takes _several minutes_. If it's taking a long time, it's _just taking a long time_. Reducing compile times drastically reduced performance and, therefore, was not something I wanted to do.  
+
 = Post Mortem
 #line(length: 100%)
 
-The biggest trump card for this project is that I didn't know what I wanted to do until I started building it. I looked at my output images and 
+The biggest trump card for this project is that I didn't know what I wanted to do until I started building Eva. I looked at my output images and 
 considered what would make them better and I let that, more than my core objectives, drive my development process. Perhaps a little more research at the proposal
 phase could have helped to avoid some of this, but I couldn't _see_ what my project would look like at that point so it was hard to look forward and know what I'd want to add.
 
@@ -277,7 +330,7 @@ Two things were harder than I thought they would have been:
 
 Yes, `wgpu` compiles to WASM but the work extends far beyond that. 
 
-- i) Getting the Python scripting to work in the web was very tricky and something I ultimately sided against doing. To make real-time updates work, my renderer requires exclusive access to the Python3 Global Interpreter Lock (GIL) to run the Python code and fetch the updated values. On the web, this is hard because WASM is single-threaded. So, although I could have gotten the scripts to compile to WASM, I couldn't have run them in my browser without significantly modifying how I handle the updates and added a lot of `#[cfg(target = "wasm")]` annotations for conditional rendering.
+- i) Getting the Python scripting to work on the web was very tricky and something I ultimately sided against doing. To make real-time updates work, my renderer requires exclusive access to the Python3 Global Interpreter Lock (GIL) to run the Python code and fetch the updated values. On the web, this is hard because WASM is single-threaded. So, although I could have gotten the scripts to compile to WASM, I couldn't have run them in my browser without significantly modifying how I handle the updates and adding a lot of `#[cfg(target = "wasm")]` annotations for conditional rendering.
 - ii) Assets. Loading assets on the web requires making requests. This is fine, but it requires an asynchronous runtime, like NodeJS, to poll the `Future`s (promises in JavaScript) to see if the asset is ready. Threads cannot block. Eva and Eva-py fetch texture assets, mesh assets, and create screenshots. To make these asynchronous, I needed to either move all asset loading into Rust and add an async runtime for Rust that was WASM compatible, or add an async runtime for both Rust and Python. And for Python runtimes, I needed it to be compatible with #link("https://github.com/pyodide/pyodide")[`pyodide`] so it could run in the browser. 
 
 
@@ -285,35 +338,7 @@ For those reasons, I decided to not port the application to the web.
 
 == GPU Compatibility
 
-Not all GPUs have the same features. The WebGPU `Adapter` is used to ask for a `Device` and `Queue` supporting a certain set of features, if they're available. The WebGPU `Instance`, a wrapper on your native GPU, allows you to create a `Surface` (a fancy texture) given a `winit::Window` and can tell you what the capabilities of that `Surface` are. Because I work at home on my local machine, I found out rather late into this assignment that the features and capabilities of the `Device` and `Surface` of my local machine (an M1 Max Macbook Pro) are different than what are available on the school Linux machines. My project would not run. Fixing this required changing texture formats, storage types for texture, and some other shader-specific logic. This was a non-trivial diff I was not expecting. 
-
-= Notes
-
-== Objectives
-Being explicit about the objectives I did not complete:
-3. Photon mapping (emit and trace photons).
-4. Photon mapping (estimate irradiance using stored light information).
-7. Port the application to the web.
-8. Modelling of the game objects.
-
-== Screenshots
-From my experience, WebGPU will occasionally stop rendering before a frame is finished if it's been taking a long time, resulting in images where part of the image is "empty".
-It's not supposed to happen (`Device::poll(MaintainBase::Wait)` is supposed to _wait_ for the GPU to finish running), but it does. This is particularly relevant when you're rendering
-a complicated scene in the static rendering mode. I've found that if you do things on your machine while Eva is rendering, this is significantly more likely to happen. 
-
-== Realtime Rendering
-The dynamic scenes, `pong` and `flappy-bird`, run at 60FPS (real-time) on my M1 Max Macbook Pro. They do not run smoothly on the school Linux machines. Rendering speeds can be improved by 
-reducing the number of samples per pixel and the maximum number of reflections per ray. Another solution is to reduce the resolution (in `eva-py/src/eva_main.rs`) down from `850x850`.
-
-== Static Rendering
-All the images showcased in this document took less than 3 minutes to render, most taking less than 30 seconds. The number of samples per pixel varied from 300 to 1500. They take significantly longer to render on the school Linux machines.
-
-== Compile Times
-Compiling Eva on the school Linux machines takes _several minutes_.  
-
-
-= Resources
-#line(length: 100%)
+Not all GPUs have the same features. The WebGPU `Adapter` is used to ask for a `Device` and `Queue` supporting a certain set of features, if they're available. The WebGPU `Instance`, a wrapper on your native GPU, allows you to create a `Surface` (a fancy texture) given a `winit::Window` and can tell you what the capabilities of that `Surface` are. Because I work at home on my local machine, I found out rather late into this assignment that the features and capabilities of the `Device` and `Surface` of my local machine (an M1 Max Macbook Pro) are different than what is available on the school Linux machines. My project would not run. Fixing this required changing texture formats, storage types for texture, and some other shader-specific logic. This was a non-trivial diff I was not expecting. 
 
 == Dependencies
 - #link("https://github.com/gfx-rs/wgpu")[`wgpu`]: Rust implementation of the WebGPU specification. 

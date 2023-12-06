@@ -47,7 +47,6 @@ class FlappyBird(RenderDynamic):
     def __init__(self):
         super().__init__()
         Eva.set_sample_count(4)
-        # Eva.set_max_reflections(3)
 
         self.bird = Bird()
         self.background = Background(GAME_WIDTH + 150, GAME_HEIGHT)
